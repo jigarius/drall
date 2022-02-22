@@ -1,2 +1,3 @@
-# drall
-A tool to run drush commands on multi-site installations.
+# Drall
+
+A tool to run drush commands on multi-site Drupal installations.
