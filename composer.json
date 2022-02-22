@@ -14,7 +14,8 @@
     ],
     "require": {
         "php": ">= 7.4",
-        "drush/drush": "^11.0"
+        "drush/drush": "^11.0",
+        "webflo/drupal-finder": "^1.2"
     },
     "autoload": {
         "psr-4": {
@@ -32,5 +33,10 @@
         "phpunit/phpunit": "^9.5",
         "drupal/coder": "^8.3",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1"
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }

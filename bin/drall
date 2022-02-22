@@ -1,0 +1,25 @@
+#!/usr/bin/env php
+<?php
+
+/**
+ * @file
+ * Drall entrypoint.
+ */
+
+if (php_sapi_name() !== 'cli') exit;
+
+foreach ([
+  // Development environment.
+  __DIR__ . '/../vendor/autoload.php',
+  // Global installation.
+  __DIR__ . '/../../../autoload.php',
+] as $candidate) {
+  if (is_file($candidate)) {
+    require_once $candidate;
+  }
+  unset($candidate);
+}
+
+echo 'TODO: Drall does nothing at the moment.' . PHP_EOL;
+
+exit(0);
