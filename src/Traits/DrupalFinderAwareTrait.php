@@ -21,7 +21,7 @@ trait DrupalFinderAwareTrait {
   /**
    * Get a Drupal finder.
    *
-   * @return DrupalFinder
+   * @return \DrupalFinder\DrupalFinder
    *   A Drupal Finder.
    *
    * @throws \BadMethodCallException
@@ -39,10 +39,10 @@ trait DrupalFinderAwareTrait {
   /**
    * Whether the instance has a Drupal Finder attached.
    *
-   * @return
+   * @return bool
    *   TRUE or FALSE.
    */
-  protected function hasDrupalFinder() {
+  protected function hasDrupalFinder(): bool {
     return isset($this->drupalFinder);
   }
 

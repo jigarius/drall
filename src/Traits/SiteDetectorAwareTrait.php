@@ -13,6 +13,9 @@ trait SiteDetectorAwareTrait {
 
   /**
    * Sets a Site detector.
+   *
+   * @param \Drall\Services\SiteDetector $siteDetector
+   *   A site detector.
    */
   public function setSiteDetector(SiteDetector $siteDetector) {
     $this->siteDetector = $siteDetector;
@@ -21,7 +24,7 @@ trait SiteDetectorAwareTrait {
   /**
    * Get a site detector.
    *
-   * @return SiteDetector
+   * @return \Drall\Services\SiteDetector
    *   A site detector.
    */
   public function siteDetector(): SiteDetector {
@@ -35,9 +38,12 @@ trait SiteDetectorAwareTrait {
   }
 
   /**
-   * @inheritdoc
+   * Whether the instance has a Site Detector attached.
+   *
+   * @return bool
+   *   TRUE or FALSE.
    */
-  protected function hasSiteDetector() {
+  protected function hasSiteDetector(): bool {
     return isset($this->siteDetector);
   }
 

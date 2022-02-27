@@ -4,7 +4,6 @@ namespace Drall\Commands;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Drall\Models\SitesFile;
 
 /**
  * A command to get a list of site directories in the Drupal installation.
