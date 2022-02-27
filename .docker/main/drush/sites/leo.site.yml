@@ -1,0 +1,5 @@
+local:
+  root: /opt/drupal/web
+  uri: http://leo.drall.local
+  paths:
+    files: sites/leo/files

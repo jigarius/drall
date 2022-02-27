@@ -1,0 +1,5 @@
+local:
+  root: /opt/drupal/web
+  uri: http://tmnt.drall.local
+  paths:
+    files: sites/default/files

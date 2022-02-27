@@ -1,0 +1,5 @@
+local:
+  root: /opt/drupal/web
+  uri: http://mikey.drall.local
+  paths:
+    files: sites/mikey/files
