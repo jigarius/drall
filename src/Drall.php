@@ -48,7 +48,8 @@ final class Drall extends Application {
     $cmd = new ExecCommand();
     $cmd->setSiteDetector($siteDetector);
     $this->add($cmd);
-    $this->setDefaultCommand($cmd);
+
+    $this->setDefaultCommand($cmd->getName());
   }
 
   private function getDrupalFinder(): DrupalFinder {
