@@ -5,7 +5,6 @@ namespace Drall\Commands;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Drall\Models\SitesFile;
 
 /**
  * A command to execute a drush command on multiple sites.
@@ -38,7 +37,7 @@ class ExecCommand extends BaseCommand {
     //
     // We simply ignore the first to items and send the rest to drush.
     global $argv;
-    $drushCommand = join(' ', array_slice($argv, 2));
+    $drushCommand = implode(' ', array_slice($argv, 2));
 
     $errorCodes = [];
     foreach ($dirNames as $dirName) {

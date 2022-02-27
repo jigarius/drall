@@ -2,8 +2,6 @@
 
 namespace Drall\Commands;
 
-use Consolidation\SiteAlias\SiteAliasManager;
-use Drush\SiteAlias\SiteAliasFileLoader;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

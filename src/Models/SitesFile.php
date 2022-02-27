@@ -20,6 +20,7 @@ class SitesFile {
    * Get the value of the $sites variable.
    *
    * @return array
+   *   Contents of the $sites array.
    */
   private function getEntries() {
     if (!is_file($this->path)) {
