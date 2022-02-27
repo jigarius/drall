@@ -44,3 +44,34 @@ Run a `drush` command on multiple sites.
 ```
 drall exec st --fields=site
 ```
+
+## Development
+
+Here's how you can set up a local dev environment.
+
+- Clone the `https://github.com/jigarius/drall` repository.
+  - Use a branch as per your needs.
+- Run `docker compose up -d`.
+- Run `docker compose start`.
+- Run `make ssh` to launch a shell in the Drupal container.
+- Run `make provision`.
+- Run `drall --version` to test the setup.
+
+You should now be able to `make ssh` and then run `drall`. A multi-site
+Drupal installation should be present at `/opt/drupal`.
+
+### Hosts
+
+To access the dev sites in your browser, add the following line to your hosts
+file. It is usually located at `/etc/hosts`.
+
+```
+127.0.0.1 tmnt.drall.local donnie.drall.local leo.drall.local mikey.drall.local ralph.drall.local
+```
+
+The sites should then be available at:
+- http://tmnt.drall.local/
+- http://donnie.drall.local/
+- http://leo.drall.local/
+- http://mikey.drall.local/
+- http://ralph.drall.local/
