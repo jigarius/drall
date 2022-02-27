@@ -1,0 +1,14 @@
+version: '4'
+
+services:
+  main:
+    image: drupal:9-apache
+    container_name: drall-main
+    ports:
+      - "8080:80"
+
+  postgres:
+    image: postgres:10
+    container_name: drall-db
+    environment:
+      POSTGRES_PASSWORD: postgres
