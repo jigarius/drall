@@ -6,8 +6,9 @@ ssh:
 .PHONY: provision
 provision:
 	apt-get update
-	apt-get install -y mariadb-client
+	apt-get install -y mariadb-client git unzip
 	@make provision/drupal
+	@make provision/drall
 
 
 .PHONY: provision/drupal
@@ -29,3 +30,10 @@ provision/drupal:
 
 	drush site:install -y minimal --sites-subdir=ralph --db-url="mysql://drupal:drupal@database:3306/ralph" --uri=ralph --account-name=tmnt-root --account-mail=tmnt@localhost --account-pass=cowabunga --site-name=Raphael
 	chown -R www-data:www-data web/sites/ralph
+
+
+.PHONY: provision/drall
+provision/drall:
+	cd /opt/drall
+	composer install
+	export PATH="$PATH:/opt/drall/bin"
