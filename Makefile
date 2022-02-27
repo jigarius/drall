@@ -7,8 +7,8 @@ ssh:
 provision:
 	apt-get update
 	apt-get install -y mariadb-client git unzip
-	@make provision/drupal
 	@make provision/drall
+	@make provision/drupal
 
 
 .PHONY: provision/drupal
@@ -36,4 +36,5 @@ provision/drupal:
 provision/drall:
 	cd /opt/drall
 	composer install
-	export PATH="$PATH:/opt/drall/bin"
+	rm -f /usr/local/bin/drall
+	ln -s /opt/drall/bin/drall /usr/local/bin/drall
