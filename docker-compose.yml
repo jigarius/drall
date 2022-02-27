@@ -6,9 +6,20 @@ services:
     container_name: drall-main
     ports:
       - "8080:80"
+    volumes:
+      - .:/opt/drall
+      - .docker/main/sites.php:/opt/drupal/web/sites/sites.php
+      - .docker/main/composer.json:/opt/drupal/composer.json
+      - .docker/main/composer.lock:/opt/drupal/composer.lock
+      - .docker/main/drush:/opt/drupal/drush
+      - ./Makefile:/opt/drupal/Makefile
 
-  postgres:
-    image: postgres:10
+  database:
+    image: mariadb:10
     container_name: drall-db
     environment:
-      POSTGRES_PASSWORD: postgres
+      MARIADB_USER: drupal
+      MARIADB_PASSWORD: drupal
+      MARIADB_ROOT_PASSWORD: drupal
+    volumes:
+      - .docker/database/init.sql:/docker-entrypoint-initdb.d/1-init.sql
