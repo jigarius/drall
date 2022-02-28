@@ -35,8 +35,31 @@ class SiteDetector {
     return $sitesFile->getDirNames();
   }
 
+  /**
+   * Get site aliases.
+   *
+   * @return Consolidation\SiteAlias\SiteAliasInterface[]
+   *   Site aliases.
+   */
   public function getSiteAliases(): array {
     return $this->siteAliasManager()->getMultiple();
+  }
+
+  /**
+   * Get site names derived from aliases.
+   *
+   * If there are aliases like @foo.dev and @foo.prod, then @foo part is
+   * considered the site name.
+   *
+   * @return array
+   *   An array of site alias names with the @ prefix.
+   */
+  public function getSiteAliasNames(): array {
+    $result = array_map(function ($alias) {
+      return explode('.', $alias->name())[0];
+    }, $this->siteAliasManager()->getMultiple());
+
+    return array_unique(array_values($result));
   }
 
 }

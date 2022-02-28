@@ -14,6 +14,7 @@ individual sites.
 
 ```
 $ drall site:directories
+default
 donnie.com
 leo.com
 mikey.com
@@ -39,11 +40,49 @@ The output can then be iterated with scripts.
 
 ### exec
 
-Run a `drush` command on multiple sites.
+There are a number of ways to run `drush` commands on multiple sites.
+
+#### With --uri
+
+In this method, the `--uri` option is sent to `drush`.
 
 ```
-drall exec st --fields=site
+drush st --fields=site
 ```
+
+For example, the above command results in:
+
+```
+drush --uri=default st --fields=site
+drush --uri=donnie st --fields=site
+drush --uri=leo st --fields=site
+drush --uri=mikey st --fields=site
+drush --uri=ralph st --fields=site
+```
+
+Here, the `--uri` is populated with names of the subdirectories under `sites`
+in which the various sites live.
+
+#### With @alias
+
+In this method, a site alias is sent to `drush`.
+
+```
+drall exec @@site.local st --fields=site
+```
+
+For example, the above command results in:
+
+```
+drush @tmnt.local st --fields=site
+drush @donnie.local st --fields=site
+drush @leo.local st --fields=site
+drush @mikey.local st --fields=site
+drush @ralph.local st --fields=site
+```
+
+Here, `@@site` is replaced with site names detected from various site alias
+definitions.
 
 ## Development
 
