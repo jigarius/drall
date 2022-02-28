@@ -26,9 +26,7 @@ class ExecCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $dirNames = $this->siteDetector()->getSiteDirNames();
-
-    if (count($dirNames) === 0) {
+    if (!$dirNames = $this->siteDetector()->getSiteDirNames()) {
       return 0;
     }
 
@@ -42,14 +40,19 @@ class ExecCommand extends BaseCommand {
     global $argv;
     $drushCommand = join(' ', array_slice($argv, 2));
 
+    $errorCodes = [];
     foreach ($dirNames as $dirName) {
       $thisCommand = "drush --uri=$dirName $drushCommand";
       $output->writeln("Running: $thisCommand");
-      passthru($thisCommand);
-      // @todo Collect exit codes and display summary.
+      passthru($thisCommand, $exitCode);
+
+      if ($exitCode !== 0) {
+        $errorCodes[$dirName] = $exitCode;
+      }
     }
 
-    return 0;
+    // @todo Display summary of errors as per verbosity level.
+    return empty($errorCodes) ? 0 : 1;
   }
 
 }
