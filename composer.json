@@ -13,8 +13,9 @@
         }
     ],
     "require": {
-        "php": ">= 7.4",
+        "consolidation/site-alias": "^3.1",
         "drush/drush": "^11.0",
+        "php": ">= 7.4",
         "webflo/drupal-finder": "^1.2"
     },
     "autoload": {
@@ -29,15 +30,16 @@
         "bin/drall"
     ],
     "require-dev": {
-        "squizlabs/php_codesniffer": "^3.6",
-        "phpunit/phpunit": "^9.5",
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
         "drupal/coder": "^8.3",
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1"
+        "phpunit/phpunit": "^9.5",
+        "squizlabs/php_codesniffer": "^3.6"
     },
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true
-        }
+        },
+        "sort-packages": true
     },
     "scripts": {
         "lint": "composer exec phpcs",
