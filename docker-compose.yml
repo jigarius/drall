@@ -4,6 +4,9 @@ services:
   main:
     image: drupal:9-apache
     container_name: drall-main
+    build:
+      context: .
+      dockerfile: .docker/main/Dockerfile
     ports:
       - "8080:80"
     volumes:
