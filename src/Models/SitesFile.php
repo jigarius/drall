@@ -17,6 +17,16 @@ class SitesFile {
   }
 
   /**
+   * Get the path to the sites file.
+   *
+   * @return string
+   *   Path to the file.
+   */
+  public function getPath(): string {
+    return $this->path;
+  }
+
+  /**
    * Get the value of the $sites variable.
    *
    * @return array
