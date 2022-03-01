@@ -5,8 +5,6 @@ ssh:
 
 .PHONY: provision
 provision:
-	apt-get update
-	apt-get install -y mariadb-client git unzip
 	@make provision/drall
 	@make provision/drupal
 
@@ -36,5 +34,3 @@ provision/drupal:
 provision/drall:
 	cd /opt/drall
 	composer install
-	rm -f /usr/local/bin/drall
-	ln -s /opt/drall/bin/drall /usr/local/bin/drall
