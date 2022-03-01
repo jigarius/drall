@@ -4,6 +4,7 @@ namespace Drall\Commands;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -15,11 +16,21 @@ class ExecCommand extends BaseCommand {
     $this->setName('exec');
     $this->setAliases(['ex']);
     $this->setDescription('Execute a drush command.');
+
     $this->addArgument(
       'cmd',
       InputArgument::REQUIRED | InputArgument::IS_ARRAY,
       'A drush command.'
     );
+
+    $this->addOption(
+      'drall-group',
+      NULL,
+      InputOption::VALUE_REQUIRED,
+      'Site group identifier.'
+
+    );
+
     $this->addUsage('core:status');
     $this->ignoreValidationErrors();
   }
@@ -32,15 +43,15 @@ class ExecCommand extends BaseCommand {
     // Example: drall drush arg1 arg2 --opt1 --opt2
     //
     // We simply ignore the first to items and send the rest to drush.
-    global $argv;
-    $command = implode(' ', array_slice($argv, 2));
+    $command = $this->getDrushCommandFromArgv($GLOBALS['argv']);
+    $siteGroup = $input->getOption('drall-group');
 
     // Prepare all drush commands.
     if ($this->isCommandWithAlias($command)) {
-      $drushCommands = $this->generateCommandsWithAlias($command);
+      $drushCommands = $this->generateCommandsWithAlias($command, $siteGroup);
     }
     else {
-      $drushCommands = $this->generateCommandsWithUri($command);
+      $drushCommands = $this->generateCommandsWithUri($command, $siteGroup);
     }
 
     $errorCodes = [];
@@ -58,26 +69,48 @@ class ExecCommand extends BaseCommand {
   }
 
   /**
+   * Gets drush command from $argv, ignoring parts that are only for Drall.
+   *
+   * @param array $argv
+   *   An $argv array.
+   *
+   * @return string
+   *   A drush command.
+   */
+  private function getDrushCommandFromArgv(array $argv = []) {
+    // Ignore the scriptname and the word "exec".
+    $parts = array_slice($argv, 2);
+
+    // Ignore options with --drall namespace.
+    $parts = array_filter($parts, fn($w) => !str_starts_with($w, '--drall-'));
+
+    return implode(' ', $parts);
+  }
+
+  /**
    * Prepares a list of drush commands with various site URIs.
    *
    * Results are keyed by unique site URIs.
    *
    * @param string $command
    *   The command to send to Drush. Example: core:status.
+   * @param string|null $siteGroup
+   *   A site group, if any.
+   *
    * @return array
    *   Commands with various site URIs.
    */
-  private function generateCommandsWithUri(string $command): array {
+  private function generateCommandsWithUri(string $command, ?string $siteGroup = NULL): array {
     if (!$this->isCommandWithUri($command)) {
       $command = "--uri=@@uri $command";
     }
 
     $commands = [];
-    foreach ($this->siteDetector()->getSiteDirNames() as $dirName) {
+    foreach ($this->siteDetector()->getSiteDirNames($siteGroup) as $dirName) {
       // @todo Should the keys of the $sites array be used instead?
       // @todo Can sites exist with sites/GROUP/SITE/settings.php?
       //   If yes, then does --uri=GROUP/SITE work correctly?
-      $commands[]= 'drush ' . str_replace('@@uri', $dirName, $command);
+      $commands[] = 'drush ' . str_replace('@@uri', $dirName, $command);
     }
     return $commands;
   }
@@ -89,13 +122,16 @@ class ExecCommand extends BaseCommand {
    *
    * @param string $command
    *   The command to send to Drush. Example: core:status.
+   * @param string|null $siteGroup
+   *   A site group, if any.
+   *
    * @return array
    *   Commands with various site aliases.
    */
-  private function generateCommandsWithAlias(string $command): array {
+  private function generateCommandsWithAlias(string $command, ?string $siteGroup = NULL): array {
     $commands = [];
-    foreach ($this->siteDetector()->getSiteAliasNames() as $siteName) {
-      $commands[]= 'drush ' . str_replace('@@site', $siteName, $command);
+    foreach ($this->siteDetector()->getSiteAliasNames($siteGroup) as $siteName) {
+      $commands[] = 'drush ' . str_replace('@@site', $siteName, $command);
     }
     return $commands;
   }
