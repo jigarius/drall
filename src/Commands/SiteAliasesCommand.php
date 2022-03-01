@@ -15,12 +15,16 @@ class SiteAliasesCommand extends BaseCommand {
     $this->setName('site:aliases');
     $this->setAliases(['sa']);
     $this->setDescription('Get a list of site aliases.');
+
     $this->addOption(
       'drall-group',
       NULL,
       InputOption::VALUE_REQUIRED,
       'Site group identifier.'
     );
+
+    $this->addUsage('site:aliases');
+    $this->addUsage('--drall-group=GROUP site:aliases');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

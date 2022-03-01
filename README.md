@@ -84,6 +84,49 @@ drush @ralph.local st --fields=site
 Here, `@@site` is replaced with site names detected from various site alias
 definitions.
 
+## Site groups
+
+Drall allows you to group your sites so that you can run commands on such
+groups with ease.
+
+```
+drall exec --drall-group=GROUP core:rebuild
+```
+
+Here's how you can create site groups.
+
+### With site aliases
+
+In a site alias definition file, you can assign site aliases to one or more
+groups like this:
+
+```yaml
+# File: tnmt.site.yml
+local:
+  root: /opt/drupal/web
+  uri: http://tmnt.com/
+  # ...
+  drall:
+    groups:
+      - cartoon
+      - action
+```
+
+This puts the alias `@tnmt.local` in the `cartoon` and `action` groups.
+
+### With sites.php
+
+If your project doesn't use site aliases, you can still group your sites using
+one or more `sites.GROUP.php` files like this:
+
+```php
+# File: sites.bluish.php
+$sites['donnie.drall.local'] = 'donnie';
+$sites['leo.drall.local'] = 'leo';
+```
+
+This puts the sites `donnie` and `leo` in a group named `bluish`.
+
 ## Development
 
 Here's how you can set up a local dev environment.

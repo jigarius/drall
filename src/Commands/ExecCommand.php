@@ -31,6 +31,10 @@ class ExecCommand extends BaseCommand {
     );
 
     $this->addUsage('core:status');
+    $this->addUsage('--uri=@@uri core:status');
+    $this->addUsage('@@site.ENV core:status');
+    $this->addUsage('--drall-group=GROUP core:status');
+
     $this->ignoreValidationErrors();
   }
 
