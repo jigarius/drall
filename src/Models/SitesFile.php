@@ -34,12 +34,12 @@ class SitesFile {
    */
   private function getEntries() {
     if (!is_file($this->path)) {
-      throw new \RuntimeException("Cannot read sites file: {$this->path}");
+      throw new \RuntimeException("Cannot read sites file: $this->path");
     }
 
     require $this->path;
     if (!isset($sites) || !is_array($sites)) {
-      throw new \RuntimeException("Site declarations not found in file: {$this->path}");
+      throw new \RuntimeException("Site declarations not found in file: $this->path");
     }
 
     return $sites;
