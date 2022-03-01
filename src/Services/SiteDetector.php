@@ -46,11 +46,22 @@ class SiteDetector {
   /**
    * Get site aliases.
    *
+   * @param string|null $group
+   *   A site group, if any.
+   *
    * @return Consolidation\SiteAlias\SiteAliasInterface[]
    *   Site aliases.
    */
-  public function getSiteAliases(): array {
-    return $this->siteAliasManager()->getMultiple();
+  public function getSiteAliases(string $group = NULL): array {
+    $result = $this->siteAliasManager()->getMultiple();
+
+    if (!$group) {
+      return $result;
+    }
+
+    return array_filter($result, function ($alias) use ($group) {
+      return in_array($group, $alias->get('drall.groups') ?? []);
+    });
   }
 
   /**
@@ -59,18 +70,16 @@ class SiteDetector {
    * If there are aliases like @foo.dev and @foo.prod, then @foo part is
    * considered the site name.
    *
+   * @param string|null $group
+   *   A site group, if any.
+   *
    * @return array
    *   An array of site alias names with the @ prefix.
    */
   public function getSiteAliasNames(string $group = NULL): array {
-    $result = [];
-    foreach ($this->siteAliasManager()->getMultiple() as $siteAlias) {
-      if ($group && !in_array($group, $siteAlias->get('drall.groups') ?? [])) {
-        continue;
-      }
-
-      $result[] = explode('.', $siteAlias->name())[0];
-    }
+    $result = array_map(function ($siteAlias) {
+      return explode('.', $siteAlias->name())[0];
+    }, $this->getSiteAliases($group));
     return array_unique(array_values($result));
   }
 

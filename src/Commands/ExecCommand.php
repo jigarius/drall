@@ -28,7 +28,6 @@ class ExecCommand extends BaseCommand {
       NULL,
       InputOption::VALUE_REQUIRED,
       'Site group identifier.'
-
     );
 
     $this->addUsage('core:status');

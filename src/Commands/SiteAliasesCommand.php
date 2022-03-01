@@ -3,6 +3,7 @@
 namespace Drall\Commands;
 
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -14,10 +15,18 @@ class SiteAliasesCommand extends BaseCommand {
     $this->setName('site:aliases');
     $this->setAliases(['sa']);
     $this->setDescription('Get a list of site aliases.');
+    $this->addOption(
+      'drall-group',
+      NULL,
+      InputOption::VALUE_REQUIRED,
+      'Site group identifier.'
+    );
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $aliases = $this->siteDetector()->getSiteAliases();
+    $aliases = $this->siteDetector()->getSiteAliases(
+      $input->getOption('drall-group')
+    );
 
     if (count($aliases) === 0) {
       $this->logger->warning('No site aliases found.');
