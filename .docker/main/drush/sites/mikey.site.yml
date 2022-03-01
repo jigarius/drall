@@ -3,3 +3,6 @@ local:
   uri: http://mikey.drall.local
   paths:
     files: sites/mikey/files
+  drall:
+    groups:
+      - reddish
