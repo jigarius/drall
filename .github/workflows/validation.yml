@@ -28,4 +28,4 @@ jobs:
       - name: Prepare
         run: composer install
       - name: Test
-        run: composer test
+        run: composer test && cat .coverage/text
