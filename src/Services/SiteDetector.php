@@ -29,9 +29,17 @@ class SiteDetector {
     return $drupalRoot;
   }
 
-  public function getSiteDirNames(): array {
-    $drupalRoot = $this->getDrupalRoot();
-    $sitesFile = new SitesFile("$drupalRoot/sites/sites.php");
+  /**
+   * Get a list of site directory names for a site group.
+   *
+   * @param string|null $group
+   *   A site group, if any.
+   *
+   * @return array
+   *   Contents of the $sites variable.
+   */
+  public function getSiteDirNames(string $group = NULL): array {
+    $sitesFile = $this->getSitesFile($group);
     return $sitesFile->getDirNames();
   }
 
@@ -60,6 +68,17 @@ class SiteDetector {
     }, $this->siteAliasManager()->getMultiple());
 
     return array_unique(array_values($result));
+  }
+
+  private function getSitesFile($group = NULL): SitesFile {
+    $drupalRoot = $this->getDrupalRoot();
+
+    $basename = 'sites.php';
+    if ($group) {
+      $basename = "sites.$group.php";
+    }
+
+    return new SitesFile("$drupalRoot/sites/$basename");
   }
 
 }
