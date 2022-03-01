@@ -63,6 +63,23 @@ final class Drall extends Application {
     $this->setDefaultCommand($cmd->getName());
   }
 
+  protected function configureIO(InputInterface $input, OutputInterface $output) {
+    parent::configureIO($input, $output);
+
+    // Symfony will set these later, but we want it set upfront
+    if ($input->getParameterOption(['--verbose', '-v'], false, true) !== false) {
+      $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
+    }
+    // We are not using "very verbose", but set this for completeness
+    if ($input->getParameterOption(['-vv'], false, true) !== false) {
+      $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
+    }
+    // Use -vvv of --debug for even more verbose logging.
+    if ($input->getParameterOption(['--debug', '-d', '-vvv'], false, true) !== false) {
+      $output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
+    }
+  }
+
   private function getDrupalFinder(): DrupalFinder {
     $drupalFinder = new DrupalFinder();
     $drupalFinder->locateRoot(getcwd());
