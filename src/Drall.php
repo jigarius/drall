@@ -63,19 +63,24 @@ final class Drall extends Application {
     $this->setDefaultCommand($cmd->getName());
   }
 
+  /**
+   * {@inheritdoc}
+   *
+   * Based on Drush/Application::configureIO().
+   */
   protected function configureIO(InputInterface $input, OutputInterface $output) {
     parent::configureIO($input, $output);
 
-    // Symfony will set these later, but we want it set upfront
-    if ($input->getParameterOption(['--verbose', '-v'], false, true) !== false) {
+    // Symfony will set these later, but we want it set upfront.
+    if ($input->getParameterOption(['--verbose', '-v'], FALSE, TRUE) !== FALSE) {
       $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
     }
-    // We are not using "very verbose", but set this for completeness
-    if ($input->getParameterOption(['-vv'], false, true) !== false) {
+    // We are not using "very verbose", but set this for completeness.
+    if ($input->getParameterOption(['-vv'], FALSE, TRUE) !== FALSE) {
       $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
     }
     // Use -vvv of --debug for even more verbose logging.
-    if ($input->getParameterOption(['--debug', '-d', '-vvv'], false, true) !== false) {
+    if ($input->getParameterOption(['--debug', '-d', '-vvv'], FALSE, TRUE) !== FALSE) {
       $output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
     }
   }
