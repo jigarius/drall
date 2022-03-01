@@ -59,8 +59,6 @@ final class Drall extends Application {
     $cmd->setSiteDetector($siteDetector);
     $cmd->setLogger($this->logger);
     $this->add($cmd);
-
-    $this->setDefaultCommand($cmd->getName());
   }
 
   /**
