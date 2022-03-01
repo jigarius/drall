@@ -15,12 +15,16 @@ class SiteDirectoriesCommand extends BaseCommand {
     $this->setName('site:directories');
     $this->setAliases(['sd']);
     $this->setDescription('Get a list of site directories.');
+
     $this->addOption(
       'drall-group',
       NULL,
       InputOption::VALUE_REQUIRED,
       'Site group identifier.'
     );
+
+    $this->addUsage('site:directories');
+    $this->addUsage('--drall-group=GROUP site:directories');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
