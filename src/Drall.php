@@ -22,6 +22,8 @@ final class Drall extends Application {
 
   const NAME = 'Drall';
 
+  const VERSION = '0.5.0';
+
   use LoggerAwareTrait;
 
   /**
@@ -31,7 +33,7 @@ final class Drall extends Application {
     parent::__construct();
 
     $this->setName(self::NAME);
-    $this->setVersion('0.0.0');
+    $this->setVersion(self::VERSION);
 
     $this->input = new ArgvInput();
     $this->output = new ConsoleOutput();
