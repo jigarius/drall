@@ -62,11 +62,15 @@ class SiteDetector {
    * @return array
    *   An array of site alias names with the @ prefix.
    */
-  public function getSiteAliasNames(): array {
-    $result = array_map(function ($alias) {
-      return explode('.', $alias->name())[0];
-    }, $this->siteAliasManager()->getMultiple());
+  public function getSiteAliasNames(string $group = NULL): array {
+    $result = [];
+    foreach ($this->siteAliasManager()->getMultiple() as $siteAlias) {
+      if ($group && !in_array($group, $siteAlias->get('drall.groups') ?? [])) {
+        continue;
+      }
 
+      $result[] = explode('.', $siteAlias->name())[0];
+    }
     return array_unique(array_values($result));
   }
 

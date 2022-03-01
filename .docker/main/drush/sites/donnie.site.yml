@@ -3,3 +3,6 @@ local:
   uri: http://donnie.drall.local
   paths:
     files: sites/donnie/files
+  drall:
+    groups:
+      - bluish

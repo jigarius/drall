@@ -3,3 +3,6 @@ local:
   uri: http://leo.drall.local
   paths:
     files: sites/leo/files
+  drall:
+    groups:
+      - bluish

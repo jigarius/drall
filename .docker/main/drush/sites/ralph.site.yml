@@ -3,3 +3,6 @@ local:
   uri: http://ralph.drall.local
   paths:
     files: sites/ralph/files
+  drall:
+    groups:
+      - reddish
