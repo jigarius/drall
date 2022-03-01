@@ -16,7 +16,7 @@ class ExecCommand extends BaseCommand {
     $this->setAliases(['ex']);
     $this->setDescription('Execute a drush command.');
     $this->addArgument(
-      'command',
+      'cmd',
       InputArgument::REQUIRED | InputArgument::IS_ARRAY,
       'A drush command.'
     );
@@ -35,36 +35,21 @@ class ExecCommand extends BaseCommand {
     global $argv;
     $command = implode(' ', array_slice($argv, 2));
 
-    // @todo Generate commands in different methods, but execute them from
-    //   one place. This will allow processing the exit codes in a uniform
-    //   manner.
+    // Prepare all drush commands.
     if ($this->isCommandWithAlias($command)) {
-      return $this->executeWithAlias($command, $input, $output);
+      $drushCommands = $this->generateCommandsWithAlias($command);
     }
-
-    return $this->executeWithUri($command, $input, $output);
-  }
-
-  private function executeWithUri(
-    string $command,
-    InputInterface $input,
-    OutputInterface $output
-  ): int {
-    if (!$this->isCommandWithUri($command)) {
-      $command = "--uri=@@uri $command";
+    else {
+      $drushCommands = $this->generateCommandsWithUri($command);
     }
 
     $errorCodes = [];
-    foreach ($this->siteDetector()->getSiteDirNames() as $dirName) {
-      // @todo Should the keys of the $sites array be used instead?
-      // @todo Can sites exist with sites/GROUP/SITE/settings.php?
-      //   If yes, then does --uri=GROUP/SITE work correctly?
-      $thisCommand = 'drush ' . str_replace('@@uri', $dirName, $command);
-      $this->logger->info("Running: $thisCommand");
-      passthru($thisCommand, $exitCode);
+    foreach ($drushCommands as $key => $drushCommand) {
+      $output->writeln("Running: $drushCommand");
+      passthru($drushCommand, $exitCode);
 
       if ($exitCode !== 0) {
-        $errorCodes[$dirName] = $exitCode;
+        $errorCodes[$key] = $exitCode;
       }
     }
 
@@ -72,24 +57,47 @@ class ExecCommand extends BaseCommand {
     return empty($errorCodes) ? 0 : 1;
   }
 
-  private function executeWithAlias(
-    string $command,
-    InputInterface $input,
-    OutputInterface $output
-  ): int {
-    $errorCodes = [];
-    foreach ($this->siteDetector()->getSiteAliasNames() as $siteName) {
-      $thisCommand = 'drush ' . str_replace('@@site', $siteName, $command);
-      $this->logger->info("Running: $thisCommand");
-      passthru($thisCommand, $exitCode);
-
-      if ($exitCode !== 0) {
-        $errorCodes[$siteName] = $exitCode;
-      }
+  /**
+   * Prepares a list of drush commands with various site URIs.
+   *
+   * Results are keyed by unique site URIs.
+   *
+   * @param string $command
+   *   The command to send to Drush. Example: core:status.
+   * @return array
+   *   Commands with various site URIs.
+   */
+  private function generateCommandsWithUri(string $command): array {
+    if (!$this->isCommandWithUri($command)) {
+      $command = "--uri=@@uri $command";
     }
 
-    // @todo Display summary of errors as per verbosity level.
-    return 1;
+    $commands = [];
+    foreach ($this->siteDetector()->getSiteDirNames() as $dirName) {
+      // @todo Should the keys of the $sites array be used instead?
+      // @todo Can sites exist with sites/GROUP/SITE/settings.php?
+      //   If yes, then does --uri=GROUP/SITE work correctly?
+      $commands[]= 'drush ' . str_replace('@@uri', $dirName, $command);
+    }
+    return $commands;
+  }
+
+  /**
+   * Prepares a list of drush commands with various site aliases.
+   *
+   * Results are keyed by unique site aliases.
+   *
+   * @param string $command
+   *   The command to send to Drush. Example: core:status.
+   * @return array
+   *   Commands with various site aliases.
+   */
+  private function generateCommandsWithAlias(string $command): array {
+    $commands = [];
+    foreach ($this->siteDetector()->getSiteAliasNames() as $siteName) {
+      $commands[]= 'drush ' . str_replace('@@site', $siteName, $command);
+    }
+    return $commands;
   }
 
   private function isCommandWithUri(string $command): bool {
