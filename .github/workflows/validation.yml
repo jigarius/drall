@@ -2,16 +2,30 @@ name: validation
 on:
   - push
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '7.4'
+          php-version: '8.0'
       - name: Prepare
         run: composer install
       - name: Lint
         run: composer lint
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: ['7.4', '8.0']
+    needs:
+      - lint
+    steps:
+      - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+      - name: Prepare
+        run: composer install
       - name: Test
         run: composer test
