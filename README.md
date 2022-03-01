@@ -1,6 +1,15 @@
 # Drall
 
-A tool to run drush commands on multi-site Drupal installations.
+Drall is a tool to that helps run [drush](https://www.drush.org/) commands on multi-site Drupal installations.
+
+## Installation
+
+Drall is listed on [Packagist.org](https://packagist.org/packages/jigarius/drall).
+Thus, it can easily be installed using `composer` as follows:
+
+```
+composer require jigarius/drall
+```
 
 ## Commands
 
