@@ -20,7 +20,7 @@ class SiteDirectoriesCommand extends BaseCommand {
     $dirNames = $this->siteDetector()->getSiteDirNames();
 
     if (count($dirNames) === 0) {
-      $output->writeln('No site directories found.');
+      $this->logger->warning('No site directories found.');
       return 0;
     }
 

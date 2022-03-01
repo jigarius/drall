@@ -20,7 +20,7 @@ class SiteAliasesCommand extends BaseCommand {
     $aliases = $this->siteDetector()->getSiteAliases();
 
     if (count($aliases) === 0) {
-      $output->writeln('No site aliases found.');
+      $this->logger->warning('No site aliases found.');
       return 0;
     }
 

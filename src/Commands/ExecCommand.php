@@ -16,7 +16,7 @@ class ExecCommand extends BaseCommand {
     $this->setAliases(['ex']);
     $this->setDescription('Execute a drush command.');
     $this->addArgument(
-      'drush-command',
+      'command',
       InputArgument::REQUIRED | InputArgument::IS_ARRAY,
       'A drush command.'
     );
@@ -60,7 +60,7 @@ class ExecCommand extends BaseCommand {
       // @todo Can sites exist with sites/GROUP/SITE/settings.php?
       //   If yes, then does --uri=GROUP/SITE work correctly?
       $thisCommand = 'drush ' . str_replace('@@uri', $dirName, $command);
-      $output->writeln("Running: $thisCommand");
+      $this->logger->info("Running: $thisCommand");
       passthru($thisCommand, $exitCode);
 
       if ($exitCode !== 0) {
@@ -80,7 +80,7 @@ class ExecCommand extends BaseCommand {
     $errorCodes = [];
     foreach ($this->siteDetector()->getSiteAliasNames() as $siteName) {
       $thisCommand = 'drush ' . str_replace('@@site', $siteName, $command);
-      $output->writeln("Running: $thisCommand");
+      $this->logger->info("Running: $thisCommand");
       passthru($thisCommand, $exitCode);
 
       if ($exitCode !== 0) {
