@@ -1,5 +1,7 @@
 <?php
 
+namespace Unit;
+
 use Drall\Drall;
 use Drall\TestCase;
 
@@ -20,7 +22,7 @@ class DrallTest extends TestCase {
       $app->getVersion()
     );
 
-    $json_path = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'composer.json';
+    $json_path = $this->projectDir() . DIRECTORY_SEPARATOR . 'composer.json';
     $json_data = json_decode(file_get_contents($json_path));
 
     $this->assertNotEmpty($json_data->version);

@@ -1,7 +1,9 @@
 <?php
 
-use Drall\TestCase;
+namespace Unit\Models;
+
 use Drall\Models\SitesFile;
+use Drall\TestCase;
 
 /**
  * @covers \Drall\Models\SitesFile

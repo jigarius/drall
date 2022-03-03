@@ -1,12 +1,14 @@
 <?php
 
+namespace Unit\Services;
+
 use Consolidation\SiteAlias\SiteAliasFileDiscovery;
 use Consolidation\SiteAlias\SiteAliasFileLoader;
 use Consolidation\SiteAlias\SiteAliasManager;
 use Consolidation\SiteAlias\Util\YamlDataFileLoader;
-use DrupalFinder\DrupalFinder;
-use Drall\TestCase;
 use Drall\Services\SiteDetector;
+use Drall\TestCase;
+use DrupalFinder\DrupalFinder;
 
 /**
  * @covers \Drall\Services\SiteDetector

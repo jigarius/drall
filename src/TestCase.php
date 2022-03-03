@@ -10,6 +10,16 @@ use PHPUnit\Framework\TestCase as TestCaseBase;
 abstract class TestCase extends TestCaseBase {
 
   /**
+   * Get the path to the project's root directory.
+   *
+   * @return string
+   *   /path/to/root.
+   */
+  protected function projectDir(): string {
+    return dirname(__DIR__);
+  }
+
+  /**
    * Get the path to the fixtures directory.
    *
    * @return string

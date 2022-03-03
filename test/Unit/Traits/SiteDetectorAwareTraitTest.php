@@ -1,10 +1,12 @@
 <?php
 
+namespace Unit\Traits;
+
+use Consolidation\SiteAlias\SiteAliasManager;
+use Drall\Services\SiteDetector;
 use Drall\TestCase;
 use Drall\Traits\SiteDetectorAwareTrait;
-use Drall\Services\SiteDetector;
 use DrupalFinder\DrupalFinder;
-use Consolidation\SiteAlias\SiteAliasManager;
 
 /**
  * @covers \Drall\Traits\SiteDetectorAwareTrait
