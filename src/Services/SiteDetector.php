@@ -21,14 +21,6 @@ class SiteDetector {
     $this->setSiteAliasManager($siteAliasManager);
   }
 
-  public function getDrupalRoot(): string {
-    if (!$drupalRoot = $this->drupalFinder->getDrupalRoot()) {
-      throw new \RuntimeException('Could not detect a Drupal installation.');
-    }
-
-    return $drupalRoot;
-  }
-
   /**
    * Get a list of site directory names for a site group.
    *
@@ -83,8 +75,10 @@ class SiteDetector {
     return array_unique(array_values($result));
   }
 
-  private function getSitesFile($group = NULL): SitesFile {
-    $drupalRoot = $this->getDrupalRoot();
+  private function getSitesFile($group = NULL): ?SitesFile {
+    if (!$drupalRoot = $this->drupalFinder->getDrupalRoot()) {
+      return NULL;
+    }
 
     $basename = 'sites.php';
     if ($group) {
