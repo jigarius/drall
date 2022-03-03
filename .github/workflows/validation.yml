@@ -22,10 +22,11 @@ jobs:
       - lint
     steps:
       - uses: actions/checkout@v2
-      - uses: shivammathur/setup-php@v2
-        with:
-          php-version: ${{ matrix.php-versions }}
+      - name: Docker
+        run: docker compose build --progress=plain && docker compose up -d
       - name: Prepare
-        run: composer install
+        run: docker compose exec -T main make provision
       - name: Test
-        run: composer test && cat .coverage/text
+        run: docker compose exec -T --workdir=/opt/drall main composer test
+      - name: Coverage
+        run: make coverage-report/text
