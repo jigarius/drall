@@ -1,5 +1,7 @@
 <?php
 
+namespace Unit;
+
 use Drall\TestCase;
 
 /**
@@ -15,8 +17,15 @@ class TestCaseTest extends TestCase {
 
   public function testFixturesDir() {
     $this->assertEquals(
-      dirname(__FILE__) . '/fixtures',
+      dirname(__DIR__) . '/fixtures',
       $this->fixturesDir()
+    );
+  }
+
+  public function testProjectDir() {
+    $this->assertEquals(
+      dirname(dirname(__DIR__)),
+      $this->projectDir()
     );
   }
 

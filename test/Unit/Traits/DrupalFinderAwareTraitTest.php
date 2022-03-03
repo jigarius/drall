@@ -1,5 +1,7 @@
 <?php
 
+namespace Unit\Traits;
+
 use Drall\TestCase;
 use Drall\Traits\DrupalFinderAwareTrait;
 use DrupalFinder\DrupalFinder;
