@@ -2,10 +2,10 @@
 
 namespace Drall;
 
-use Consolidation\SiteAlias\SiteAliasManagerInterface;
 use Consolidation\SiteAlias\SiteAliasManager;
 use Drall\Commands\ExecCommand;
 use Drall\Services\SiteDetector;
+use Drall\Traits\SiteDetectorAwareTrait;
 use DrupalCodeGenerator\Logger\ConsoleLogger;
 use Drush\SiteAlias\SiteAliasFileLoader;
 use DrupalFinder\DrupalFinder;
@@ -25,11 +25,13 @@ final class Drall extends Application {
   const VERSION = '0.5.0';
 
   use LoggerAwareTrait;
+  use SiteDetectorAwareTrait;
 
   /**
    * Creates a Phpake Application instance.
    */
   public function __construct(
+    SiteDetector $siteDetector = NULL,
     ?InputInterface $input = NULL,
     ?OutputInterface $output = NULL
   ) {
@@ -41,14 +43,10 @@ final class Drall extends Application {
     $this->setName(self::NAME);
     $this->setVersion(self::VERSION);
     $this->configureIO($input, $output);
-
-    // @todo Use dependency injection.
-    $siteDetector = new SiteDetector(
-      $this->getDrupalFinder(),
-      $this->getSiteAliasManager()
-    );
-
     $this->setLogger(new ConsoleLogger($output));
+
+    $siteDetector ??= $this->createDefaultSiteDetector();
+    $this->setSiteDetector($siteDetector);
 
     $cmd = new SiteDirectoriesCommand();
     $cmd->setSiteDetector($siteDetector);
@@ -66,17 +64,14 @@ final class Drall extends Application {
     $this->add($cmd);
   }
 
-  private function getDrupalFinder(): DrupalFinder {
+  private function createDefaultSiteDetector() {
     $drupalFinder = new DrupalFinder();
     $drupalFinder->locateRoot(getcwd());
-    return $drupalFinder;
-  }
 
-  private function getSiteAliasManager(): SiteAliasManagerInterface {
-    $aliasFileLoader = new SiteAliasFileLoader();
-    $siteAliasManager = new SiteAliasManager($aliasFileLoader);
+    $siteAliasManager = new SiteAliasManager(new SiteAliasFileLoader());
     $siteAliasManager->addSearchLocation('drush/sites');
-    return $siteAliasManager;
+
+    return new SiteDetector($drupalFinder, $siteAliasManager);
   }
 
 }
