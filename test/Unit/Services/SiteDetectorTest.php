@@ -35,17 +35,6 @@ class SiteDetectorTest extends TestCase {
     $this->subject = new SiteDetector($drupalFinder, $siteAliasManager);
   }
 
-  public function testGetDrupalRoot() {
-    $this->assertEquals("$this->drupalPath/web", $this->subject->getDrupalRoot());
-  }
-
-  public function testGetDrupalRootNotExists() {
-    $subject = new SiteDetector(new DrupalFinder(), new SiteAliasManager());
-
-    $this->expectException(\RuntimeException::class);
-    $subject->getDrupalRoot();
-  }
-
   public function testGetSiteDirNames() {
     $this->assertEquals(
       ['default', 'donnie', 'leo', 'mikey', 'ralph'],
