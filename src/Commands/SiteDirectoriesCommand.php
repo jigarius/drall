@@ -19,7 +19,7 @@ class SiteDirectoriesCommand extends BaseCommand {
     $this->addOption(
       'drall-group',
       NULL,
-      InputOption::VALUE_REQUIRED,
+      InputOption::VALUE_OPTIONAL,
       'Site group identifier.'
     );
 
