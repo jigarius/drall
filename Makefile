@@ -12,8 +12,12 @@ provision:
 .PHONY: provision/drupal
 provision/drupal:
 	cd /opt/drupal
-	composer install
+	composer install --no-progress
+	echo 'Drupal databases can be provisioned with: make provision/drupal/database'
 
+
+.PHONY: provision/drupal/database
+provision/drupal/database:
 	drush site:install -y minimal --db-url="mysql://drupal:drupal@database:3306/tmnt" --uri=default --account-name=tmnt-root --account-mail=tmnt@localhost --account-pass=cowabunga --site-name=TMNT
 	chown -R www-data:www-data web/sites/default
 
@@ -32,8 +36,7 @@ provision/drupal:
 
 .PHONY: provision/drall
 provision/drall:
-	cd /opt/drall
-	composer install
+	composer install --working-dir=/opt/drall --no-progress
 
 
 .PHONY: coverage-text
@@ -44,3 +47,13 @@ coverage-report/text:
 .PHONY: coverage-html
 coverage-report/html:
 	open .coverage/html/dashboard.html
+
+
+.PHONY: lint
+test:
+	composer --working-dir=/opt/drall run lint
+
+
+.PHONY: test
+test:
+	composer --working-dir=/opt/drall run test
