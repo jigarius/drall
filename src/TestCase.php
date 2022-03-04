@@ -10,6 +10,16 @@ use PHPUnit\Framework\TestCase as TestCaseBase;
 abstract class TestCase extends TestCaseBase {
 
   /**
+   * Get the path to the Drupal project root.
+   *
+   * @return string
+   *   /path/to/drupal.
+   */
+  protected function drupalDir(): string {
+    return getenv('DRUPAL_PATH');
+  }
+
+  /**
    * Get the path to the project's root directory.
    *
    * @return string

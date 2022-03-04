@@ -9,6 +9,10 @@ use Drall\TestCase;
  */
 class TestCaseTest extends TestCase {
 
+  public function testDrupalDir() {
+    $this->assertEquals('/opt/drupal', $this->drupalDir());
+  }
+
   public function testCreateTempFile() {
     $path = static::createTempFile('Bunny Wabbit');
     $this->assertFileExists($path);
