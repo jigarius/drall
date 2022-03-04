@@ -31,7 +31,10 @@ class SiteDetector {
    *   Contents of the $sites variable.
    */
   public function getSiteDirNames(string $group = NULL): array {
-    $sitesFile = $this->getSitesFile($group);
+    if (!$sitesFile = $this->getSitesFile($group)) {
+      return [];
+    }
+
     return $sitesFile->getDirNames();
   }
 
