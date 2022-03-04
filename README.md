@@ -23,6 +23,60 @@ composer require jigarius/drall
 To see a list of commands offered by Drall, run `drall list`. If you feel lost,
 run `drall help` or continue reading this documentation.
 
+### exec
+
+There are a number of ways to run `drush` commands on multiple sites.
+
+#### With --uri
+
+In this method, the `--uri` option is sent to `drush`.
+
+```
+drall exec --uri=@@uri core:status
+```
+
+Or simplify omit the `--uri=@@uri` and it will be added automatically.
+
+```
+drall exec core:status
+```
+
+##### Example
+
+```
+$ drall core:status
+drush --uri=default core:status
+drush --uri=donnie core:status
+drush --uri=leo core:status
+drush --uri=mikey core:status
+drush --uri=ralph core:status
+```
+
+Here, the `--uri` is populated with names of the subdirectories under `sites`
+in which the various sites live.
+
+#### With @alias
+
+In this method, a site alias is sent to `drush`.
+
+```
+drall exec @@site.local core:status
+```
+
+##### Example
+
+```
+$ drall exec @@site.local core:status
+drush @tmnt.local core:status
+drush @donnie.local core:status
+drush @leo.local core:status
+drush @mikey.local core:status
+drush @ralph.local core:status
+```
+
+Here, `@@site` is replaced with site names detected from various site alias
+definitions.
+
 ### site:directories
 
 Get a list of all available site directory names in the Drupal installation.
@@ -76,60 +130,6 @@ do
   echo "Current site: $site";
 done;
 ```
-
-### exec
-
-There are a number of ways to run `drush` commands on multiple sites.
-
-#### With --uri
-
-In this method, the `--uri` option is sent to `drush`.
-
-```
-drall exec --uri=@@uri core:status
-```
-
-Or simplify omit the `--uri=@@uri` and it will be added automatically.
-
-```
-drall exec core:status
-```
-
-#### Example
-
-```
-$ drall core:status
-drush --uri=default core:status
-drush --uri=donnie core:status
-drush --uri=leo core:status
-drush --uri=mikey core:status
-drush --uri=ralph core:status
-```
-
-Here, the `--uri` is populated with names of the subdirectories under `sites`
-in which the various sites live.
-
-#### With @alias
-
-In this method, a site alias is sent to `drush`.
-
-```
-drall exec @@site.local core:status
-```
-
-#### Example
-
-```
-$ drall exec @@site.local core:status
-drush @tmnt.local core:status
-drush @donnie.local core:status
-drush @leo.local core:status
-drush @mikey.local core:status
-drush @ralph.local core:status
-```
-
-Here, `@@site` is replaced with site names detected from various site alias
-definitions.
 
 ## Site groups
 
