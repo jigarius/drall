@@ -1,6 +1,13 @@
 # Drall
 
-Drall is a tool to that helps run [drush](https://www.drush.org/) commands on multi-site Drupal installations.
+Drall is a tool to that helps run [drush](https://www.drush.org/) commands
+on multi-site Drupal installations.
+
+> One command to *drush* them all.
+> — [Jigarius](https://jigarius.com/about)
+
+A big thanks and shout-out to [Symetris](https://symetris.ca/) for sponsoring
+the initial development of Drall.
 
 ## Installation
 
@@ -13,13 +20,16 @@ composer require jigarius/drall
 
 ## Commands
 
-To see a list of commands offered by drall, run `drall list`.
+To see a list of commands offered by Drall, run `drall list`. If you feel lost,
+run `drall help` or continue reading this documentation.
 
 ### site:directories
 
 Get a list of all available site directory names in the Drupal installation.
 All `sites/*` directories containing a `settings.php` file are treated as
 individual sites.
+
+#### Example: Usage
 
 ```
 $ drall site:directories
@@ -32,9 +42,20 @@ ralph.com
 
 The output can then be iterated with scripts.
 
+#### Example: Iterating
+
+```shell
+for site in $(drall site:directories)
+do
+  echo "Current site: $site";
+done;
+```
+
 ### site:aliases
 
 Get a list of site aliases.
+
+#### Example: Usage
 
 ```
 $ drall site:aliases
@@ -47,6 +68,15 @@ $ drall site:aliases
 
 The output can then be iterated with scripts.
 
+#### Example: Iterating
+
+```shell
+for site in $(drall site:aliases)
+do
+  echo "Current site: $site";
+done;
+```
+
 ### exec
 
 There are a number of ways to run `drush` commands on multiple sites.
@@ -56,17 +86,24 @@ There are a number of ways to run `drush` commands on multiple sites.
 In this method, the `--uri` option is sent to `drush`.
 
 ```
-drush st --fields=site
+drall exec --uri=@@uri core:status
 ```
 
-For example, the above command results in:
+Or simplify omit the `--uri=@@uri` and it will be added automatically.
 
 ```
-drush --uri=default st --fields=site
-drush --uri=donnie st --fields=site
-drush --uri=leo st --fields=site
-drush --uri=mikey st --fields=site
-drush --uri=ralph st --fields=site
+drall exec core:status
+```
+
+#### Example
+
+```
+$ drall core:status
+drush --uri=default core:status
+drush --uri=donnie core:status
+drush --uri=leo core:status
+drush --uri=mikey core:status
+drush --uri=ralph core:status
 ```
 
 Here, the `--uri` is populated with names of the subdirectories under `sites`
@@ -77,17 +114,18 @@ in which the various sites live.
 In this method, a site alias is sent to `drush`.
 
 ```
-drall exec @@site.local st --fields=site
+drall exec @@site.local core:status
 ```
 
-For example, the above command results in:
+#### Example
 
 ```
-drush @tmnt.local st --fields=site
-drush @donnie.local st --fields=site
-drush @leo.local st --fields=site
-drush @mikey.local st --fields=site
-drush @ralph.local st --fields=site
+$ drall exec @@site.local core:status
+drush @tmnt.local core:status
+drush @donnie.local core:status
+drush @leo.local core:status
+drush @mikey.local core:status
+drush @ralph.local core:status
 ```
 
 Here, `@@site` is replaced with site names detected from various site alias
@@ -102,9 +140,7 @@ groups with ease.
 drall exec --drall-group=GROUP core:rebuild
 ```
 
-Here's how you can create site groups.
-
-### With site aliases
+### Drall groups with site aliases
 
 In a site alias definition file, you can assign site aliases to one or more
 groups like this:
@@ -123,7 +159,7 @@ local:
 
 This puts the alias `@tnmt.local` in the `cartoon` and `action` groups.
 
-### With sites.php
+### Drall groups with sites.*.php
 
 If your project doesn't use site aliases, you can still group your sites using
 one or more `sites.GROUP.php` files like this:
@@ -147,14 +183,18 @@ Here's how you can set up a local dev environment.
 - Run `make ssh` to launch a shell in the Drupal container.
 - Run `make provision`.
 - Run `drall --version` to test the setup.
+- Run `make lint` to run linter.
+- Run `make test` to run tests.
 
-You should now be able to `make ssh` and then run `drall`. A multi-site
-Drupal installation should be present at `/opt/drupal`.
+You should now be able to `make ssh` and then run `drall`. A multi-site Drupal
+installation should be present at `/opt/drupal`. Oh! And Drall should be
+present at `/opt/drall`.
 
 ### Hosts
 
 To access the dev sites in your browser, add the following line to your hosts
-file. It is usually located at `/etc/hosts`.
+file. It is usually located at `/etc/hosts`. This is completely optional, so
+do this only if you need it.
 
 ```
 127.0.0.1 tmnt.drall.local donnie.drall.local leo.drall.local mikey.drall.local ralph.drall.local
@@ -166,3 +206,9 @@ The sites should then be available at:
 - http://leo.drall.local/
 - http://mikey.drall.local/
 - http://ralph.drall.local/
+
+## Acknowledgements
+
+- Thanks [Symetris](https://symetris.ca/) for funding the initial development.
+- Thanks [Jigar Mehta (Jigarius)](https://jigarius.com/about) (that's me) for
+  spending evenings and weekends to make this tool possible.
