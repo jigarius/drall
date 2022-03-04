@@ -50,7 +50,7 @@ coverage-report/html:
 
 
 .PHONY: lint
-test:
+lint:
 	composer --working-dir=/opt/drall run lint
 
 
