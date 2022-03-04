@@ -71,6 +71,11 @@ class ExecCommand extends BaseCommand {
       $drushCommands = $this->generateCommandsWithUri($command, $siteGroup);
     }
 
+    if (empty($drushCommands)) {
+      $this->logger->warning('No Drupal sites found.');
+      return 0;
+    }
+
     $errorCodes = [];
     foreach ($drushCommands as $key => $drushCommand) {
       $output->writeln("Running: $drushCommand");
