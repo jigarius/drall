@@ -15,6 +15,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 class ExecCommand extends BaseCommand {
 
   /**
+   * To be treated as the $argv array.
+   *
+   * @var array
+   */
+  protected array $argv;
+
+  /**
    * The runner to use for executing commands.
    *
    * @var \Drall\Runners\RunnerInterface
@@ -23,7 +30,44 @@ class ExecCommand extends BaseCommand {
 
   public function __construct(string $name = NULL) {
     parent::__construct($name);
+    $this->argv = $GLOBALS['argv'];
     $this->runner = new PassthruRunner();
+  }
+
+  public function setRunner(RunnerInterface $runner): self {
+    $this->runner = $runner;
+    return $this;
+  }
+
+  /**
+   * Sets an array to be treated as $argv, mostly for testing.
+   *
+   * The $argv array contains:
+   *   - Script name as the first parameter, i.e. drall.
+   *   - The Drall command as the second parameter, e.g. exec.
+   *   - Options for the Drall command, e.g. --drall-group=bluish.
+   *   - The Drush command and its arguments, e.g. pmu devel
+   *   - Options for the Drush command, e.g. --fields=site.
+   *
+   * @code
+   * $command->setArgv([
+   *   '/opt/drall/bin/drall',
+   *   'exec',
+   *   '--drall-group=bluish',
+   *   'core:status',
+   *   '--fields=site',
+   * ]);
+   * @endcode
+   *
+   * @param array $argv
+   *   An array matching the $argv array format.
+   *
+   * @return self
+   *   The command.
+   */
+  public function setArgv(array $argv): self {
+    $this->argv = $argv;
+    return $this;
   }
 
   protected function configure() {
@@ -55,12 +99,10 @@ class ExecCommand extends BaseCommand {
   protected function execute(InputInterface $input, OutputInterface $output) {
     // Symfony Console only recognizes options that are defined in the
     // ::configure() method. Since our goal is to catch all arguments and
-    // options and send them to drush, we do exactly that.
+    // options and send them to drush, we do it ourselves using $argv.
     //
-    // Example: drall drush arg1 arg2 --opt1 --opt2
-    //
-    // We simply ignore the first to items and send the rest to drush.
-    $command = $this->getDrushCommandFromArgv($GLOBALS['argv']);
+    // @todo Is there a way to catch all options from $input?
+    $command = static::getDrushCommandFromArgv($this->argv);
     $siteGroup = $input->getOption('drall-group');
 
     // Prepare all drush commands.
@@ -86,8 +128,12 @@ class ExecCommand extends BaseCommand {
       }
     }
 
+    if (empty($errorCodes)) {
+      return 0;
+    }
+
     // @todo Display summary of errors as per verbosity level.
-    return empty($errorCodes) ? 0 : 1;
+    return 1;
   }
 
   /**
@@ -99,10 +145,9 @@ class ExecCommand extends BaseCommand {
    * @return string
    *   A drush command.
    */
-  private function getDrushCommandFromArgv(array $argv = []) {
-    // Ignore the scriptname and the word "exec".
+  private static function getDrushCommandFromArgv(array $argv): string {
+    // Ignore the script name and the word "exec".
     $parts = array_slice($argv, 2);
-
     // Ignore options with --drall namespace.
     $parts = array_filter($parts, fn($w) => !str_starts_with($w, '--drall-'));
 
