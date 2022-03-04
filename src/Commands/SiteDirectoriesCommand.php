@@ -33,7 +33,7 @@ class SiteDirectoriesCommand extends BaseCommand {
     );
 
     if (count($dirNames) === 0) {
-      $this->logger->warning('No site directories found.');
+      $this->logger->warning('No Drupal sites found.');
       return 0;
     }
 
