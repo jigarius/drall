@@ -12,12 +12,25 @@ provision:
 .PHONY: provision/drupal
 provision/drupal:
 	cd /opt/drupal
-	composer install --no-progress
-	echo 'Drupal databases can be provisioned with: make provision/drupal/database'
+
+	mkdir -p web/sites/donnie
+	mkdir -p web/sites/leo
+	mkdir -p web/sites/mikey
+	mkdir -p web/sites/ralph
+
+	cp web/sites/default/default.settings.php web/sites/default/settings.php
+	cp web/sites/default/default.settings.php web/sites/donnie/settings.php
+	cp web/sites/default/default.settings.php web/sites/leo/settings.php
+	cp web/sites/default/default.settings.php web/sites/mikey/settings.php
+	cp web/sites/default/default.settings.php web/sites/ralph/settings.php
+
+	@echo 'Drupal databases can be provisioned with: make provision/drupal/database'
 
 
 .PHONY: provision/drupal/database
 provision/drupal/database:
+	rm -f web/sites/*/settings.php
+
 	drush site:install -y minimal --db-url="mysql://drupal:drupal@database:3306/tmnt" --uri=default --account-name=tmnt-root --account-mail=tmnt@localhost --account-pass=cowabunga --site-name=TMNT
 	chown -R www-data:www-data web/sites/default
 
