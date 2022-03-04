@@ -1,6 +1,6 @@
 FROM drupal:9-apache
 
-ENV PATH="${PATH}:/opt/drall/bin"
+ENV PATH="/opt/drall/bin:${PATH}:/opt/drall/vendor/bin"
 ENV PHP_INI_PATH="$PHP_INI_DIR/conf.d/php.ini"
 
 ENV DRUPAL_PATH="/opt/drupal"
