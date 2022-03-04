@@ -15,21 +15,17 @@ use DrupalFinder\DrupalFinder;
  */
 class SiteDetectorTest extends TestCase {
 
-  protected string $drupalPath;
-
   protected SiteDetector $subject;
 
   protected function setUp(): void {
-    $this->drupalPath = getenv('DRUPAL_PATH');
-
     $drupalFinder = new DrupalFinder();
-    $drupalFinder->locateRoot($this->drupalPath);
+    $drupalFinder->locateRoot($this->drupalDir());
 
     $siteAliasFileLoader = new SiteAliasFileLoader(
-      new SiteAliasFileDiscovery(["$this->drupalPath/drush/sites"])
+      new SiteAliasFileDiscovery(["{$this->drupalDir()}/drush/sites"])
     );
     $siteAliasFileLoader->addLoader('yml', new YamlDataFileLoader());
-    $siteAliasManager = new SiteAliasManager($siteAliasFileLoader, $this->drupalPath);
+    $siteAliasManager = new SiteAliasManager($siteAliasFileLoader, $this->drupalDir());
     $siteAliasManager->addSearchLocation('drush/sites');
 
     $this->subject = new SiteDetector($drupalFinder, $siteAliasManager);
@@ -50,6 +46,12 @@ class SiteDetectorTest extends TestCase {
       ['mikey', 'ralph'],
       $this->subject->getSiteDirNames('reddish')
     );
+  }
+
+  public function testGetSiteDirNamesWithNoDrupal() {
+    $this->subject = new SiteDetector(new DrupalFinder(), new SiteAliasManager());
+
+    $this->assertEquals([], $this->subject->getSiteDirNames('reddish'));
   }
 
   public function testGetSiteAliasNames() {
