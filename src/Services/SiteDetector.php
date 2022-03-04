@@ -41,19 +41,19 @@ class SiteDetector {
    * @param string|null $group
    *   A site group, if any.
    *
-   * @return Consolidation\SiteAlias\SiteAliasInterface[]
+   * @return string[]
    *   Site aliases.
    */
   public function getSiteAliases(string $group = NULL): array {
     $result = $this->siteAliasManager()->getMultiple();
 
-    if (!$group) {
-      return $result;
+    if ($group) {
+      $result = array_filter($result, function ($alias) use ($group) {
+        return in_array($group, $alias->get('drall.groups') ?? []);
+      });
     }
 
-    return array_filter($result, function ($alias) use ($group) {
-      return in_array($group, $alias->get('drall.groups') ?? []);
-    });
+    return array_map(fn($a) => $a->name(), $result);
   }
 
   /**
@@ -70,7 +70,7 @@ class SiteDetector {
    */
   public function getSiteAliasNames(string $group = NULL): array {
     $result = array_map(function ($siteAlias) {
-      return explode('.', $siteAlias->name())[0];
+      return explode('.', $siteAlias)[0];
     }, $this->getSiteAliases($group));
     return array_unique(array_values($result));
   }

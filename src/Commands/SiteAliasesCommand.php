@@ -38,7 +38,7 @@ class SiteAliasesCommand extends BaseCommand {
     }
 
     foreach ($aliases as $alias) {
-      $output->writeln($alias->name());
+      $output->writeln($alias);
     }
 
     return 0;
