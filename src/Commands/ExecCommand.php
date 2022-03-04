@@ -2,6 +2,8 @@
 
 namespace Drall\Commands;
 
+use Drall\Runners\PassthruRunner;
+use Drall\Runners\RunnerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -11,6 +13,18 @@ use Symfony\Component\Console\Output\OutputInterface;
  * A command to execute a drush command on multiple sites.
  */
 class ExecCommand extends BaseCommand {
+
+  /**
+   * The runner to use for executing commands.
+   *
+   * @var \Drall\Runners\RunnerInterface
+   */
+  protected RunnerInterface $runner;
+
+  public function __construct(string $name = NULL) {
+    parent::__construct($name);
+    $this->runner = new PassthruRunner();
+  }
 
   protected function configure() {
     $this->setName('exec');
@@ -60,7 +74,7 @@ class ExecCommand extends BaseCommand {
     $errorCodes = [];
     foreach ($drushCommands as $key => $drushCommand) {
       $output->writeln("Running: $drushCommand");
-      passthru($drushCommand, $exitCode);
+      $exitCode = $this->runner->execute($drushCommand);
 
       if ($exitCode !== 0) {
         $errorCodes[$key] = $exitCode;
