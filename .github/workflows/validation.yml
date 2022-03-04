@@ -22,11 +22,9 @@ jobs:
       - lint
     steps:
       - uses: actions/checkout@v2
-      - name: Docker
-        run: docker compose build --progress=plain && docker compose up -d
       - name: Prepare
-        run: docker compose exec -T main make provision
+        run: docker compose build -q && docker compose up -d && docker compose exec -T main make provision
       - name: Test
-        run: docker compose exec -T --workdir=/opt/drall main composer test
+        run: docker compose exec -T --workdir=/opt/drall -e XDEBUG_MODE=coverage main make test
       - name: Coverage
         run: make coverage-report/text
