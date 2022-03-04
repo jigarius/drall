@@ -8,8 +8,6 @@
 
 if (php_sapi_name() !== 'cli') exit;
 
-use Drall\Drall;
-
 foreach ([
   // Development environment.
   __DIR__ . '/../vendor/autoload.php',
@@ -21,6 +19,8 @@ foreach ([
   }
   unset($candidate);
 }
+
+use Drall\Drall;
 
 try {
   $drall = new Drall();
