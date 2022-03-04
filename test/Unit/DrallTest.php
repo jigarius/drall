@@ -18,7 +18,7 @@ class DrallTest extends TestCase {
   public function testVersion() {
     $app = new Drall();
     $this->assertMatchesRegularExpression(
-      '/^\d+\.\d+.\d+(-(alpha|beta|rc)\.\d+)?$/',
+      '/^\d+\.\d+.\d+(-(alpha|beta|rc)\d+)?$/',
       $app->getVersion()
     );
 

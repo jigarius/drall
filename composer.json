@@ -1,7 +1,7 @@
 {
     "name": "jigarius/drall",
     "description": "Drall is a utility to run drush on multi-site Drupal installations.",
-    "version": "0.5.0",
+    "version": "1.0.0-beta1",
     "homepage": "https://github.com/jigarius/drall",
     "license": "GPL-3.0-only",
     "keywords": ["drush", "drupal"],
