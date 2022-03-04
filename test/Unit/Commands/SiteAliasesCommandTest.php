@@ -1,7 +1,6 @@
 <?php
 
 use Consolidation\SiteAlias\SiteAliasManager;
-use Consolidation\SiteAlias\SiteAlias;
 use Symfony\Component\Console\Tester\CommandTester;
 use DrupalFinder\DrupalFinder;
 use Drall\Drall;
@@ -17,9 +16,6 @@ class SiteAliasesCommandTest extends TestCase {
     $drupalFinder = new DrupalFinder();
     $siteAliasManager = new SiteAliasManager();
 
-    $aliasLeo = new SiteAlias([], '@leo', 'local');
-    $aliasRalph = new SiteAlias([], '@ralph', 'local');
-
     $siteDetectorMock = $this->getMockBuilder(SiteDetector::class)
       ->setConstructorArgs([$drupalFinder, $siteAliasManager])
       ->onlyMethods(['getSiteAliases'])
@@ -27,7 +23,7 @@ class SiteAliasesCommandTest extends TestCase {
     $siteDetectorMock
       ->expects($this->once())
       ->method('getSiteAliases')
-      ->willReturn([$aliasLeo, $aliasRalph]);
+      ->willReturn(['@leo.local', '@ralph.local']);
 
     $app = new Drall($siteDetectorMock);
     $tester = new CommandTester($app->find('site:aliases'));
@@ -50,8 +46,6 @@ EOF
     $drupalFinder = new DrupalFinder();
     $siteAliasManager = new SiteAliasManager();
 
-    $aliasTmnt = new SiteAlias([], '@tmnt', 'local');
-
     $siteDetectorMock = $this->getMockBuilder(SiteDetector::class)
       ->setConstructorArgs([$drupalFinder, $siteAliasManager])
       ->onlyMethods(['getSiteAliases'])
@@ -60,7 +54,7 @@ EOF
       ->expects($this->once())
       ->method('getSiteAliases')
       ->with('bluish')
-      ->willReturn([$aliasTmnt]);
+      ->willReturn(['@tmnt.local']);
 
     $app = new Drall($siteDetectorMock);
     $tester = new CommandTester($app->find('site:aliases'));
