@@ -27,7 +27,7 @@ run `drall help` or continue reading this documentation.
 
 There are a number of ways to run `drush` commands on multiple sites.
 
-#### With --uri
+#### With @@uri
 
 In this method, the `--uri` option is sent to `drush`.
 
@@ -55,7 +55,7 @@ drush --uri=ralph core:status
 Here, the `--uri` is populated with names of the subdirectories under `sites`
 in which the various sites live.
 
-#### With @alias
+#### With @@site
 
 In this method, a site alias is sent to `drush`.
 
