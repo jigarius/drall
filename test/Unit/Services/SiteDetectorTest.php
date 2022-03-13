@@ -71,4 +71,11 @@ class SiteDetectorTest extends TestCase {
     );
   }
 
+  public function testGetDrushPath() {
+    $this->assertEquals(
+      '/opt/drupal/vendor/bin/drush',
+      $this->subject->getDrushPath()
+    );
+  }
+
 }
