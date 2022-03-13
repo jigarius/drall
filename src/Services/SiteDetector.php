@@ -78,6 +78,16 @@ class SiteDetector {
     return array_unique(array_values($result));
   }
 
+  /**
+   * Gets the path to the applicable drush binary.
+   *
+   * @return string
+   *   Path/to/drush.
+   */
+  public function getDrushPath(): string {
+    return $this->drupalFinder->getVendorDir() . '/bin/drush';
+  }
+
   private function getSitesFile($group = NULL): ?SitesFile {
     if (!$drupalRoot = $this->drupalFinder->getDrupalRoot()) {
       return NULL;
