@@ -120,8 +120,8 @@ class ExecCommand extends BaseCommand {
 
     $errorCodes = [];
     foreach ($drushCommands as $key => $drushCommand) {
-      $output->writeln("Running: $drushCommand");
-      $exitCode = $this->runner->execute($drushCommand);
+      $output->writeln("Running: {$drushCommand['log']}");
+      $exitCode = $this->runner->execute($drushCommand['run']);
 
       if ($exitCode !== 0) {
         $errorCodes[$key] = $exitCode;
@@ -165,19 +165,29 @@ class ExecCommand extends BaseCommand {
    *   A site group, if any.
    *
    * @return array
-   *   Commands with various site URIs.
+   *   An array of arrays containing commands.
+   *
+   *   Each item of the result array contains two keys:
+   *   - run: The command to execute.
+   *   - log: The command to display.
+   *
+   * @todo Revisit command generate once we start dealing we support for exec:shell.
    */
   private function generateCommandsWithUri(string $command, ?string $siteGroup = NULL): array {
     if (!$this->isCommandWithUri($command)) {
       $command = "--uri=@@uri $command";
     }
 
+    $drushPath = $this->siteDetector->getDrushPath();
     $commands = [];
     foreach ($this->siteDetector()->getSiteDirNames($siteGroup) as $dirName) {
       // @todo Should the keys of the $sites array be used instead?
       // @todo Can sites exist with sites/GROUP/SITE/settings.php?
       //   If yes, then does --uri=GROUP/SITE work correctly?
-      $commands[] = 'drush ' . str_replace('@@uri', $dirName, $command);
+      $commands[$dirName] = [
+        'run' => $drushPath . ' ' . str_replace('@@uri', $dirName, $command),
+        'log' => 'drush ' . str_replace('@@uri', $dirName, $command),
+      ];
     }
     return $commands;
   }
@@ -193,12 +203,22 @@ class ExecCommand extends BaseCommand {
    *   A site group, if any.
    *
    * @return array
-   *   Commands with various site aliases.
+   *   An array of arrays containing commands.
+   *
+   *   Each item of the result array contains two keys:
+   *   - run: The command to execute.
+   *   - log: The command to display.
+   *
+   * @todo Revisit command generate once we start dealing we support for exec:shell.
    */
   private function generateCommandsWithAlias(string $command, ?string $siteGroup = NULL): array {
+    $drushPath = $this->siteDetector->getDrushPath();
     $commands = [];
     foreach ($this->siteDetector()->getSiteAliasNames($siteGroup) as $siteName) {
-      $commands[] = 'drush ' . str_replace('@@site', $siteName, $command);
+      $commands[$siteName] = [
+        'run' => $drushPath . ' ' . str_replace('@@site', $siteName, $command),
+        'log' => 'drush ' . str_replace('@@site', $siteName, $command),
+      ];
     }
     return $commands;
   }

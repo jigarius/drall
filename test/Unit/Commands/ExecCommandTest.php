@@ -20,12 +20,16 @@ class ExecCommandTest extends TestCase {
 
     $siteDetectorMock = $this->getMockBuilder(SiteDetector::class)
       ->setConstructorArgs([$drupalFinder, $siteAliasManager])
-      ->onlyMethods(['getSiteDirNames'])
+      ->onlyMethods(['getSiteDirNames', 'getDrushPath'])
       ->getMock();
     $siteDetectorMock
       ->expects($this->once())
       ->method('getSiteDirNames')
       ->willReturn(['default', 'april', 'kacey']);
+    $siteDetectorMock
+      ->expects($this->once())
+      ->method('getDrushPath')
+      ->willReturn('/foo/drush');
 
     $app = new Drall($siteDetectorMock);
     $input = ['cmd' => 'core:status', '--fields' => 'site'];
@@ -40,9 +44,9 @@ class ExecCommandTest extends TestCase {
     $tester->assertCommandIsSuccessful();
     $this->assertEquals(
       [
-        'drush --uri=default core:status --fields=site',
-        'drush --uri=april core:status --fields=site',
-        'drush --uri=kacey core:status --fields=site',
+        '/foo/drush --uri=default core:status --fields=site',
+        '/foo/drush --uri=april core:status --fields=site',
+        '/foo/drush --uri=kacey core:status --fields=site',
       ],
       $runner->commandHistory(),
     );
@@ -54,12 +58,16 @@ class ExecCommandTest extends TestCase {
 
     $siteDetectorMock = $this->getMockBuilder(SiteDetector::class)
       ->setConstructorArgs([$drupalFinder, $siteAliasManager])
-      ->onlyMethods(['getSiteAliasNames'])
+      ->onlyMethods(['getSiteAliasNames', 'getDrushPath'])
       ->getMock();
     $siteDetectorMock
       ->expects($this->once())
       ->method('getSiteAliasNames')
       ->willReturn(['@splinter', '@shredder']);
+    $siteDetectorMock
+      ->expects($this->once())
+      ->method('getDrushPath')
+      ->willReturn('/foo/drush');
 
     $app = new Drall($siteDetectorMock);
     $input = ['cmd' => '@@site.dev core:status', '--fields' => 'site'];
@@ -74,8 +82,8 @@ class ExecCommandTest extends TestCase {
     $tester->assertCommandIsSuccessful();
     $this->assertEquals(
       [
-        'drush @splinter.dev core:status --fields=site',
-        'drush @shredder.dev core:status --fields=site',
+        '/foo/drush @splinter.dev core:status --fields=site',
+        '/foo/drush @shredder.dev core:status --fields=site',
       ],
       $runner->commandHistory(),
     );
@@ -115,12 +123,16 @@ class ExecCommandTest extends TestCase {
 
     $siteDetectorMock = $this->getMockBuilder(SiteDetector::class)
       ->setConstructorArgs([$drupalFinder, $siteAliasManager])
-      ->onlyMethods(['getSiteAliasNames'])
+      ->onlyMethods(['getSiteAliasNames', 'getDrushPath'])
       ->getMock();
     $siteDetectorMock
       ->expects($this->once())
       ->method('getSiteAliasNames')
       ->willReturn(['@splinter', '@shredder']);
+    $siteDetectorMock
+      ->expects($this->once())
+      ->method('getDrushPath')
+      ->willReturn('/foo/drush');
 
     $app = new Drall($siteDetectorMock);
     $input = ['cmd' => '@@site.dev core:rebuild'];
@@ -135,8 +147,8 @@ class ExecCommandTest extends TestCase {
     $this->assertEquals(1, $tester->execute($input));
     $this->assertEquals(
       [
-        'drush @splinter.dev core:rebuild',
-        'drush @shredder.dev core:rebuild',
+        '/foo/drush @splinter.dev core:rebuild',
+        '/foo/drush @shredder.dev core:rebuild',
       ],
       $runner->commandHistory(),
     );
