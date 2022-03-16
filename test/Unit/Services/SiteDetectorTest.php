@@ -78,4 +78,18 @@ class SiteDetectorTest extends TestCase {
     );
   }
 
+  /**
+   * Drush path is "drush" when a Drupal installation is not found.
+   */
+  public function testGetDrushPathWithoutDrupal() {
+    $drupalFinder = new DrupalFinder();
+    $drupalFinder->locateRoot('/');
+    $subject = new SiteDetector($drupalFinder, new SiteAliasManager());
+
+    $this->assertEquals(
+      'drush',
+      $subject->getDrushPath()
+    );
+  }
+
 }

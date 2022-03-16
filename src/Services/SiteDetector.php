@@ -85,7 +85,13 @@ class SiteDetector {
    *   Path/to/drush.
    */
   public function getDrushPath(): string {
-    return $this->drupalFinder->getVendorDir() . '/bin/drush';
+    if (!$vendorDir = $this->drupalFinder->getVendorDir()) {
+      // This should only happen when drall is installed globally and not in a
+      // specific Drupal project.
+      return 'drush';
+    }
+
+    return "$vendorDir/bin/drush";
   }
 
   private function getSitesFile($group = NULL): ?SitesFile {
