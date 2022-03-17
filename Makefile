@@ -13,6 +13,8 @@ provision:
 provision/drupal:
 	cd /opt/drupal
 
+	composer install
+
 	mkdir -p web/sites/donnie
 	mkdir -p web/sites/leo
 	mkdir -p web/sites/mikey
