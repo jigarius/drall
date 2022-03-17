@@ -71,8 +71,8 @@ class ExecCommand extends BaseCommand {
   }
 
   protected function configure() {
-    $this->setName('exec');
-    $this->setAliases(['ex']);
+    $this->setName('exec:drush');
+    $this->setAliases(['exec', 'ex', 'exd']);
     $this->setDescription('Execute a drush command.');
 
     $this->addArgument(
@@ -104,6 +104,17 @@ class ExecCommand extends BaseCommand {
     // @todo Is there a way to catch all options from $input?
     $command = static::getDrushCommandFromArgv($this->argv);
     $siteGroup = $input->getOption('drall-group');
+
+    if ($input->getArgument('command') === 'exec') {
+      $this->logger->warning(
+        'The command "drall exec" will be removed in v2.0. Use "drall exec:drush" instead.'
+      );
+    }
+    elseif ($input->getArgument('command') === 'ex') {
+      $this->logger->warning(
+        'The command "drall ex" will be removed in v2.0. Use "drall exd" instead.'
+      );
+    }
 
     // Prepare all drush commands.
     if ($this->isCommandWithAlias($command)) {
