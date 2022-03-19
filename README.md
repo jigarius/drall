@@ -32,13 +32,13 @@ There are a number of ways to run `drush` commands on multiple sites.
 In this method, the `--uri` option is sent to `drush`.
 
 ```
-drall exec --uri=@@uri core:status
+drall exec:drush --uri=@@uri core:status
 ```
 
 Or simplify omit the `--uri=@@uri` and it will be added automatically.
 
 ```
-drall exec core:status
+drall exec:drush core:status
 ```
 
 ##### Example
@@ -60,13 +60,13 @@ in which the various sites live.
 In this method, a site alias is sent to `drush`.
 
 ```
-drall exec @@site.local core:status
+drall exec:drush @@site.local core:status
 ```
 
 ##### Example
 
 ```
-$ drall exec @@site.local core:status
+$ drall exec:drush @@site.local core:status
 drush @tmnt.local core:status
 drush @donnie.local core:status
 drush @leo.local core:status
@@ -137,7 +137,7 @@ Drall allows you to group your sites so that you can run commands on such
 groups with ease.
 
 ```
-drall exec --drall-group=GROUP core:rebuild
+drall exec:drush --drall-group=GROUP core:rebuild
 ```
 
 ### Drall groups with site aliases
