@@ -131,6 +131,16 @@ do
 done;
 ```
 
+## Global options
+
+This section covers some options that are supported by all `drall` commands.
+
+### --root
+
+Specify a Drupal project root or document root directory.
+
+    drall --root=/path/to/drupal site:directories
+
 ## Site groups
 
 Drall allows you to group your sites so that you can run commands on such
