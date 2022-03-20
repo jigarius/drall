@@ -4,6 +4,8 @@ namespace Drall;
 
 use Consolidation\SiteAlias\SiteAliasManager;
 use Drall\Commands\ExecCommand;
+use Drall\Commands\SiteDirectoriesCommand;
+use Drall\Commands\SiteAliasesCommand;
 use Drall\Services\SiteDetector;
 use Drall\Traits\SiteDetectorAwareTrait;
 use DrupalCodeGenerator\Logger\ConsoleLogger;
@@ -14,8 +16,6 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
-use Drall\Commands\SiteDirectoriesCommand;
-use Drall\Commands\SiteAliasesCommand;
 use Symfony\Component\Console\Output\OutputInterface;
 
 final class Drall extends Application {
@@ -45,7 +45,8 @@ final class Drall extends Application {
     $this->configureIO($input, $output);
     $this->setLogger(new ConsoleLogger($output));
 
-    $siteDetector ??= $this->createDefaultSiteDetector();
+    $root = $input->getParameterOption('--root') ?: getcwd();
+    $siteDetector ??= $this->createDefaultSiteDetector($root);
     $this->setSiteDetector($siteDetector);
 
     $cmd = new SiteDirectoriesCommand();
@@ -64,12 +65,12 @@ final class Drall extends Application {
     $this->add($cmd);
   }
 
-  private function createDefaultSiteDetector() {
+  private function createDefaultSiteDetector(string $root): SiteDetector {
     $drupalFinder = new DrupalFinder();
-    $drupalFinder->locateRoot(getcwd());
+    $drupalFinder->locateRoot($root);
 
     $siteAliasManager = new SiteAliasManager(new SiteAliasFileLoader());
-    $siteAliasManager->addSearchLocation('drush/sites');
+    $siteAliasManager->addSearchLocation($drupalFinder->getComposerRoot() . '/drush/sites');
 
     return new SiteDetector($drupalFinder, $siteAliasManager);
   }

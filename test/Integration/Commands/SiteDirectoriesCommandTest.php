@@ -45,4 +45,30 @@ leo
 EOF, $output);
   }
 
+  public function testWithComposerRoot() {
+    chdir('/');
+    $output = shell_exec('drall --root=' . $this->drupalDir() . ' site:directories');
+    $this->assertEquals(<<<EOF
+default
+donnie
+leo
+mikey
+ralph
+
+EOF, $output);
+  }
+
+  public function testWithDrupalRoot() {
+    chdir('/');
+    $output = shell_exec('drall --root=' . $this->drupalDir() . '/web site:directories');
+    $this->assertEquals(<<<EOF
+default
+donnie
+leo
+mikey
+ralph
+
+EOF, $output);
+  }
+
 }
