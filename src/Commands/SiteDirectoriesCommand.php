@@ -12,6 +12,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class SiteDirectoriesCommand extends BaseCommand {
 
   protected function configure() {
+    parent::configure();
+
     $this->setName('site:directories');
     $this->setAliases(['sd']);
     $this->setDescription('Get a list of site directories.');
