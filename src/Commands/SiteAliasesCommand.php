@@ -12,6 +12,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class SiteAliasesCommand extends BaseCommand {
 
   protected function configure() {
+    parent::configure();
+
     $this->setName('site:aliases');
     $this->setAliases(['sa']);
     $this->setDescription('Get a list of site aliases.');

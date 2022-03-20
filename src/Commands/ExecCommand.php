@@ -71,6 +71,8 @@ class ExecCommand extends BaseCommand {
   }
 
   protected function configure() {
+    parent::configure();
+
     $this->setName('exec:drush');
     $this->setAliases(['exec', 'ex', 'exd']);
     $this->setDescription('Execute a drush command.');
