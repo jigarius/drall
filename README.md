@@ -141,14 +141,17 @@ Specify a Drupal project root or document root directory.
 
     drall --root=/path/to/drupal site:directories
 
+### --drall-group
+
+Specify the target site group. See the section *site groups* for more
+information on site groups.
+
+    drall exec:drush --drall-group=GROUP core:status --field=site
+
 ## Site groups
 
-Drall allows you to group your sites so that you can run commands on such
-groups with ease.
-
-```
-drall exec:drush --drall-group=GROUP core:rebuild
-```
+Drall allows you to group your sites so that you can run commands on these
+groups using the `--drall-group` option.
 
 ### Drall groups with site aliases
 
