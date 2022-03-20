@@ -45,4 +45,30 @@ EOF, $output);
 EOF, $output);
   }
 
+  public function testWithComposerRoot() {
+    chdir('/');
+    $output = shell_exec('drall --root=' . $this->drupalDir() . ' site:aliases');
+    $this->assertEquals(<<<EOF
+@donnie.local
+@leo.local
+@mikey.local
+@ralph.local
+@tmnt.local
+
+EOF, $output);
+  }
+
+  public function testWithDrupalRoot() {
+    chdir('/');
+    $output = shell_exec('drall --root=' . $this->drupalDir() . '/web site:aliases');
+    $this->assertEquals(<<<EOF
+@donnie.local
+@leo.local
+@mikey.local
+@ralph.local
+@tmnt.local
+
+EOF, $output);
+  }
+
 }
