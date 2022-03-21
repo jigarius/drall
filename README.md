@@ -1,6 +1,6 @@
 # Drall
 
-Drall is a tool to that helps run [drush](https://www.drush.org/) commands
+Drall is a tool that helps run [drush](https://www.drush.org/) commands
 on multi-site Drupal installations.
 
 > One command to *drush* them all.
