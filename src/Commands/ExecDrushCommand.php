@@ -2,6 +2,7 @@
 
 namespace Drall\Commands;
 
+use Drall\Models\RawCommand;
 use Drall\Runners\PassthruRunner;
 use Drall\Runners\RunnerInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -12,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * A command to execute a drush command on multiple sites.
  */
-class ExecCommand extends BaseCommand {
+class ExecDrushCommand extends BaseCommand {
 
   /**
    * To be treated as the $argv array.
@@ -74,7 +75,7 @@ class ExecCommand extends BaseCommand {
     parent::configure();
 
     $this->setName('exec:drush');
-    $this->setAliases(['exec', 'ex', 'exd']);
+    $this->setAliases(['exd']);
     $this->setDescription('Execute a drush command.');
 
     $this->addArgument(
@@ -104,22 +105,11 @@ class ExecCommand extends BaseCommand {
     // options and send them to drush, we do it ourselves using $argv.
     //
     // @todo Is there a way to catch all options from $input?
-    $command = static::getDrushCommandFromArgv($this->argv);
+    $command = new RawCommand(static::getDrushCommandFromArgv($this->argv));
     $siteGroup = $input->getOption('drall-group');
 
-    if ($input->getArgument('command') === 'exec') {
-      $this->logger->warning(
-        'The command "drall exec" will be removed in v2.0. Use "drall exec:drush" instead.'
-      );
-    }
-    elseif ($input->getArgument('command') === 'ex') {
-      $this->logger->warning(
-        'The command "drall ex" will be removed in v2.0. Use "drall exd" instead.'
-      );
-    }
-
     // Prepare all drush commands.
-    if ($this->isCommandWithAlias($command)) {
+    if ($command->hasPlaceholder('site')) {
       $drushCommands = $this->generateCommandsWithAlias($command, $siteGroup);
     }
     else {
@@ -172,7 +162,7 @@ class ExecCommand extends BaseCommand {
    *
    * Results are keyed by unique site URIs.
    *
-   * @param string $command
+   * @param \Drall\Models\RawCommand $command
    *   The command to send to Drush. Example: core:status.
    * @param string|null $siteGroup
    *   A site group, if any.
@@ -184,25 +174,25 @@ class ExecCommand extends BaseCommand {
    *   - run: The command to execute.
    *   - log: The command to display.
    *
-   * @todo Revisit command generate once we start dealing we support for exec:shell.
+   * @todo Revisit the "run" and "log" behavior.
    */
-  private function generateCommandsWithUri(string $command, ?string $siteGroup = NULL): array {
-    if (!$this->isCommandWithUri($command)) {
-      $command = "--uri=@@uri $command";
+  private function generateCommandsWithUri(RawCommand $command, ?string $siteGroup = NULL): array {
+    if (!$command->hasPlaceholder('uri')) {
+      $command = new RawCommand("--uri=@@uri $command");
     }
-
+    $command = new RawCommand("@@drush $command");
     $drushPath = $this->siteDetector->getDrushPath();
-    $commands = [];
+    $result = [];
     foreach ($this->siteDetector()->getSiteDirNames($siteGroup) as $dirName) {
       // @todo Should the keys of the $sites array be used instead?
       // @todo Can sites exist with sites/GROUP/SITE/settings.php?
       //   If yes, then does --uri=GROUP/SITE work correctly?
-      $commands[$dirName] = [
-        'run' => $drushPath . ' ' . str_replace('@@uri', $dirName, $command),
-        'log' => 'drush ' . str_replace('@@uri', $dirName, $command),
+      $result[$dirName] = [
+        'run' => $command->with(['drush' => $drushPath, 'uri' => $dirName]),
+        'log' => $command->with(['drush' => 'drush', 'uri' => $dirName]),
       ];
     }
-    return $commands;
+    return $result;
   }
 
   /**
@@ -210,7 +200,7 @@ class ExecCommand extends BaseCommand {
    *
    * Results are keyed by unique site aliases.
    *
-   * @param string $command
+   * @param \Drall\Models\RawCommand $command
    *   The command to send to Drush. Example: core:status.
    * @param string|null $siteGroup
    *   A site group, if any.
@@ -221,27 +211,18 @@ class ExecCommand extends BaseCommand {
    *   Each item of the result array contains two keys:
    *   - run: The command to execute.
    *   - log: The command to display.
-   *
-   * @todo Revisit command generate once we start dealing we support for exec:shell.
    */
-  private function generateCommandsWithAlias(string $command, ?string $siteGroup = NULL): array {
+  private function generateCommandsWithAlias(RawCommand $command, ?string $siteGroup = NULL): array {
+    $command = new RawCommand("@@drush $command");
     $drushPath = $this->siteDetector->getDrushPath();
-    $commands = [];
+    $result = [];
     foreach ($this->siteDetector()->getSiteAliasNames($siteGroup) as $siteName) {
-      $commands[$siteName] = [
-        'run' => $drushPath . ' ' . str_replace('@@site', $siteName, $command),
-        'log' => 'drush ' . str_replace('@@site', $siteName, $command),
+      $result[$siteName] = [
+        'run' => $command->with(['drush' => $drushPath, 'site' => $siteName]),
+        'log' => $command->with(['drush' => 'drush', 'site' => $siteName]),
       ];
     }
-    return $commands;
-  }
-
-  private function isCommandWithUri(string $command): bool {
-    return preg_match('/\W?@@uri\W?/', $command);
-  }
-
-  private function isCommandWithAlias(string $command): bool {
-    return preg_match('/\W?@@site\W?/', $command);
+    return $result;
   }
 
 }

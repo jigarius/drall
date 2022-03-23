@@ -10,9 +10,9 @@ use Drall\Services\SiteDetector;
 use Drall\TestCase;
 
 /**
- * @covers \Drall\Commands\ExecCommand
+ * @covers \Drall\Commands\ExecDrushCommand
  */
-class ExecCommandTest extends TestCase {
+class ExecDrushCommandTest extends TestCase {
 
   public function testExecuteWithSiteUris() {
     $drupalFinder = new DrupalFinder();
@@ -163,7 +163,7 @@ class ExecCommandTest extends TestCase {
    * @return array
    *   Array resembling $argv.
    *
-   * @see \Drall\Commands\ExecCommand::setArgv()
+   * @see \Drall\Commands\ExecDrushCommand::setArgv()
    */
   private static function arrayInputAsArgv(array $input): array {
     array_unshift($input, '/path/to/drall', 'exec');
