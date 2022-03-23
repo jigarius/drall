@@ -5,9 +5,9 @@ namespace Drall\Test\Integration\Commands;
 use Drall\IntegrationTestCase;
 
 /**
- * @covers \Drall\Commands\ExecCommand
+ * @covers \Drall\Commands\ExecDrushCommand
  */
-class ExecCommandTest extends IntegrationTestCase {
+class ExecDrushCommandTest extends IntegrationTestCase {
 
   /**
    * Run drall exec:drush with implicit --uri=@@uri in a directory with no Drupal.
