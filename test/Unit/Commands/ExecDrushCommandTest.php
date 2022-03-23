@@ -35,7 +35,7 @@ class ExecDrushCommandTest extends TestCase {
     $input = ['cmd' => 'core:status', '--fields' => 'site'];
     $runner = new FakeRunner();
     /** @var ExecCommand $command */
-    $command = $app->find('exec')
+    $command = $app->find('exec:drush')
       ->setRunner($runner)
       ->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
@@ -72,8 +72,8 @@ class ExecDrushCommandTest extends TestCase {
     $app = new Drall($siteDetectorMock);
     $input = ['cmd' => '@@site.dev core:status', '--fields' => 'site'];
     $runner = new FakeRunner();
-    /** @var ExecCommand $command */
-    $command = $app->find('exec')
+    /** @var \Drall\Commands\ExecDrushCommand $command */
+    $command = $app->find('exec:drush')
       ->setRunner($runner)
       ->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
@@ -105,8 +105,7 @@ class ExecDrushCommandTest extends TestCase {
     $output = new BufferedOutput();
     $app = new Drall($siteDetectorMock, NULL, $output);
     $input = ['cmd' => 'core:status', '--fields' => 'site'];
-    $runner = new FakeRunner();
-    $command = $app->find('exec');
+    $command = $app->find('exec:drush');
     $tester = new CommandTester($command);
     $tester->execute($input);
 
@@ -139,7 +138,7 @@ class ExecDrushCommandTest extends TestCase {
     $runner = new FakeRunner();
     $runner->setExitCode(5);
     /** @var ExecCommand $command */
-    $command = $app->find('exec')
+    $command = $app->find('exec:drush')
       ->setRunner($runner)
       ->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);

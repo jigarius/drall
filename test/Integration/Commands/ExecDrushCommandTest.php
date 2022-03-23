@@ -24,15 +24,15 @@ class ExecDrushCommandTest extends IntegrationTestCase {
   public function testWithImplicitSiteUri(): void {
     $output = shell_exec('drall exec:drush st --fields=site');
     $this->assertOutputEquals(<<<EOF
-Running: drush --uri=default st --fields=site
+Current site: default
  Site path : sites/default
-Running: drush --uri=donnie st --fields=site
+Current site: donnie
  Site path : sites/donnie
-Running: drush --uri=leo st --fields=site
+Current site: leo
  Site path : sites/leo
-Running: drush --uri=mikey st --fields=site
+Current site: mikey
  Site path : sites/mikey
-Running: drush --uri=ralph st --fields=site
+Current site: ralph
  Site path : sites/ralph
 
 EOF, $output);
@@ -44,9 +44,9 @@ EOF, $output);
   public function testWithImplicitSiteUriAndGroup(): void {
     $output = shell_exec('drall exec:drush --drall-group=bluish st --fields=site');
     $this->assertOutputEquals(<<<EOF
-Running: drush --uri=donnie st --fields=site
+Current site: donnie
  Site path : sites/donnie
-Running: drush --uri=leo st --fields=site
+Current site: leo
  Site path : sites/leo
 
 EOF, $output);
@@ -58,15 +58,15 @@ EOF, $output);
   public function testWithExplicitSiteUri(): void {
     $output = shell_exec('drall exec:drush st --uri=@@uri --fields=site');
     $this->assertOutputEquals(<<<EOF
-Running: drush st --uri=default --fields=site
+Current site: default
  Site path : sites/default
-Running: drush st --uri=donnie --fields=site
+Current site: donnie
  Site path : sites/donnie
-Running: drush st --uri=leo --fields=site
+Current site: leo
  Site path : sites/leo
-Running: drush st --uri=mikey --fields=site
+Current site: mikey
  Site path : sites/mikey
-Running: drush st --uri=ralph --fields=site
+Current site: ralph
  Site path : sites/ralph
 
 EOF, $output);
@@ -87,15 +87,15 @@ EOF, $output);
   public function testWithSiteAlias(): void {
     $output = shell_exec('drall exec:drush @@site.local st --fields=site');
     $this->assertOutputEquals(<<<EOF
-Running: drush @donnie.local st --fields=site
+Current site: @donnie
  Site path : sites/donnie
-Running: drush @leo.local st --fields=site
+Current site: @leo
  Site path : sites/leo
-Running: drush @mikey.local st --fields=site
+Current site: @mikey
  Site path : sites/mikey
-Running: drush @ralph.local st --fields=site
+Current site: @ralph
  Site path : sites/ralph
-Running: drush @tmnt.local st --fields=site
+Current site: @tmnt
  Site path : sites/default
 
 EOF, $output);
@@ -107,9 +107,9 @@ EOF, $output);
   public function testWithSiteAliasAndGroup(): void {
     $output = shell_exec('drall exec:drush --drall-group=bluish @@site.local st --fields=site');
     $this->assertOutputEquals(<<<EOF
-Running: drush @donnie.local st --fields=site
+Current site: @donnie
  Site path : sites/donnie
-Running: drush @leo.local st --fields=site
+Current site: @leo
  Site path : sites/leo
 
 EOF, $output);
