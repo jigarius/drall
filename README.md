@@ -23,7 +23,7 @@ composer require jigarius/drall
 To see a list of commands offered by Drall, run `drall list`. If you feel lost,
 run `drall help` or continue reading this documentation.
 
-### exec
+### exec:drush
 
 There are a number of ways to run `drush` commands on multiple sites.
 
@@ -76,6 +76,35 @@ drush @ralph.local core:status
 
 Here, `@@site` is replaced with site names detected from various site alias
 definitions.
+
+### exec:shell
+
+If you want to run non-drush commands on your sites, or run multiple commands
+on each site in your multi-site Drupal installation, this command comes to the
+rescue.
+
+This command simply takes one or more shell commands, replaces placeholders
+like `@@uri` or `@@site` and executes them.
+
+**Important:** You can only use any one of the possible placeholders, e.g. if
+you use `@@uri` and you cannot mix it with `@@site`.
+
+#### Example: Usage
+
+```
+$ drall exec:shell cat web/sites/@@uri/settings.local.php
+cat web/sites/default/settings.local.php
+cat web/sites/donnie/settings.local.php
+cat web/sites/leo/settings.local.php
+cat web/sites/mikey/settings.local.php
+cat web/sites/ralph/settings.local.php
+```
+
+#### Example: Multiple commands
+
+```
+$ drall exec:shell "drush @@site.dev updb -y && drush @@site.dev cim -y && drush @@site.dev cr"
+```
 
 ### site:directories
 
