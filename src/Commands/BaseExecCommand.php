@@ -90,18 +90,6 @@ class BaseExecCommand extends BaseCommand {
     $this->ignoreValidationErrors();
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output): int {
-    // Symfony Console only recognizes options that are defined in the
-    // ::configure() method. Since our goal is to catch all arguments and
-    // options and send them to drush, we do it ourselves using $argv.
-    //
-    // @todo Is there a way to catch all options from $input?
-    return $this->doExecute(
-      RawCommand::fromArgv($this->argv),
-      $input->getOption('drall-group')
-    );
-  }
-
   protected function doExecute(
     RawCommand $command,
     InputInterface $input,
