@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * A command to execute a drush command on multiple sites.
  */
-class BaseExecCommand extends BaseCommand {
+abstract class BaseExecCommand extends BaseCommand {
 
   /**
    * To be treated as the $argv array.
@@ -97,6 +97,16 @@ class BaseExecCommand extends BaseCommand {
   ): int {
     $siteGroup = $input->getOption('drall-group');
 
+    if ($command->hasPlaceholder('uri') && $command->hasPlaceholder('site')) {
+      $this->logger->error('The command cannot contain both @@uri and @@site placeholders.');
+      return 1;
+    }
+
+    if (!$command->hasPlaceholder('uri') && !$command->hasPlaceholder('site')) {
+      $this->logger->error('The command has no placeholders and it can be run without Drall.');
+      return 1;
+    }
+
     $shellCommands = [];
     if ($command->hasPlaceholder('uri')) {
       foreach ($this->siteDetector()->getSiteDirNames($siteGroup) as $dirName) {
@@ -106,13 +116,10 @@ class BaseExecCommand extends BaseCommand {
         $shellCommands[$dirName] = $command->with(['uri' => $dirName]);
       }
     }
-    elseif ($command->hasPlaceholder('site')) {
+    else {
       foreach ($this->siteDetector()->getSiteAliasNames($siteGroup) as $siteName) {
         $shellCommands[$siteName] = $command->with(['site' => $siteName]);
       }
-    }
-    else {
-      $this->logger->warning('The command has no placeholders. Consider running it without Drall.');
     }
 
     if (empty($shellCommands)) {

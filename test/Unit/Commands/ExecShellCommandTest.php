@@ -7,17 +7,17 @@ use DrupalFinder\DrupalFinder;
 use Drall\Drall;
 use Drall\Services\SiteDetector;
 use Drall\Commands\BaseExecCommand;
-use Drall\Commands\ExecDrushCommand;
+use Drall\Commands\ExecShellCommand;
 use Drall\TestCase;
 
 /**
- * @covers \Drall\Commands\ExecDrushCommand
+ * @covers \Drall\Commands\ExecShellCommand
  * @covers \Drall\Commands\BaseExecCommand
  */
-class ExecDrushCommandTest extends TestCase {
+class ExecShellCommandTest extends TestCase {
 
   public function testExtendsBaseCommand() {
-    $this->assertTrue(is_subclass_of(ExecDrushCommand::class, BaseExecCommand::class));
+    $this->assertTrue(is_subclass_of(ExecShellCommand::class, BaseExecCommand::class));
   }
 
   public function testExecuteWithSiteUris() {
@@ -32,16 +32,12 @@ class ExecDrushCommandTest extends TestCase {
       ->expects($this->once())
       ->method('getSiteDirNames')
       ->willReturn(['default', 'april', 'kacey']);
-    $siteDetectorMock
-      ->expects($this->once())
-      ->method('getDrushPath')
-      ->willReturn('/foo/drush');
 
     $app = new Drall($siteDetectorMock);
-    $input = ['cmd' => 'core:status', '--fields' => 'site', '--uri' => '@@uri'];
+    $input = ['cmd' => 'cat web/sites/@@uri/settings.php'];
     $runner = new FakeRunner();
-    /** @var ExecCommand $command */
-    $command = $app->find('exec:drush')
+    /** @var \Drall\Commands\ExecShellCommand $command */
+    $command = $app->find('exec:shell')
       ->setRunner($runner)
       ->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
@@ -50,50 +46,9 @@ class ExecDrushCommandTest extends TestCase {
     $tester->assertCommandIsSuccessful();
     $this->assertEquals(
       [
-        '/foo/drush core:status --fields=site --uri=default',
-        '/foo/drush core:status --fields=site --uri=april',
-        '/foo/drush core:status --fields=site --uri=kacey',
-      ],
-      $runner->commandHistory(),
-    );
-  }
-
-  /**
-   * If the command doesn't contain @@uri it is added automatically.
-   */
-  public function testExecuteWithImplicitSiteUris() {
-    $drupalFinder = new DrupalFinder();
-    $siteAliasManager = new SiteAliasManager();
-
-    $siteDetectorMock = $this->getMockBuilder(SiteDetector::class)
-      ->setConstructorArgs([$drupalFinder, $siteAliasManager])
-      ->onlyMethods(['getSiteDirNames', 'getDrushPath'])
-      ->getMock();
-    $siteDetectorMock
-      ->expects($this->once())
-      ->method('getSiteDirNames')
-      ->willReturn(['default', 'april', 'kacey']);
-    $siteDetectorMock
-      ->expects($this->once())
-      ->method('getDrushPath')
-      ->willReturn('/foo/drush');
-
-    $app = new Drall($siteDetectorMock);
-    $input = ['cmd' => 'core:status', '--fields' => 'site'];
-    $runner = new FakeRunner();
-    /** @var ExecCommand $command */
-    $command = $app->find('exec:drush')
-      ->setRunner($runner)
-      ->setArgv(self::arrayInputAsArgv($input));
-    $tester = new CommandTester($command);
-    $tester->execute($input);
-
-    $tester->assertCommandIsSuccessful();
-    $this->assertEquals(
-      [
-        '/foo/drush --uri=default core:status --fields=site',
-        '/foo/drush --uri=april core:status --fields=site',
-        '/foo/drush --uri=kacey core:status --fields=site',
+        'cat web/sites/default/settings.php',
+        'cat web/sites/april/settings.php',
+        'cat web/sites/kacey/settings.php',
       ],
       $runner->commandHistory(),
     );
@@ -111,16 +66,12 @@ class ExecDrushCommandTest extends TestCase {
       ->expects($this->once())
       ->method('getSiteAliasNames')
       ->willReturn(['@splinter', '@shredder']);
-    $siteDetectorMock
-      ->expects($this->once())
-      ->method('getDrushPath')
-      ->willReturn('/foo/drush');
 
     $app = new Drall($siteDetectorMock);
-    $input = ['cmd' => '@@site.dev core:status', '--fields' => 'site'];
+    $input = ['cmd' => 'drush @@site.dev core:rebuild && drush @@site.dev core:status'];
     $runner = new FakeRunner();
-    /** @var \Drall\Commands\ExecDrushCommand $command */
-    $command = $app->find('exec:drush')
+    /** @var \Drall\Commands\ExecShellCommand $command */
+    $command = $app->find('exec:shell')
       ->setRunner($runner)
       ->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
@@ -129,8 +80,8 @@ class ExecDrushCommandTest extends TestCase {
     $tester->assertCommandIsSuccessful();
     $this->assertEquals(
       [
-        '/foo/drush @splinter.dev core:status --fields=site',
-        '/foo/drush @shredder.dev core:status --fields=site',
+        'drush @splinter.dev core:rebuild && drush @splinter.dev core:status',
+        'drush @shredder.dev core:rebuild && drush @shredder.dev core:status',
       ],
       $runner->commandHistory(),
     );

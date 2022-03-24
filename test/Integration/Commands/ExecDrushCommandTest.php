@@ -10,16 +10,7 @@ use Drall\IntegrationTestCase;
 class ExecDrushCommandTest extends IntegrationTestCase {
 
   /**
-   * Run drall exec:drush with implicit --uri=@@uri in a directory with no Drupal.
-   */
-  public function testWithImplicitSiteUriAndNoDrupal(): void {
-    chdir('/tmp');
-    $output = shell_exec('drall exec:drush st');
-    $this->assertOutputEquals("[warning] No Drupal sites found." . PHP_EOL, $output);
-  }
-
-  /**
-   * Run drall exec:drush with implicit --uri=@@uri.
+   * Run drall exec:drush with implicit --uri.
    */
   public function testWithImplicitSiteUri(): void {
     $output = shell_exec('drall exec:drush st --fields=site');
@@ -39,10 +30,10 @@ EOF, $output);
   }
 
   /**
-   * Run drall exec:drush with implicit --uri=@@uri and --drall-group.
+   * Run drall exec:drush with explicit --uri and --drall-group.
    */
-  public function testWithImplicitSiteUriAndGroup(): void {
-    $output = shell_exec('drall exec:drush --drall-group=bluish st --fields=site');
+  public function testWithSiteUriAndGroup(): void {
+    $output = shell_exec('drall exec:drush --drall-group=bluish core:status --uri=@@uri --fields=site');
     $this->assertOutputEquals(<<<EOF
 Current site: donnie
  Site path : sites/donnie
@@ -53,7 +44,7 @@ EOF, $output);
   }
 
   /**
-   * Run drall exec:drush with explicit --uri=@@uri.
+   * Run drall exec:drush with explicit --uri.
    */
   public function testWithExplicitSiteUri(): void {
     $output = shell_exec('drall exec:drush st --uri=@@uri --fields=site');
@@ -70,15 +61,6 @@ Current site: ralph
  Site path : sites/ralph
 
 EOF, $output);
-  }
-
-  /**
-   * Run drall exec:drush with @@site in a directory with no Drupal.
-   */
-  public function testWithImplicitSiteAliasAndNoDrupal(): void {
-    chdir('/tmp');
-    $output = shell_exec('drall exec:drush @@site.local st');
-    $this->assertOutputEquals("[warning] No Drupal sites found." . PHP_EOL, $output);
   }
 
   /**
