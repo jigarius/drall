@@ -49,7 +49,7 @@ class RawCommandTest extends TestCase {
     );
   }
 
-  public function fromArgv() {
+  public function testFromArgv() {
     $command = RawCommand::fromArgv(['/path/to/drall', 'exs', 'ls', '-alh']);
     $this->assertEquals("ls -alh", (string) $command);
   }
