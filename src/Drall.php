@@ -22,7 +22,7 @@ final class Drall extends Application {
 
   const NAME = 'Drall';
 
-  const VERSION = '1.1.0-rc1';
+  const VERSION = '1.1.0';
 
   use LoggerAwareTrait;
   use SiteDetectorAwareTrait;
