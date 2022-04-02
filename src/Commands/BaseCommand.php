@@ -19,6 +19,13 @@ abstract class BaseCommand extends Command {
       InputOption::VALUE_OPTIONAL,
       'Drupal root or Composer root.'
     );
+
+    $this->addOption(
+      'drall-group',
+      NULL,
+      InputOption::VALUE_OPTIONAL,
+      'Site group identifier.'
+    );
   }
 
 }

@@ -7,7 +7,6 @@ use Drall\Runners\PassthruRunner;
 use Drall\Runners\RunnerInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -78,13 +77,6 @@ abstract class BaseExecCommand extends BaseCommand {
       'cmd',
       InputArgument::REQUIRED | InputArgument::IS_ARRAY,
       'A drush command.'
-    );
-
-    $this->addOption(
-      'drall-group',
-      NULL,
-      InputOption::VALUE_OPTIONAL,
-      'Site group identifier.'
     );
 
     $this->ignoreValidationErrors();
