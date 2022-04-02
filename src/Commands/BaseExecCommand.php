@@ -87,7 +87,7 @@ abstract class BaseExecCommand extends BaseCommand {
     InputInterface $input,
     OutputInterface $output
   ): int {
-    $siteGroup = $input->getOption('drall-group');
+    $siteGroup = $this->getDrallGroup($input);
 
     if ($command->hasPlaceholder('uri') && $command->hasPlaceholder('site')) {
       $this->logger->error('The command cannot contain both @@uri and @@site placeholders.');

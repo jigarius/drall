@@ -177,6 +177,9 @@ information on site groups.
 
     drall exec:drush --drall-group=GROUP core:status --field=site
 
+If `--drall-group` is not set, then the Drall uses the environment variable
+`DRALL_GROUP`, if it is set.
+
 ## Site groups
 
 Drall allows you to group your sites so that you can run commands on these

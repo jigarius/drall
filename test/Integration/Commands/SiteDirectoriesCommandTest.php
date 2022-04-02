@@ -45,6 +45,18 @@ leo
 EOF, $output);
   }
 
+  /**
+   * Run site:directories with DRALL_GROUP env var.
+   */
+  public function testWithGroupEnvVar(): void {
+    $output = shell_exec('DRALL_GROUP=bluish drall site:directories');
+    $this->assertOutputEquals(<<<EOF
+donnie
+leo
+
+EOF, $output);
+  }
+
   public function testWithComposerRoot() {
     chdir('/');
     $output = shell_exec('drall --root=' . $this->drupalDir() . ' site:directories');

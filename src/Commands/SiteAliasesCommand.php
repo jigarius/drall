@@ -21,9 +21,8 @@ class SiteAliasesCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $aliases = $this->siteDetector()->getSiteAliases(
-      $input->getOption('drall-group')
-    );
+    $aliases = $this->siteDetector()
+      ->getSiteAliases($this->getDrallGroup($input));
 
     if (count($aliases) === 0) {
       $this->logger->warning('No site aliases found.');

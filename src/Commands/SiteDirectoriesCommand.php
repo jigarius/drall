@@ -21,9 +21,8 @@ class SiteDirectoriesCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
-    $dirNames = $this->siteDetector()->getSiteDirNames(
-      $input->getOption('drall-group')
-    );
+    $dirNames = $this->siteDetector()
+      ->getSiteDirNames($this->getDrallGroup($input));
 
     if (count($dirNames) === 0) {
       $this->logger->warning('No Drupal sites found.');
