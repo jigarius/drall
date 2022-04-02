@@ -71,7 +71,7 @@ class SiteDetector {
    * @return array
    *   An array of site alias names with the @ prefix.
    */
-  public function getSiteAliasNames(string $group = NULL): array {
+  public function getSiteAliasNames(?string $group = NULL): array {
     $result = array_map(function ($siteAlias) {
       return explode('.', $siteAlias)[0];
     }, $this->getSiteAliases($group));

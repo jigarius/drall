@@ -9,6 +9,7 @@ use Drall\Services\SiteDetector;
 use Drall\TestCase;
 
 /**
+ * @covers \Drall\Commands\BaseCommand
  * @covers \Drall\Commands\SiteAliasesCommand
  */
 class SiteAliasesCommandTest extends TestCase {
