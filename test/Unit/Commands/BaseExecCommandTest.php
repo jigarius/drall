@@ -91,6 +91,21 @@ class BaseExecCommandTest extends TestCase {
     $output->fetch());
   }
 
+  public function testExecuteWithMixedPlaceholders() {
+    $output = new BufferedOutput();
+    $app = new Drall(NULL, NULL, $output);
+    $input = ['cmd' => 'drush @@site.local core:status && drush --uri=@@uri core:status'];
+    /** @var ExecCommand $command */
+    $command = $app->find('exec:shell')
+      ->setArgv(self::arrayInputAsArgv($input));
+    $tester = new CommandTester($command);
+
+    $this->assertEquals(1, $tester->execute($input));
+    $this->assertEquals(
+      '[error] The command cannot contain both @@uri and @@site placeholders.' . PHP_EOL,
+    $output->fetch());
+  }
+
   /**
    * Converts an array of input into a $argv like array.
    *
