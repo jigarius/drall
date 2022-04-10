@@ -13,6 +13,12 @@ class TestCaseTest extends TestCase {
     $this->assertEquals('/opt/drupal', $this->drupalDir());
   }
 
+  public function testCreateTempFilePath() {
+    $path = static::createTempFilePath();
+    $this->assertEquals(sys_get_temp_dir(), dirname($path));
+    $this->assertStringStartsWith('Drall.', basename($path));
+  }
+
   public function testCreateTempFile() {
     $path = static::createTempFile('Bunny Wabbit');
     $this->assertFileExists($path);

@@ -40,6 +40,19 @@ abstract class TestCase extends TestCaseBase {
   }
 
   /**
+   * Creates a temporary file path.
+   *
+   * @example
+   * /path/to/tmp/Drall.random
+   *
+   * @return string
+   *   A path.
+   */
+  protected function createTempFilePath(): string {
+    return tempnam(sys_get_temp_dir(), 'Drall.');
+  }
+
+  /**
    * Creates a temporary file with the given contents.
    *
    * @param string $data
@@ -48,8 +61,8 @@ abstract class TestCase extends TestCaseBase {
    * @return string
    *   Path to the file.
    */
-  protected static function createTempFile(string $data): string {
-    $path = tempnam(sys_get_temp_dir(), 'Phpake.');
+  protected function createTempFile(string $data): string {
+    $path = $this->createTempFilePath();
     file_put_contents($path, $data);
     return $path;
   }
