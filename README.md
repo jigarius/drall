@@ -215,6 +215,25 @@ $sites['leo.drall.local'] = 'leo';
 
 This puts the sites `donnie` and `leo` in a group named `bluish`.
 
+## Parallel execution
+
+Say you have 100 sites in a Drupal installation. By default, Drall runs
+commands on these sites one after the other. To speed up the execution, you
+can ask Drall to execute multiple commands in parallel. You can specify the
+number of workers with the `--drall-workers=n` option, where `n` is the
+number of processes you want to run in parallel.
+
+Please keep in mind that running a high number of workers can create problems!
+The maximum number of workers allowed is set to `10` at the moment.
+
+### Example: Parallel execution
+
+The command below launches 3 instances of Drall to run `core:rebuild` command.
+
+  drall exec:drush core:rebuild --drall-workers=3
+
+When a worker runs out of work, it terminates automatically.
+
 ## Development
 
 Here's how you can set up a local dev environment.
