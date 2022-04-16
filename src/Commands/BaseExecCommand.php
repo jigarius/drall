@@ -2,11 +2,16 @@
 
 namespace Drall\Commands;
 
+use Drall\Drall;
+use Drall\Models\Queue\Queue;
+use Drall\Models\Queue\File;
+use Drall\Models\Queue\Item;
 use Drall\Models\RawCommand;
 use Drall\Traits\RunnerAwareTrait;
 use Drall\Runners\PassthruRunner;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -69,6 +74,14 @@ abstract class BaseExecCommand extends BaseCommand {
       'A drush command.'
     );
 
+    $this->addOption(
+      'drall-workers',
+      NULL,
+      InputOption::VALUE_OPTIONAL,
+      'Number of commands to execute in parallel.',
+      1,
+    );
+
     $this->ignoreValidationErrors();
   }
 
@@ -78,47 +91,66 @@ abstract class BaseExecCommand extends BaseCommand {
     OutputInterface $output
   ): int {
     $siteGroup = $this->getDrallGroup($input);
+    $placeholder = $this->getPlaceholderName($command);
 
-    if ($command->hasPlaceholder('uri') && $command->hasPlaceholder('site')) {
-      $this->logger->error('The command cannot contain both @@uri and @@site placeholders.');
-      return 1;
-    }
-
-    if (!$command->hasPlaceholder('uri') && !$command->hasPlaceholder('site')) {
-      $this->logger->error('The command has no placeholders and it can be run without Drall.');
-      return 1;
-    }
-
-    $shellCommands = [];
-    if ($command->hasPlaceholder('uri')) {
-      foreach ($this->siteDetector()->getSiteDirNames($siteGroup) as $dirName) {
-        // @todo Should the keys of the $sites array be used instead?
-        // @todo Can sites exist with sites/GROUP/SITE/settings.php?
-        //   If yes, then does --uri=GROUP/SITE work correctly?
-        $shellCommands[$dirName] = $command->with(['uri' => $dirName]);
-      }
+    // Get all values for the placeholder.
+    if ($placeholder === 'uri') {
+      // @todo Should the keys of the $sites array be used instead?
+      // @todo Can sites exist with sites/GROUP/SITE/settings.php?
+      //   If yes, then does --uri=GROUP/SITE work correctly?
+      $values = $this->siteDetector()->getSiteDirNames($siteGroup);
     }
     else {
-      foreach ($this->siteDetector()->getSiteAliasNames($siteGroup) as $siteName) {
-        $shellCommands[$siteName] = $command->with(['site' => $siteName]);
-      }
+      $values = $this->siteDetector()->getSiteAliasNames($siteGroup);
     }
 
-    if (empty($shellCommands)) {
+    if (empty($values)) {
       $this->logger->warning('No Drupal sites found.');
       return 0;
     }
 
+    // Prepare queue items for each value.
+    $qData = new Queue(Drall::VERSION, $command, $placeholder);
+    foreach ($values as $itemId) {
+      $qData->push(new Item($itemId));
+    }
+
+    // If multiple workers are required.
+    $w = $input->getOption('drall-workers');
+    if ($w > 1) {
+      $this->logger->info("Executing with $w workers.");
+
+      $qFile = new File(sys_get_temp_dir() . '/' . uniqid() . '.drallq.json');
+      $qFile->write($qData);
+      $this->logger->debug("Created queue: {$qFile->getPath()}");
+
+      // Execute one command to launch all workers.
+      // @example (cmd1 &) && (cmd2 &), and so on.
+      $workerCommands = [];
+      for ($i = 1; $i <= $w; $i++) {
+        $workerCommands[] = "({$this->argv[0]} exec:queue '{$qFile->getPath()}' --drall-debug &)";
+      }
+
+      // If all workers are launched at the same time, they will compete to
+      // acquire locks on the .drall.json and the output. Thus, we launch them
+      // after 0.19s intervals.
+      $all = implode(' && ', $workerCommands);
+      $this->runner->execute($all);
+
+      return 0;
+    }
+
     $errorCodes = [];
-    foreach ($shellCommands as $key => $shellCommand) {
+    while ($item = $qData->next()) {
       // @todo Only show the full command in verbose mode.
       // @todo Show progress, i.e. current and total.
-      $output->writeln("Current site: $key");
-      $this->logger->debug("Running: {$shellCommand}");
+      $output->writeln("Current site: {$item->getId()}");
+      $shellCommand = $command->with([$placeholder => $item->getId()]);
+      $this->logger->debug("Running: $shellCommand");
       $exitCode = $this->runner->execute($shellCommand);
 
       if ($exitCode !== 0) {
-        $errorCodes[$key] = $exitCode;
+        $errorCodes[$item->getId()] = $exitCode;
       }
     }
 
@@ -128,6 +160,27 @@ abstract class BaseExecCommand extends BaseCommand {
 
     // @todo Display summary of errors in verbose mode.
     return 1;
+  }
+
+  private function getPlaceholderName(RawCommand $command): ?string {
+    $hasUri = $command->hasPlaceholder('uri');
+    $hasSite = $command->hasPlaceholder('site');
+
+    if ($hasUri && $hasSite) {
+      $this->logger->error('The command cannot contain both @@uri and @@site placeholders.');
+      return NULL;
+    }
+
+    if (!$hasUri && !$hasSite) {
+      $this->logger->error('The command has no placeholders and it can be run without Drall.');
+      return NULL;
+    }
+
+    if ($hasUri) {
+      return 'uri';
+    }
+
+    return 'site';
   }
 
 }
