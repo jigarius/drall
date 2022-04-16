@@ -170,6 +170,10 @@ information on site groups.
 If `--drall-group` is not set, then the Drall uses the environment variable
 `DRALL_GROUP`, if it is set.
 
+### --drall-verbose
+
+Whether Drall should display verbose output.
+
 ## Site groups
 
 Drall allows you to group your sites so that you can run commands on these
