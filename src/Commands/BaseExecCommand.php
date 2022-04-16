@@ -117,6 +117,12 @@ abstract class BaseExecCommand extends BaseCommand {
 
     // If multiple workers are required.
     $w = $input->getOption('drall-workers');
+
+    if ($w > 10) {
+      $this->logger->warning('Limiting workers to 10, which is the maximum.');
+      $w = 10;
+    }
+
     if ($w > 1) {
       $this->logger->info("Executing with $w workers.");
 
