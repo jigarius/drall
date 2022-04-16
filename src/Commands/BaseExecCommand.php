@@ -94,14 +94,20 @@ abstract class BaseExecCommand extends BaseCommand {
     $placeholder = $this->getPlaceholderName($command);
 
     // Get all values for the placeholder.
-    if ($placeholder === 'uri') {
-      // @todo Should the keys of the $sites array be used instead?
-      // @todo Can sites exist with sites/GROUP/SITE/settings.php?
-      //   If yes, then does --uri=GROUP/SITE work correctly?
-      $values = $this->siteDetector()->getSiteDirNames($siteGroup);
-    }
-    else {
-      $values = $this->siteDetector()->getSiteAliasNames($siteGroup);
+    switch ($placeholder) {
+      case 'uri':
+        // @todo Should the keys of the $sites array be used instead?
+        // @todo Can sites exist with sites/GROUP/SITE/settings.php?
+        //   If yes, then does --uri=GROUP/SITE work correctly?
+        $values = $this->siteDetector()->getSiteDirNames($siteGroup);
+        break;
+
+      case 'site':
+        $values = $this->siteDetector()->getSiteAliasNames($siteGroup);
+        break;
+
+      default:
+        return 1;
     }
 
     if (empty($values)) {
