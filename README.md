@@ -14,9 +14,7 @@ the initial development of Drall.
 Drall is listed on [Packagist.org](https://packagist.org/packages/jigarius/drall).
 Thus, it can easily be installed using `composer` as follows:
 
-```
-composer require jigarius/drall
-```
+  composer require jigarius/drall
 
 ## Commands
 
@@ -31,15 +29,11 @@ There are a number of ways to run `drush` commands on multiple sites.
 
 In this method, the `--uri` option is sent to `drush`.
 
-```
-drall exec:drush --uri=@@uri core:status
-```
+  drall exec:drush --uri=@@uri core:status
 
 Or simplify omit the `--uri=@@uri` and it will be added automatically.
 
-```
-drall exec:drush core:status
-```
+  drall exec:drush core:status
 
 ##### Example
 
@@ -59,13 +53,11 @@ in which the various sites live.
 
 In this method, a site alias is sent to `drush`.
 
-```
-drall exec:drush @@site.local core:status
-```
+  drall exec:drush @@site.local core:status
 
 ##### Example
 
-```
+```shell
 $ drall exec:drush @@site.local core:status
 drush @tmnt.local core:status
 drush @donnie.local core:status
@@ -91,7 +83,7 @@ you use `@@uri` and you cannot mix it with `@@site`.
 
 #### Example: Usage
 
-```
+```shell
 $ drall exec:shell cat web/sites/@@uri/settings.local.php
 cat web/sites/default/settings.local.php
 cat web/sites/donnie/settings.local.php
@@ -102,9 +94,7 @@ cat web/sites/ralph/settings.local.php
 
 #### Example: Multiple commands
 
-```
-$ drall exec:shell "drush @@site.dev updb -y && drush @@site.dev cim -y && drush @@site.dev cr"
-```
+  drall exec:shell "drush @@site.dev updb -y && drush @@site.dev cim -y && drush @@site.dev cr"
 
 ### site:directories
 
@@ -140,7 +130,7 @@ Get a list of site aliases.
 
 #### Example: Usage
 
-```
+```shell
 $ drall site:aliases
 @tmnt.local
 @donnie.local
@@ -241,16 +231,14 @@ To access the dev sites in your browser, add the following line to your hosts
 file. It is usually located at `/etc/hosts`. This is completely optional, so
 do this only if you need it.
 
-```
-127.0.0.1 tmnt.drall.local donnie.drall.local leo.drall.local mikey.drall.local ralph.drall.local
-```
+  127.0.0.1 tmnt.drall.local donnie.drall.local leo.drall.local mikey.drall.local ralph.drall.local
 
 The sites should then be available at:
-- http://tmnt.drall.local/
-- http://donnie.drall.local/
-- http://leo.drall.local/
-- http://mikey.drall.local/
-- http://ralph.drall.local/
+- [tmnt.drall.local](http://tmnt.drall.local/)
+- [donnie.drall.local](http://donnie.drall.local/)
+- [leo.drall.local](http://leo.drall.local/)
+- [mikey.drall.local](http://mikey.drall.local/)
+- [ralph.drall.local](http://ralph.drall.local/)
 
 ## Acknowledgements
 
