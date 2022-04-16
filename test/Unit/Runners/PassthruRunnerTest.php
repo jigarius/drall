@@ -13,4 +13,10 @@ class PassthruRunnerTest extends TestCase {
     $this->assertEquals(0, $runner->execute('ls > /dev/null'));
   }
 
+  public function testGetOutput() {
+    $runner = new PassthruRunner();
+    $runner->execute('ls > /dev/null');
+    $this->assertNull($runner->getOutput());
+  }
+
 }

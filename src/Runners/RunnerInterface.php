@@ -15,4 +15,12 @@ interface RunnerInterface {
    */
   public function execute(string $command): int;
 
+  /**
+   * Get output from the previous command, if supported.
+   *
+   * @return string|null
+   *   Output from the last executed command.
+   */
+  public function getOutput(): ?string;
+
 }

@@ -16,6 +16,10 @@ class FakeRunner implements RunnerInterface {
     return $this->exitCode;
   }
 
+  public function getOutput(): ?string {
+    return NULL;
+  }
+
   /**
    * Set the exit code to return for the next call to ::execute().
    *
