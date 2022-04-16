@@ -174,6 +174,10 @@ If `--drall-group` is not set, then the Drall uses the environment variable
 
 Whether Drall should display verbose output.
 
+### --drall-debug
+
+Whether Drall should display debugging output.
+
 ## Site groups
 
 Drall allows you to group your sites so that you can run commands on these
