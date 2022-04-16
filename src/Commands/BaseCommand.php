@@ -27,6 +27,20 @@ abstract class BaseCommand extends Command {
       InputOption::VALUE_OPTIONAL,
       'Site group identifier.'
     );
+
+    $this->addOption(
+      'drall-verbose',
+      NULL,
+      InputOption::VALUE_NONE,
+      'Display verbose output.'
+    );
+
+    $this->addOption(
+      'drall-debug',
+      NULL,
+      InputOption::VALUE_NONE,
+      'Display debugging output.'
+    );
   }
 
   /**

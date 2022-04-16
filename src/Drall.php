@@ -15,6 +15,7 @@ use DrupalFinder\DrupalFinder;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -69,6 +70,29 @@ final class Drall extends Application {
     $cmd->setSiteDetector($siteDetector);
     $cmd->setLogger($this->logger);
     $this->add($cmd);
+  }
+
+  protected function configureIO(InputInterface $input, OutputInterface $output) {
+    parent::configureIO($input, $output);
+
+    if ($input->hasParameterOption('--drall-debug', TRUE)) {
+      $output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
+    }
+    elseif ($input->hasParameterOption('--drall-verbose', TRUE)) {
+      $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
+    }
+    else {
+      $output->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
+    }
+  }
+
+  protected function getDefaultInputDefinition(): InputDefinition {
+    $definition = parent::getDefaultInputDefinition();
+    $options = $definition->getOptions();
+    unset($options['verbose'], $options['quiet']);
+    $definition->setOptions($options);
+
+    return $definition;
   }
 
   private function createDefaultSiteDetector(string $root): SiteDetector {
