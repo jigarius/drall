@@ -35,7 +35,7 @@ class ExecQueueCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $prefix = '[pid:' . getmypid() . ']';
+    $prefix = '[drall:' . getmypid() . ']';
     $qPath = $input->getArgument('drallq-file');
     $qPath = realpath($qPath);
 
@@ -51,18 +51,17 @@ class ExecQueueCommand extends BaseCommand {
     // Run until we run out of items to process.
     while (TRUE) {
       $qLock->acquire(TRUE);
-      $this->logger->debug("$prefix Queue lock acquired.");
-
       $qData = $qFile->read();
       $item = $qData->next();
       // This way, other workers know that an item has been taken by this worker.
       $qFile->write($qData);
       $qLock->release();
-      $this->logger->debug("$prefix Queue lock released.");
 
       // No more items left? Then we're done.
       if (!$item) {
-        $this->logger->debug("$prefix Nothing left to do.");
+        $outputLock->acquire(TRUE);
+        $this->logger->debug("$prefix Nothing left to do. Terminating.");
+        $outputLock->release();
         break;
       }
 
@@ -70,22 +69,25 @@ class ExecQueueCommand extends BaseCommand {
       $rawCommand = $qData->getCommand();
       $placeholder = $qData->getPlaceholder();
       $shellCommand = $rawCommand->with([$placeholder => $item->getId()]);
-      $this->logger->debug("Running: $shellCommand");
 
+      $outputLock->acquire(TRUE);
+      $this->logger->info("$prefix Started: $shellCommand");
+      // @todo Store start time for each item.
+      $outputLock->release();
+
+      // @todo Store exit codes for each item.
+      // @todo Store finish time for each item.
       $this->runner()->execute($shellCommand);
 
       // Mark the item as done.
       $qLock->acquire(TRUE);
-      $this->logger->debug("$prefix Queue lock acquired.");
-
       $qData = $qFile->read();
       $qData->markAsDone($item);
       $qFile->write($qData);
-
-      $this->logger->debug("$prefix Queue lock released.");
       $qLock->release();
 
       $outputLock->acquire(TRUE);
+      $this->logger->info("$prefix Finished: $shellCommand");
       $output->write($this->runner->getOutput());
       $outputLock->release();
     }
