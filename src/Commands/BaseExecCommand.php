@@ -149,6 +149,8 @@ abstract class BaseExecCommand extends BaseCommand {
       $all = implode(' && ', $workerCommands);
       $this->runner->execute($all);
 
+      // @todo Do not terminate until all items are processed?
+      //   Display summary of all the failures?
       return 0;
     }
 
