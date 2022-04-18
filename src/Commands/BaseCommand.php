@@ -17,31 +17,10 @@ abstract class BaseCommand extends Command {
 
   protected function configure() {
     $this->addOption(
-      'root',
-      NULL,
-      InputOption::VALUE_OPTIONAL,
-      'Drupal root or Composer root.'
-    );
-
-    $this->addOption(
       'drall-group',
       NULL,
       InputOption::VALUE_OPTIONAL,
       'Site group identifier.'
-    );
-
-    $this->addOption(
-      'drall-verbose',
-      NULL,
-      InputOption::VALUE_NONE,
-      'Display verbose output.'
-    );
-
-    $this->addOption(
-      'drall-debug',
-      NULL,
-      InputOption::VALUE_NONE,
-      'Display debugging output.'
     );
   }
 
