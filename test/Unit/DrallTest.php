@@ -4,6 +4,9 @@ namespace Unit;
 
 use Drall\Drall;
 use Drall\TestCase;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 /**
  * @covers \Drall\Drall
@@ -37,6 +40,44 @@ class DrallTest extends TestCase {
     $this->assertArrayNotHasKey('verbose', $options);
     $this->assertArrayHasKey('drall-verbose', $options);
     $this->assertArrayHasKey('drall-debug', $options);
+  }
+
+  public function testOptionVerbosityNormal() {
+    $output = new ConsoleOutput();
+    $input = new ArgvInput([
+      '/path/to/drall',
+      'exec:drush',
+      'core:status',
+    ]);
+    new Drall(NULL, $input, $output);
+
+    $this->assertEquals(OutputInterface::VERBOSITY_NORMAL, $output->getVerbosity());
+  }
+
+  public function testOptionVerbosityVerbose() {
+    $output = new ConsoleOutput();
+    $input = new ArgvInput([
+      '/path/to/drall',
+      'exec:drush',
+      'core:status',
+      '--drall-verbose',
+    ]);
+    new Drall(NULL, $input, $output);
+
+    $this->assertEquals(OutputInterface::VERBOSITY_VERY_VERBOSE, $output->getVerbosity());
+  }
+
+  public function testOptionVerbosityDebug() {
+    $output = new ConsoleOutput();
+    $input = new ArgvInput([
+      '/path/to/drall',
+      'exec:drush',
+      'core:status',
+      '--drall-debug',
+    ]);
+    new Drall(NULL, $input, $output);
+
+    $this->assertEquals(OutputInterface::VERBOSITY_DEBUG, $output->getVerbosity());
   }
 
 }
