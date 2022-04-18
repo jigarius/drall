@@ -29,4 +29,14 @@ class DrallTest extends TestCase {
     $this->assertEquals($json_data->version, $app->getVersion());
   }
 
+  public function testDefaultInputOptions() {
+    $app = new Drall();
+    $options = $app->getDefinition()->getOptions();
+
+    $this->assertArrayNotHasKey('quiet', $options);
+    $this->assertArrayNotHasKey('verbose', $options);
+    $this->assertArrayHasKey('drall-verbose', $options);
+    $this->assertArrayHasKey('drall-debug', $options);
+  }
+
 }

@@ -16,6 +16,7 @@ use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 final class Drall extends Application {
@@ -34,12 +35,10 @@ final class Drall extends Application {
     ?InputInterface $input = NULL
   ) {
     parent::__construct();
-
-    $input = $input ?? new ArgvInput();
-
     $this->setName(self::NAME);
     $this->setVersion(self::VERSION);
 
+    $input = $input ?? new ArgvInput();
     $root = $input->getParameterOption('--root') ?: getcwd();
     $siteDetector ??= $this->createDefaultSiteDetector($root);
     $this->setSiteDetector($siteDetector);
@@ -62,7 +61,6 @@ final class Drall extends Application {
 
     $cmd = new ExecQueueCommand();
     $cmd->setSiteDetector($siteDetector);
-    $cmd->setLogger($this->logger);
     $this->add($cmd);
   }
 
@@ -82,9 +80,30 @@ final class Drall extends Application {
 
   protected function getDefaultInputDefinition(): InputDefinition {
     $definition = parent::getDefaultInputDefinition();
+
+    // Remove unneeded options.
     $options = $definition->getOptions();
     unset($options['verbose'], $options['quiet']);
     $definition->setOptions($options);
+
+    $definition->addOption(new InputOption(
+      'drall-verbose',
+      NULL,
+      InputOption::VALUE_NONE,
+      'Display verbose output for Drall.'
+    ));
+    $definition->addOption(new InputOption(
+      'drall-debug',
+      NULL,
+      InputOption::VALUE_NONE,
+      'Display debugging output for Drall.'
+    ));
+    $definition->addOption(new InputOption(
+      'root',
+      NULL,
+      InputOption::VALUE_OPTIONAL,
+      'Drupal root or Composer root.'
+    ));
 
     return $definition;
   }
