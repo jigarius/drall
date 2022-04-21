@@ -37,6 +37,7 @@ final class Drall extends Application {
     parent::__construct();
     $this->setName(self::NAME);
     $this->setVersion(self::VERSION);
+    $this->setAutoExit(FALSE);
 
     $input = $input ?? new ArgvInput();
     $root = $input->getParameterOption('--root') ?: getcwd();
