@@ -8,6 +8,7 @@ use Drall\Runners\ExecRunner;
 use Drall\Traits\RunnerAwareTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -31,19 +32,23 @@ class ExecQueueCommand extends BaseCommand {
     $this->setAliases(['exq']);
     $this->addArgument('drallq-file', InputArgument::REQUIRED);
     $this->addUsage('/path/to/drallq.json');
+    $this->addOption('drall-worker-id', NULL, InputOption::VALUE_OPTIONAL, 'The ID to assign to the worker.');
     $this->setHidden();
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
-    $prefix = '[drall:' . getmypid() . ']';
-    $qPath = $input->getArgument('drallq-file');
-    $qPath = realpath($qPath);
+    $this->preExecute($input, $output);
 
-    if (!$qPath) {
+    $workerId = $input->getOption('drall-worker-id') ?: getmypid();
+    $prefix = '[drall:' . $workerId . ']';
+    $qPath = $input->getArgument('drallq-file');
+
+    if (!is_file($qPath)) {
       $this->logger->error("Queue file not found: $qPath");
       return 1;
     }
 
+    $qPath = realpath($qPath);
     $qFile = new QueueFile($qPath);
     $qLock = new Lock("$qPath.rw.lock");
     $outputLock = new Lock("$qPath.output.lock");
@@ -87,8 +92,13 @@ class ExecQueueCommand extends BaseCommand {
       $qLock->release();
 
       $outputLock->acquire(TRUE);
-      $this->logger->info("$prefix Finished: $shellCommand");
+      // @todo Instead of writing output from each worker, maybe we can have
+      //   the main drall command write the output? That way, users will be
+      //   able to redirect the output to a log file, if required. Or maybe
+      //   add support for a --drall-log-file option which will make all the
+      //   workers write to the same log file.
       $output->write($this->runner->getOutput());
+      $this->logger->info("$prefix Finished: $shellCommand");
       $outputLock->release();
     }
 
