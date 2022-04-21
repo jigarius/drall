@@ -143,14 +143,20 @@ abstract class BaseExecCommand extends BaseCommand {
         $workerCommands[] = "({$this->argv[0]} exec:queue '{$qFile->getPath()}' --drall-debug &)";
       }
 
-      // If all workers are launched at the same time, they will compete to
-      // acquire locks on the .drall.json and the output. Thus, we launch them
-      // after 0.19s intervals.
-      $all = implode(' && ', $workerCommands);
-      $this->runner->execute($all);
+      $this->runner->execute(implode(' && ', $workerCommands));
 
-      // @todo Do not terminate until all items are processed?
-      //   Display summary of all the failures?
+      do {
+        $qData = $qFile->read();
+        if ($qData->getProgress() < 100) {
+          sleep(1);
+          continue;
+        }
+
+        break;
+      } while (TRUE);
+
+      unlink($qFile->getPath());
+
       return 0;
     }
 
