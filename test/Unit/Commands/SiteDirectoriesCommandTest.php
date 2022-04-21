@@ -78,16 +78,16 @@ EOF
       ->method('getSiteDirNames')
       ->willReturn([]);
 
-    $output = new BufferedOutput();
-
-    $app = new Drall($siteDetectorMock, NULL, $output);
+    $app = new Drall($siteDetectorMock);
     $tester = new CommandTester($app->find('site:directories'));
     $tester->execute([]);
 
     $tester->assertCommandIsSuccessful();
 
-    $this->assertEquals('', $tester->getDisplay());
-    $this->assertEquals("[warning] No Drupal sites found.\n", $output->fetch());
+    $this->assertEquals(
+      '[warning] No Drupal sites found.' . PHP_EOL,
+      $tester->getDisplay()
+    );
   }
 
 }

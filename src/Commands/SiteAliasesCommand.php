@@ -21,6 +21,8 @@ class SiteAliasesCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
+    $this->preExecute($input, $output);
+
     $aliases = $this->siteDetector()
       ->getSiteAliases($this->getDrallGroup($input));
 

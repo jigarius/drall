@@ -2,7 +2,6 @@
 
 use Consolidation\SiteAlias\SiteAliasManager;
 use Drall\Runners\FakeRunner;
-use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Tester\CommandTester;
 use DrupalFinder\DrupalFinder;
 use Drall\Drall;
@@ -28,8 +27,7 @@ class BaseExecCommandTest extends TestCase {
       ->method('getSiteDirNames')
       ->willReturn([]);
 
-    $output = new BufferedOutput();
-    $app = new Drall($siteDetectorMock, NULL, $output);
+    $app = new Drall($siteDetectorMock);
     $input = ['cmd' => 'cat @@uri'];
     $command = $app->find('exec:shell')
       ->setArgv(self::arrayInputAsArgv($input));
@@ -38,8 +36,8 @@ class BaseExecCommandTest extends TestCase {
 
     $tester->assertCommandIsSuccessful();
     $this->assertEquals(
-      "[warning] No Drupal sites found.\n",
-      $output->fetch(),
+      '[warning] No Drupal sites found.' . PHP_EOL,
+      $tester->getDisplay(),
     );
   }
 
@@ -77,8 +75,7 @@ class BaseExecCommandTest extends TestCase {
   }
 
   public function testExecuteWithoutPlaceholders() {
-    $output = new BufferedOutput();
-    $app = new Drall(NULL, NULL, $output);
+    $app = new Drall();
     $input = ['cmd' => 'drush core:status'];
     /** @var ExecCommand $command */
     $command = $app->find('exec:shell')
@@ -88,12 +85,12 @@ class BaseExecCommandTest extends TestCase {
     $this->assertEquals(1, $tester->execute($input));
     $this->assertEquals(
       '[error] The command has no placeholders and it can be run without Drall.' . PHP_EOL,
-    $output->fetch());
+      $tester->getDisplay()
+    );
   }
 
   public function testExecuteWithMixedPlaceholders() {
-    $output = new BufferedOutput();
-    $app = new Drall(NULL, NULL, $output);
+    $app = new Drall();
     $input = ['cmd' => 'drush @@site.local core:status && drush --uri=@@uri core:status'];
     /** @var ExecCommand $command */
     $command = $app->find('exec:shell')
@@ -103,7 +100,8 @@ class BaseExecCommandTest extends TestCase {
     $this->assertEquals(1, $tester->execute($input));
     $this->assertEquals(
       '[error] The command cannot contain both @@uri and @@site placeholders.' . PHP_EOL,
-    $output->fetch());
+      $tester->getDisplay()
+    );
   }
 
   /**

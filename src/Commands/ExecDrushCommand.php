@@ -24,6 +24,8 @@ class ExecDrushCommand extends BaseExecCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
+    $this->preExecute($input, $output);
+
     // Symfony Console only recognizes options that are defined in the
     // ::configure() method. Since our goal is to catch all arguments and
     // options and send them to drush, we do it ourselves using $argv.
