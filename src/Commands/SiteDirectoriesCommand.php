@@ -21,6 +21,8 @@ class SiteDirectoriesCommand extends BaseCommand {
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
+    $this->preExecute($input, $output);
+
     $dirNames = $this->siteDetector()
       ->getSiteDirNames($this->getDrallGroup($input));
 

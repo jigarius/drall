@@ -3,10 +3,12 @@
 namespace Drall\Commands;
 
 use Drall\Traits\SiteDetectorAwareTrait;
+use DrupalCodeGenerator\Logger\ConsoleLogger;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class BaseCommand extends Command {
 
@@ -58,6 +60,12 @@ abstract class BaseCommand extends Command {
     }
 
     return getenv('DRALL_GROUP') ?: NULL;
+  }
+
+  protected function preExecute(InputInterface $input, OutputInterface $output) {
+    if (!$this->logger) {
+      $this->logger = new ConsoleLogger($output);
+    }
   }
 
 }
