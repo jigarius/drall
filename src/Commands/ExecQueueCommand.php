@@ -33,7 +33,7 @@ class ExecQueueCommand extends BaseCommand {
     $this->addArgument('drallq-file', InputArgument::REQUIRED);
     $this->addUsage('/path/to/drallq.json');
     $this->addOption('drall-worker-id', NULL, InputOption::VALUE_OPTIONAL, 'The ID to assign to the worker.');
-    $this->setHidden();
+    $this->setHidden(TRUE);
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
