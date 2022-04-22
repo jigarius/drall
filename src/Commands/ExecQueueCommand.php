@@ -97,8 +97,8 @@ class ExecQueueCommand extends BaseCommand {
       //   able to redirect the output to a log file, if required. Or maybe
       //   add support for a --drall-log-file option which will make all the
       //   workers write to the same log file.
-      $output->write($this->runner->getOutput());
       $this->logger->info("$prefix Finished: $shellCommand");
+      $output->write($this->runner->getOutput());
       $outputLock->release();
     }
 

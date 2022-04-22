@@ -7,6 +7,7 @@ use Drall\Models\Queue\Queue;
 use Drall\Models\Queue\File;
 use Drall\Models\Queue\Item;
 use Drall\Models\RawCommand;
+use Drall\Runners\FakeRunner;
 use Drall\Traits\RunnerAwareTrait;
 use Drall\Runners\PassthruRunner;
 use Symfony\Component\Console\Input\InputArgument;
@@ -20,6 +21,13 @@ use Symfony\Component\Console\Output\OutputInterface;
 abstract class BaseExecCommand extends BaseCommand {
 
   use RunnerAwareTrait;
+
+  /**
+   * Maximum number of Drall workers.
+   *
+   * @var int
+   */
+  const WORKER_LIMIT = 10;
 
   /**
    * To be treated as the $argv array.
@@ -124,7 +132,7 @@ abstract class BaseExecCommand extends BaseCommand {
     // If multiple workers are required.
     $w = $input->getOption('drall-workers');
 
-    if ($w > 10) {
+    if ($w > self::WORKER_LIMIT) {
       $this->logger->warning('Limiting workers to 10, which is the maximum.');
       $w = 10;
     }
@@ -136,16 +144,32 @@ abstract class BaseExecCommand extends BaseCommand {
       $qFile->write($qData);
       $this->logger->debug("Created queue: {$qFile->getPath()}");
 
-      // Execute one command to launch all workers.
-      // @example (cmd1 &) && (cmd2 &), and so on.
       $workerCommands = [];
       for ($i = 1; $i <= $w; $i++) {
-        $workerCommands[] = "({$this->argv[0]} exec:queue '{$qFile->getPath()}' --drall-debug &)";
+        $workerCommand = array_filter([
+          $this->argv[0],
+          'exec:queue',
+          "'{$qFile->getPath()}'",
+          "--drall-worker-id=$i",
+          $input->getOption('drall-debug') ? '--drall-debug' : NULL,
+          $input->getOption('drall-verbose') ? '--drall-verbose' : NULL,
+          '&',
+        ]);
+
+        $workerCommands[] = implode(' ', $workerCommand);
       }
 
-      $this->runner->execute(implode(' && ', $workerCommands));
+      // Execute one command to launch all workers.
+      // @example (cmd1 &) && (cmd2 &), and so on.
+      $this->runner->execute('(' . implode(') && (', $workerCommands) . ')');
 
       do {
+        // FakeRunner is used during tests. It doesn't actually execute the commands,
+        // so this loop becomes infinite.
+        if (is_a($this->runner, FakeRunner::class)) {
+          break;
+        }
+
         $qData = $qFile->read();
         if ($qData->getProgress() < 100) {
           sleep(1);

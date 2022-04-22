@@ -39,6 +39,10 @@ final class Drall extends Application {
     $this->setVersion(self::VERSION);
     $this->setAutoExit(FALSE);
 
+    // @todo Instead of using $input to create a SiteDetector here, we can
+    //   create the SiteDetector in BaseCommand::preExecute(). That way,
+    //   we won't need this extra dependency injection, thereby simplifying
+    //   the code and the tests.
     $input = $input ?? new ArgvInput();
     $root = $input->getParameterOption('--root') ?: getcwd();
     $siteDetector ??= $this->createDefaultSiteDetector($root);
