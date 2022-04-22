@@ -27,4 +27,9 @@ class FakeRunnerTest extends TestCase {
     $this->assertEquals(['foo', 'bar', 'baz'], $runner->commandHistory());
   }
 
+  public function testGetOutput() {
+    $runner = new FakeRunner();
+    $this->assertNull($runner->getOutput());
+  }
+
 }
