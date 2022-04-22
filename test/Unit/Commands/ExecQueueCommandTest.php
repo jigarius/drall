@@ -41,7 +41,7 @@ class ExecQueueCommandTest extends TestCase {
     $qFile = new File($this->createTempFilePath());
     $qData = new Queue(
       'x.y.z',
-      new RawCommand('echo "We at @@uri"'),
+      new RawCommand('echo "We at @@uri."'),
       'uri'
     );
     $qData->push(new Item('default'));
@@ -57,9 +57,9 @@ class ExecQueueCommandTest extends TestCase {
 
     $this->assertEquals(
       <<<EOF
-[info] [drall:test] Started: echo "We at default"
-We at default
-[info] [drall:test] Finished: echo "We at default"
+[info] [drall:test] Started: echo "We at default."
+[info] [drall:test] Finished: echo "We at default."
+We at default.
 EOF,
       trim($tester->getDisplay(TRUE)),
     );

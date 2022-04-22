@@ -2,6 +2,7 @@
 
 use Consolidation\SiteAlias\SiteAliasManager;
 use Drall\Runners\FakeRunner;
+use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Tester\CommandTester;
 use DrupalFinder\DrupalFinder;
 use Drall\Drall;
@@ -105,6 +106,126 @@ class BaseExecCommandTest extends TestCase {
   }
 
   /**
+   * Drall caps the maximum number of workers.
+   */
+  public function testExecuteWithWorkerLimit() {
+    $input = [
+      'cmd' => 'drush --uri=@@uri core:status --fields=site',
+      '--root' => $this->drupalDir(),
+      '--drall-workers' => 15,
+      '--drall-verbose' => TRUE,
+    ];
+
+    $app = new Drall(NULL, new ArrayInput($input));
+    /** @var \Drall\Commands\ExecShellCommand $command */
+    $command = $app->find('exec:shell');
+    $command->setArgv(self::arrayInputAsArgv($input))
+      ->setRunner($runner = new FakeRunner());
+    $tester = new CommandTester($command);
+    $tester->execute($input);
+
+    $this->assertEquals(
+      '[warning] Limiting workers to 10, which is the maximum.' . PHP_EOL,
+      $tester->getDisplay()
+    );
+  }
+
+  public function testExecuteWithWorkers() {
+    $input = [
+      'cmd' => 'drush --uri=@@uri core:status --fields=site',
+      '--root' => $this->drupalDir(),
+      '--drall-workers' => 2,
+    ];
+
+    $app = new Drall(NULL, new ArrayInput($input));
+    /** @var \Drall\Commands\ExecShellCommand $command */
+    $command = $app->find('exec:shell');
+    $command->setArgv(self::arrayInputAsArgv($input))
+      ->setRunner($runner = new FakeRunner());
+    $tester = new CommandTester($command);
+    $tester->execute($input);
+
+    $this->assertCount(1, $runner->commandHistory());
+    // Remove the random part of the basename in /path/to/62628d4ce25f7.drallq.json.
+    $workerCommand = preg_replace("@([^/]+)(\.drallq\.json)@", 'RAND$2', $runner->commandHistory()[0]);
+
+    $tmpDir = sys_get_temp_dir();
+    $this->assertEquals(
+      [
+        "(/opt/drall/bin/drall exec:queue '$tmpDir/RAND.drallq.json' --drall-worker-id=1 &)",
+        "(/opt/drall/bin/drall exec:queue '$tmpDir/RAND.drallq.json' --drall-worker-id=2 &)",
+      ],
+      explode(' && ', $workerCommand)
+    );
+  }
+
+  /**
+   * The --drall-verbose flag is passed to worker processes.
+   */
+  public function testExecuteWithWorkerVerbosity() {
+    $input = [
+      'cmd' => 'drush --uri=@@uri core:status --fields=site',
+      '--root' => $this->drupalDir(),
+      '--drall-workers' => 2,
+      '--drall-verbose' => TRUE,
+    ];
+
+    $app = new Drall(NULL, new ArrayInput($input));
+    /** @var \Drall\Commands\ExecShellCommand $command */
+    $command = $app->find('exec:shell');
+    $command->setArgv(self::arrayInputAsArgv($input))
+      ->setRunner($runner = new FakeRunner());
+    $tester = new CommandTester($command);
+    $tester->execute($input);
+
+    $this->assertCount(1, $runner->commandHistory());
+    // Remove the random part of the basename in /path/to/62628d4ce25f7.drallq.json.
+    $workerCommand = preg_replace("@([^/]+)(\.drallq\.json)@", 'RAND$2', $runner->commandHistory()[0]);
+
+    $tmpDir = sys_get_temp_dir();
+    $this->assertEquals(
+      [
+        "(/opt/drall/bin/drall exec:queue '$tmpDir/RAND.drallq.json' --drall-worker-id=1 --drall-verbose &)",
+        "(/opt/drall/bin/drall exec:queue '$tmpDir/RAND.drallq.json' --drall-worker-id=2 --drall-verbose &)",
+      ],
+      explode(' && ', $workerCommand)
+    );
+  }
+
+  /**
+   * The --drall-debug flag is passed to worker processes.
+   */
+  public function testExecuteWithWorkerDebug() {
+    $input = [
+      'cmd' => 'drush --uri=@@uri core:status --fields=site',
+      '--root' => $this->drupalDir(),
+      '--drall-workers' => 2,
+      '--drall-debug' => TRUE,
+    ];
+
+    $app = new Drall(NULL, new ArrayInput($input));
+    /** @var \Drall\Commands\ExecShellCommand $command */
+    $command = $app->find('exec:shell');
+    $command->setArgv(self::arrayInputAsArgv($input))
+      ->setRunner($runner = new FakeRunner());
+    $tester = new CommandTester($command);
+    $tester->execute($input);
+
+    $this->assertCount(1, $runner->commandHistory());
+    // Remove the random part of the basename in /path/to/62628d4ce25f7.drallq.json.
+    $workerCommand = preg_replace("@([^/]+)(\.drallq\.json)@", 'RAND$2', $runner->commandHistory()[0]);
+
+    $tmpDir = sys_get_temp_dir();
+    $this->assertEquals(
+      [
+        "(/opt/drall/bin/drall exec:queue '$tmpDir/RAND.drallq.json' --drall-worker-id=1 --drall-debug &)",
+        "(/opt/drall/bin/drall exec:queue '$tmpDir/RAND.drallq.json' --drall-worker-id=2 --drall-debug &)",
+      ],
+      explode(' && ', $workerCommand)
+    );
+  }
+
+  /**
    * Converts an array of input into a $argv like array.
    *
    * @param array $input
@@ -116,7 +237,7 @@ class BaseExecCommandTest extends TestCase {
    * @see \Drall\Commands\ExecDrushCommand::setArgv()
    */
   private static function arrayInputAsArgv(array $input): array {
-    array_unshift($input, '/path/to/drall', 'exec');
+    array_unshift($input, '/opt/drall/bin/drall', 'exec');
 
     $argv = [];
     foreach ($input as $key => $value) {
