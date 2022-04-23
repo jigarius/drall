@@ -14,7 +14,7 @@ the initial development of Drall.
 Drall is listed on [Packagist.org](https://packagist.org/packages/jigarius/drall).
 Thus, it can easily be installed using `composer` as follows:
 
-  composer require jigarius/drall
+    composer require jigarius/drall
 
 ## Commands
 
@@ -29,11 +29,11 @@ There are a number of ways to run `drush` commands on multiple sites.
 
 In this method, the `--uri` option is sent to `drush`.
 
-  drall exec:drush --uri=@@uri core:status
+    drall exec:drush --uri=@@uri core:status
 
 Or simplify omit the `--uri=@@uri` and it will be added automatically.
 
-  drall exec:drush core:status
+    drall exec:drush core:status
 
 ##### Example
 
@@ -53,7 +53,7 @@ in which the various sites live.
 
 In this method, a site alias is sent to `drush`.
 
-  drall exec:drush @@site.local core:status
+    drall exec:drush @@site.local core:status
 
 ##### Example
 
@@ -94,7 +94,7 @@ cat web/sites/ralph/settings.local.php
 
 #### Example: Multiple commands
 
-  drall exec:shell "drush @@site.dev updb -y && drush @@site.dev cim -y && drush @@site.dev cr"
+    drall exec:shell "drush @@site.dev updb -y && drush @@site.dev cim -y && drush @@site.dev cr"
 
 ### site:directories
 
