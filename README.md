@@ -215,7 +215,7 @@ $sites['leo.drall.local'] = 'leo';
 
 This puts the sites `donnie` and `leo` in a group named `bluish`.
 
-## Parallel execution
+## Parallel execution (Experimental)
 
 Say you have 100 sites in a Drupal installation. By default, Drall runs
 commands on these sites one after the other. To speed up the execution, you
