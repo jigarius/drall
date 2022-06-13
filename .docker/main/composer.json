@@ -16,9 +16,9 @@
     ],
     "require": {
         "composer/installers": "^1.9",
-        "drupal/core-composer-scaffold": "^9.2",
-        "drupal/core-recommended": "9.3.9",
-        "drupal/core-vendor-hardening": "^9.2",
+        "drupal/core-composer-scaffold": "^9.3",
+        "drupal/core-recommended": "^9.3",
+        "drupal/core-vendor-hardening": "^9.3",
         "drush/drush": "^11"
     },
     "conflict": {
