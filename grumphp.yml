@@ -1,0 +1,9 @@
+grumphp:
+    tasks:
+      composer: ~
+      composer_normalize: ~
+      git_commit_message:
+        enforce_no_subject_trailing_period: true
+        max_body_width: 72
+        max_subject_width: 60
+      phpcs: ~
