@@ -1,10 +1,14 @@
 {
     "name": "jigarius/drall",
     "description": "Drall is a command-line utility to run drush on multi-site Drupal installations.",
-    "version": "2.0.0-rc1",
-    "homepage": "https://github.com/jigarius/drall",
     "license": "GPL-3.0-only",
-    "keywords": ["drupal", "drush", "drall", "cli"],
+    "version": "2.0.0-rc1",
+    "keywords": [
+        "drupal",
+        "drush",
+        "drall",
+        "cli"
+    ],
     "authors": [
         {
             "name": "Jigar Mehta",
@@ -12,6 +16,7 @@
             "role": "Developer"
         }
     ],
+    "homepage": "https://github.com/jigarius/drall",
     "require": {
         "php": ">= 7.4",
         "amphp/process": "^1.1",
@@ -19,6 +24,14 @@
         "consolidation/site-alias": "^3.1",
         "drush/drush": "^11.0",
         "webflo/drupal-finder": "^1.2"
+    },
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
+        "drupal/coder": "^8.3",
+        "ergebnis/composer-normalize": "^2.28",
+        "phpro/grumphp": "^1.13",
+        "phpunit/phpunit": "^9.5",
+        "squizlabs/php_codesniffer": "^3.6"
     },
     "autoload": {
         "psr-4": {
@@ -31,15 +44,11 @@
     "bin": [
         "bin/drall"
     ],
-    "require-dev": {
-        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
-        "drupal/coder": "^8.3",
-        "phpunit/phpunit": "^9.5",
-        "squizlabs/php_codesniffer": "^3.6"
-    },
     "config": {
         "allow-plugins": {
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "dealerdirect/phpcodesniffer-composer-installer": true,
+            "phpro/grumphp": true,
+            "ergebnis/composer-normalize": true
         },
         "sort-packages": true
     },
