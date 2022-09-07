@@ -77,15 +77,15 @@ EOF, $output);
     $output = shell_exec('drall exec:shell drush @@site.local core:status --fields=site');
     $this->assertOutputEquals(<<<EOF
 Current site: @donnie
- Site path : sites/donnie
+Site path : sites/donnie
 Current site: @leo
- Site path : sites/leo
+Site path : sites/leo
 Current site: @mikey
- Site path : sites/mikey
+Site path : sites/mikey
 Current site: @ralph
- Site path : sites/ralph
+Site path : sites/ralph
 Current site: @tmnt
- Site path : sites/default
+Site path : sites/default
 
 EOF, $output);
   }
@@ -94,9 +94,9 @@ EOF, $output);
     $output = shell_exec('drall exec:shell drush --drall-group=bluish @@site.local st --fields=site');
     $this->assertOutputEquals(<<<EOF
 Current site: @donnie
- Site path : sites/donnie
+Site path : sites/donnie
 Current site: @leo
- Site path : sites/leo
+Site path : sites/leo
 
 EOF, $output);
   }

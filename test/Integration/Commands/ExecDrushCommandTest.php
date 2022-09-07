@@ -16,15 +16,15 @@ class ExecDrushCommandTest extends IntegrationTestCase {
     $output = shell_exec('drall exec:drush st --fields=site');
     $this->assertOutputEquals(<<<EOF
 Current site: default
- Site path : sites/default
+Site path : sites/default
 Current site: donnie
- Site path : sites/donnie
+Site path : sites/donnie
 Current site: leo
- Site path : sites/leo
+Site path : sites/leo
 Current site: mikey
- Site path : sites/mikey
+Site path : sites/mikey
 Current site: ralph
- Site path : sites/ralph
+Site path : sites/ralph
 
 EOF, $output);
   }
@@ -36,9 +36,9 @@ EOF, $output);
     $output = shell_exec('drall exec:drush --drall-group=bluish core:status --uri=@@uri --fields=site');
     $this->assertOutputEquals(<<<EOF
 Current site: donnie
- Site path : sites/donnie
+Site path : sites/donnie
 Current site: leo
- Site path : sites/leo
+Site path : sites/leo
 
 EOF, $output);
   }
@@ -50,15 +50,15 @@ EOF, $output);
     $output = shell_exec('drall exec:drush st --uri=@@uri --fields=site');
     $this->assertOutputEquals(<<<EOF
 Current site: default
- Site path : sites/default
+Site path : sites/default
 Current site: donnie
- Site path : sites/donnie
+Site path : sites/donnie
 Current site: leo
- Site path : sites/leo
+Site path : sites/leo
 Current site: mikey
- Site path : sites/mikey
+Site path : sites/mikey
 Current site: ralph
- Site path : sites/ralph
+Site path : sites/ralph
 
 EOF, $output);
   }
@@ -70,15 +70,15 @@ EOF, $output);
     $output = shell_exec('drall exec:drush @@site.local st --fields=site');
     $this->assertOutputEquals(<<<EOF
 Current site: @donnie
- Site path : sites/donnie
+Site path : sites/donnie
 Current site: @leo
- Site path : sites/leo
+Site path : sites/leo
 Current site: @mikey
- Site path : sites/mikey
+Site path : sites/mikey
 Current site: @ralph
- Site path : sites/ralph
+Site path : sites/ralph
 Current site: @tmnt
- Site path : sites/default
+Site path : sites/default
 
 EOF, $output);
   }
@@ -90,9 +90,9 @@ EOF, $output);
     $output = shell_exec('drall exec:drush --drall-group=bluish @@site.local st --fields=site');
     $this->assertOutputEquals(<<<EOF
 Current site: @donnie
- Site path : sites/donnie
+Site path : sites/donnie
 Current site: @leo
- Site path : sites/leo
+Site path : sites/leo
 
 EOF, $output);
   }
