@@ -112,7 +112,7 @@ class BaseExecCommandTest extends TestCase {
     $input = [
       'cmd' => 'drush --uri=@@uri core:status --fields=site',
       '--root' => $this->drupalDir(),
-      '--drall-workers' => 15,
+      '--drall-workers' => 17,
       '--drall-verbose' => TRUE,
     ];
 
@@ -125,7 +125,7 @@ class BaseExecCommandTest extends TestCase {
     $tester->execute($input);
 
     $this->assertEquals(
-      '[warning] Limiting workers to 10, which is the maximum.' . PHP_EOL,
+      '[warning] Limiting workers to 16, which is the maximum.' . PHP_EOL,
       $tester->getDisplay()
     );
   }

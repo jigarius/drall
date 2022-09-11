@@ -27,7 +27,7 @@ abstract class BaseExecCommand extends BaseCommand {
    *
    * @var int
    */
-  const WORKER_LIMIT = 10;
+  const WORKER_LIMIT = 16;
 
   /**
    * To be treated as the $argv array.
@@ -127,7 +127,7 @@ abstract class BaseExecCommand extends BaseCommand {
     $w = $input->getOption('drall-workers');
 
     if ($w > self::WORKER_LIMIT) {
-      $this->logger->warning('Limiting workers to 10, which is the maximum.');
+      $this->logger->warning(sprintf('Limiting workers to %d, which is the maximum.', self::WORKER_LIMIT));
       $w = 10;
     }
 
