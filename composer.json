@@ -13,9 +13,11 @@
         }
     ],
     "require": {
+        "php": ">= 7.4",
+        "amphp/process": "^1.1",
+        "amphp/sync": "^1.4",
         "consolidation/site-alias": "^3.1",
         "drush/drush": "^11.0",
-        "php": ">= 7.4",
         "webflo/drupal-finder": "^1.2"
     },
     "autoload": {
