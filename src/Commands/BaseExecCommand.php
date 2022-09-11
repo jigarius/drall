@@ -2,12 +2,12 @@
 
 namespace Drall\Commands;
 
-use Drall\Drall;
-use Drall\Models\Queue\Queue;
-use Drall\Models\Queue\File;
-use Drall\Models\Queue\Item;
+use Amp\Iterator;
+use Amp\Loop;
+use Amp\Process\Process;
+use Amp\Sync\ConcurrentIterator;
+use Amp\Sync\LocalSemaphore;
 use Drall\Models\RawCommand;
-use Drall\Runners\FakeRunner;
 use Drall\Traits\RunnerAwareTrait;
 use Drall\Runners\PassthruRunner;
 use Symfony\Component\Console\Input\InputArgument;
@@ -123,12 +123,6 @@ abstract class BaseExecCommand extends BaseCommand {
       return 0;
     }
 
-    // Prepare queue items for each value.
-    $qData = new Queue(Drall::VERSION, $command, $placeholder);
-    foreach ($values as $itemId) {
-      $qData->push(new Item($itemId));
-    }
-
     // If multiple workers are required.
     $w = $input->getOption('drall-workers');
 
@@ -139,71 +133,31 @@ abstract class BaseExecCommand extends BaseCommand {
 
     if ($w > 1) {
       $this->logger->info("Executing with $w workers.");
+    }
 
-      $qFile = new File(sys_get_temp_dir() . '/' . uniqid() . '.drallq.json');
-      $qFile->write($qData);
-      $this->logger->debug("Created queue: {$qFile->getPath()}");
+    Loop::run(function () use ($command, $w, $placeholder, $values, $output) {
+      yield ConcurrentIterator\each(
+        Iterator\fromIterable($values),
+        new LocalSemaphore($w),
+        function ($value) use ($command, $placeholder, $output) {
+          $process = new Process($command->with([$placeholder => $value]));
+          yield $process->start();
+          $promise = $process->join();
+          $promise->onResolve(function ($error, $result) use ($output) {
+            if ($error) {
+              $output->write('F');
+              return;
+            }
 
-      $workerCommands = [];
-      for ($i = 1; $i <= $w; $i++) {
-        $workerCommand = array_filter([
-          $this->argv[0],
-          'exec:queue',
-          "'{$qFile->getPath()}'",
-          "--drall-worker-id=$i",
-          $input->getOption('drall-debug') ? '--drall-debug' : NULL,
-          $input->getOption('drall-verbose') ? '--drall-verbose' : NULL,
-          '&',
-        ]);
-
-        $workerCommands[] = implode(' ', $workerCommand);
-      }
-
-      // Execute one command to launch all workers.
-      // @example (cmd1 &) && (cmd2 &), and so on.
-      $this->runner->execute('(' . implode(') && (', $workerCommands) . ')');
-
-      do {
-        // FakeRunner is used during tests. It doesn't actually execute the commands,
-        // so this loop becomes infinite.
-        if (is_a($this->runner, FakeRunner::class)) {
-          break;
+            $output->write('.');
+          });
+          yield $promise;
         }
+      );
+    });
 
-        $qData = $qFile->read();
-        if ($qData->getProgress() < 100) {
-          sleep(1);
-          continue;
-        }
-
-        break;
-      } while (TRUE);
-
-      unlink($qFile->getPath());
-
-      return 0;
-    }
-
-    $errorCodes = [];
-    while ($item = $qData->next()) {
-      // @todo Only show the full command in verbose mode.
-      // @todo Show progress, i.e. current and total.
-      $output->writeln("Current site: {$item->getId()}");
-      $shellCommand = $command->with([$placeholder => $item->getId()]);
-      $this->logger->debug("Running: $shellCommand");
-      $exitCode = $this->runner->execute($shellCommand);
-
-      if ($exitCode !== 0) {
-        $errorCodes[$item->getId()] = $exitCode;
-      }
-    }
-
-    if (empty($errorCodes)) {
-      return 0;
-    }
-
-    // @todo Display summary of errors in verbose mode.
-    return 1;
+    echo PHP_EOL;
+    return 0;
   }
 
   private function getPlaceholderName(RawCommand $command): ?string {
