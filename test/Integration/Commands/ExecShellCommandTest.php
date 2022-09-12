@@ -22,7 +22,7 @@ class ExecShellCommandTest extends IntegrationTestCase {
   }
 
   /**
-   * Run a command in a directory with no Drupal.
+   * Run a command that has none of Drall's placeholders.
    */
   public function testExecuteWithNoPlaceholders(): void {
     chdir('/tmp');
