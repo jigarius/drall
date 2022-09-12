@@ -2,6 +2,7 @@
 
 namespace Drall\Commands;
 
+use Amp\ByteStream;
 use Amp\Iterator;
 use Amp\Loop;
 use Amp\Process\Process;
@@ -101,7 +102,7 @@ abstract class BaseExecCommand extends BaseCommand {
     $siteGroup = $this->getDrallGroup($input);
     $placeholder = $this->getPlaceholderName($command);
 
-    // Get all values for the placeholder.
+    // Get all possible values for the placeholder.
     switch ($placeholder) {
       case 'uri':
         // @todo Should the keys of the $sites array be used instead?
@@ -115,6 +116,7 @@ abstract class BaseExecCommand extends BaseCommand {
         break;
 
       default:
+        // @todo Log error message.
         return 1;
     }
 
@@ -123,41 +125,50 @@ abstract class BaseExecCommand extends BaseCommand {
       return 0;
     }
 
-    // If multiple workers are required.
+    // Determine number of workers.
     $w = $input->getOption('drall-workers');
 
     if ($w > self::WORKER_LIMIT) {
       $this->logger->warning(sprintf('Limiting workers to %d, which is the maximum.', self::WORKER_LIMIT));
-      $w = 10;
+      $w = self::WORKER_LIMIT;
     }
 
     if ($w > 1) {
       $this->logger->info("Executing with $w workers.");
     }
 
-    Loop::run(function () use ($command, $w, $placeholder, $values, $output) {
+    $logger = $this->logger;
+    $hasErrors = FALSE;
+    Loop::run(function () use ($command, $placeholder, $values, $w, $output, $logger, &$hasErrors) {
+      // Removing the following line results in a segmentation fault.
+      $logger;
+
       yield ConcurrentIterator\each(
         Iterator\fromIterable($values),
         new LocalSemaphore($w),
-        function ($value) use ($command, $placeholder, $output) {
-          $process = new Process($command->with([$placeholder => $value]));
-          yield $process->start();
-          $promise = $process->join();
-          $promise->onResolve(function ($error, $result) use ($output) {
-            if ($error) {
-              $output->write('F');
-              return;
-            }
+        function ($value) use ($command, $placeholder, $output, $logger, &$hasErrors) {
+          $sCommand = $command->with([$placeholder => $value]);
+          $process = new Process($sCommand);
 
-            $output->write('.');
-          });
-          yield $promise;
+          $output->writeln("Current site: $value");
+
+          yield $process->start();
+          $logger->debug("Running: $command");
+
+          $sOutput = yield ByteStream\buffer($process->getStdout());
+          $exitCode = yield $process->join();
+
+          if ($exitCode !== 0) {
+            $hasErrors = TRUE;
+          }
+
+          $output->write($sOutput);
         }
       );
     });
 
-    echo PHP_EOL;
-    return 0;
+    $output->writeln('');
+    return $hasErrors ? 1 : 0;
   }
 
   private function getPlaceholderName(RawCommand $command): ?string {
