@@ -1,7 +1,6 @@
 <?php
 
 use Consolidation\SiteAlias\SiteAliasManager;
-use Drall\Runners\FakeRunner;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -58,11 +57,8 @@ class BaseExecCommandTest extends TestCase {
 
     $app = new Drall($siteDetectorMock);
     $input = ['cmd' => 'drush @@site.dev core:rebuild'];
-    $runner = new FakeRunner();
-    $runner->setExitCode(5);
     /** @var ExecCommand $command */
     $command = $app->find('exec:shell')
-      ->setRunner($runner)
       ->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
 
@@ -113,8 +109,7 @@ class BaseExecCommandTest extends TestCase {
     $app = new Drall(NULL, new ArrayInput($input));
     /** @var \Drall\Commands\ExecShellCommand $command */
     $command = $app->find('exec:shell');
-    $command->setArgv(self::arrayInputAsArgv($input))
-      ->setRunner(new FakeRunner());
+    $command->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
     $tester->execute($input);
 
@@ -136,8 +131,7 @@ class BaseExecCommandTest extends TestCase {
     $app = new Drall(NULL, new ArrayInput($input));
     /** @var \Drall\Commands\ExecShellCommand $command */
     $command = $app->find('exec:shell');
-    $command->setArgv(self::arrayInputAsArgv($input))
-      ->setRunner(new FakeRunner());
+    $command->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
     $tester->execute($input, [
       'verbosity' => OutputInterface::VERBOSITY_VERY_VERBOSE,

@@ -9,8 +9,6 @@ use Amp\Process\Process;
 use Amp\Sync\ConcurrentIterator;
 use Amp\Sync\LocalSemaphore;
 use Drall\Models\RawCommand;
-use Drall\Traits\RunnerAwareTrait;
-use Drall\Runners\PassthruRunner;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -20,8 +18,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  * A command to execute a drush command on multiple sites.
  */
 abstract class BaseExecCommand extends BaseCommand {
-
-  use RunnerAwareTrait;
 
   /**
    * Maximum number of Drall workers.
@@ -40,7 +36,6 @@ abstract class BaseExecCommand extends BaseCommand {
   public function __construct(string $name = NULL) {
     parent::__construct($name);
     $this->argv = $GLOBALS['argv'];
-    $this->setRunner(new PassthruRunner());
   }
 
   /**
