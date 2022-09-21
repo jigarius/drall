@@ -28,6 +28,7 @@
     "require-dev": {
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
         "drupal/coder": "^8.3",
+        "ergebnis/composer-normalize": "^2.28",
         "phpro/grumphp": "^1.13",
         "phpunit/phpunit": "^9.5",
         "squizlabs/php_codesniffer": "^3.6"
