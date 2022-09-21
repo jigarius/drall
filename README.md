@@ -269,6 +269,6 @@ The sites should then be available at:
 
 ## Acknowledgements
 
-- Thanks [Symetris](https://symetris.ca/) for funding the initial development.
-- Thanks [Jigar Mehta (Jigarius)](https://jigarius.com/about) (that's me) for
-  spending evenings and weekends to make this tool possible.
+- Thanks, [Symetris](https://symetris.ca/) for funding the initial development.
+- Thanks, [Jigarius](https://jigarius.com/about) (that's me) for spending
+  evenings and weekends to make this tool possible.
