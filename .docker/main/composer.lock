@@ -1498,7 +1498,7 @@
         },
         {
             "name": "drupal/core-composer-scaffold",
-            "version": "9.4.3",
+            "version": "9.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-composer-scaffold.git",
@@ -1542,7 +1542,7 @@
                 "drupal"
             ],
             "support": {
-                "source": "https://github.com/drupal/core-composer-scaffold/tree/9.4.3"
+                "source": "https://github.com/drupal/core-composer-scaffold/tree/9.4.8"
             },
             "time": "2022-06-19T16:14:23+00:00"
         },
@@ -1634,7 +1634,7 @@
         },
         {
             "name": "drupal/core-vendor-hardening",
-            "version": "9.4.3",
+            "version": "9.4.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/drupal/core-vendor-hardening.git",
@@ -1669,7 +1669,7 @@
                 "drupal"
             ],
             "support": {
-                "source": "https://github.com/drupal/core-vendor-hardening/tree/9.4.3"
+                "source": "https://github.com/drupal/core-vendor-hardening/tree/9.5.0-beta2"
             },
             "time": "2022-02-24T17:40:53+00:00"
         },
