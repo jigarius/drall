@@ -3,9 +3,9 @@
 namespace Drall\Commands;
 
 use Drall\Traits\SiteDetectorAwareTrait;
-use DrupalCodeGenerator\Logger\ConsoleLogger;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Logger\ConsoleLogger;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
