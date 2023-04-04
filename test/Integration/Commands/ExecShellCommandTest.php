@@ -62,6 +62,19 @@ web/sites/ralph/settings.php
 EOF, $output);
   }
 
+  public function testWithUriPlaceholderVerbose(): void {
+    $output = shell_exec('drall exs --drall-group=bluish --drall-debug ls web/sites/@@uri/settings.php');
+    $this->assertOutputEquals(<<<EOF
+Current site: donnie
+[debug] Running: ls web/sites/donnie/settings.php
+web/sites/donnie/settings.php
+Current site: leo
+[debug] Running: ls web/sites/leo/settings.php
+web/sites/leo/settings.php
+
+EOF, $output);
+  }
+
   public function testWithUriPlaceholderAndGroup(): void {
     $output = shell_exec('drall exec:shell --drall-group=bluish ls web/sites/@@uri/settings.php');
     $this->assertOutputEquals(<<<EOF
@@ -86,6 +99,19 @@ Current site: @ralph
 Site path : sites/ralph
 Current site: @tmnt
 Site path : sites/default
+
+EOF, $output);
+  }
+
+  public function testWithSitePlaceholderVerbose(): void {
+    $output = shell_exec('drall exs --drall-group=bluish --drall-debug drush @@site.local st --fields=site');
+    $this->assertOutputEquals(<<<EOF
+Current site: @donnie
+[debug] Running: drush @donnie.local st --fields=site
+Site path : sites/donnie
+Current site: @leo
+[debug] Running: drush @leo.local st --fields=site
+Site path : sites/leo
 
 EOF, $output);
   }

@@ -148,7 +148,7 @@ abstract class BaseExecCommand extends BaseCommand {
           $output->writeln("Current site: $value");
 
           yield $process->start();
-          $logger->debug("Running: $command");
+          $logger->debug("Running: $sCommand");
 
           $sOutput = yield ByteStream\buffer($process->getStdout());
           $exitCode = yield $process->join();
