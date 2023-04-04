@@ -14,6 +14,5 @@ RUN cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_PATH" \
 
 # Provision Drupal.
 COPY .docker/main/composer.json /opt/drupal/composer.json
-COPY .docker/main/composer.lock /opt/drupal/composer.lock
 COPY Makefile /opt/drupal/Makefile
 RUN make provision/drupal
