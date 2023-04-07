@@ -107,7 +107,7 @@ class BaseExecCommandTest extends TestCase {
     ];
 
     $app = new Drall(NULL, new ArrayInput($input));
-    /** @var \Drall\Commands\ExecShellCommand $command */
+    /** @var \Drall\Commands\ExecCommand $command */
     $command = $app->find('exec:shell');
     $command->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
@@ -129,7 +129,7 @@ class BaseExecCommandTest extends TestCase {
     ];
 
     $app = new Drall(NULL, new ArrayInput($input));
-    /** @var \Drall\Commands\ExecShellCommand $command */
+    /** @var \Drall\Commands\ExecCommand $command */
     $command = $app->find('exec:shell');
     $command->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);

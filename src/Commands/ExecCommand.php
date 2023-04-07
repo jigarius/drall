@@ -15,9 +15,9 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * A command to execute a command on multiple sites.
+ * A command to execute a shell command on multiple sites.
  */
-abstract class BaseExecCommand extends BaseCommand {
+class ExecCommand extends BaseCommand {
 
   /**
    * Maximum number of Drall workers.
@@ -36,6 +36,34 @@ abstract class BaseExecCommand extends BaseCommand {
   public function __construct(string $name = NULL) {
     parent::__construct($name);
     $this->argv = $GLOBALS['argv'];
+  }
+
+  protected function configure() {
+    parent::configure();
+
+    $this->setName('exec');
+    $this->setAliases(['ex']);
+    $this->setDescription('Execute a command on multiple Drupal sites.');
+    $this->addUsage('drush core:status');
+    $this->addUsage('./vendor/bin/drush core:status');
+    $this->addUsage('ls web/sites/@@uri/settings.php');
+    $this->addUsage('echo "Working on @@site" && drush @@site.local core:status');
+
+    $this->addArgument(
+      'cmd',
+      InputArgument::REQUIRED | InputArgument::IS_ARRAY,
+      'A drush command.'
+    );
+
+    $this->addOption(
+      'drall-workers',
+      NULL,
+      InputOption::VALUE_OPTIONAL,
+      'Number of commands to execute in parallel.',
+      1,
+    );
+
+    $this->ignoreValidationErrors();
   }
 
   /**
@@ -69,31 +97,10 @@ abstract class BaseExecCommand extends BaseCommand {
     return $this;
   }
 
-  protected function configure() {
-    parent::configure();
+  protected function execute(InputInterface $input, OutputInterface $output): int {
+    $this->preExecute($input, $output);
 
-    $this->addArgument(
-      'cmd',
-      InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-      'A drush command.'
-    );
-
-    $this->addOption(
-      'drall-workers',
-      NULL,
-      InputOption::VALUE_OPTIONAL,
-      'Number of commands to execute in parallel.',
-      1,
-    );
-
-    $this->ignoreValidationErrors();
-  }
-
-  protected function doExecute(
-    RawCommand $command,
-    InputInterface $input,
-    OutputInterface $output
-  ): int {
+    $command = $this->getCommand();
     $siteGroup = $this->getDrallGroup($input);
     $placeholder = $this->getPlaceholderName($command);
 
@@ -166,6 +173,33 @@ abstract class BaseExecCommand extends BaseCommand {
     return $hasErrors ? 1 : 0;
   }
 
+  protected function getCommand(): RawCommand {
+    // Symfony Console only recognizes options that are defined in the
+    // ::configure() method. Since our goal is to catch all arguments and
+    // options and send them to drush, we do it ourselves using $argv.
+    //
+    // @todo Is there a way to catch all options from $input?
+    $command = RawCommand::fromArgv($this->argv);
+
+    if (!str_contains($command, 'drush')) {
+      return $command;
+    }
+
+    // Inject --uri=@@uri for Drush commands without placeholders.
+    if (!$command->hasPlaceholder('uri') && !$command->hasPlaceholder('site')) {
+      $sCommand = preg_replace('/\b(drush) /', 'drush --uri=@@uri ', $command, -1, $count);
+      $command = new RawCommand($sCommand);
+      $this->logger->debug('Injected --uri parameter for Drush command.');
+    }
+
+    return $command;
+  }
+
+  /**
+   * Get unique placeholder from a command.
+   *
+   * @todo Move to RawCommand::getUniquePlaceholder().
+   */
   private function getPlaceholderName(RawCommand $command): ?string {
     $hasUri = $command->hasPlaceholder('uri');
     $hasSite = $command->hasPlaceholder('site');

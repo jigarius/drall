@@ -3,8 +3,7 @@
 namespace Drall;
 
 use Consolidation\SiteAlias\SiteAliasManager;
-use Drall\Commands\ExecShellCommand;
-use Drall\Commands\ExecDrushCommand;
+use Drall\Commands\ExecCommand;
 use Drall\Commands\SiteDirectoriesCommand;
 use Drall\Commands\SiteAliasesCommand;
 use Drall\Services\SiteDetector;
@@ -55,11 +54,7 @@ final class Drall extends Application {
     $cmd->setSiteDetector($siteDetector);
     $this->add($cmd);
 
-    $cmd = new ExecDrushCommand();
-    $cmd->setSiteDetector($siteDetector);
-    $this->add($cmd);
-
-    $cmd = new ExecShellCommand();
+    $cmd = new ExecCommand();
     $cmd->setSiteDetector($siteDetector);
     $this->add($cmd);
   }
