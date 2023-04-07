@@ -32,7 +32,7 @@ class IntegrationTestCase extends TestCase {
    * @param string $message
    *   Error message.
    */
-  protected function assertOutputEquals(string $expected, $actual, string $message = ''): void {
+  protected function assertOutputEquals(string $expected, mixed $actual, string $message = ''): void {
     $actual = preg_replace('@(\s+)\n@', "\n", $actual);
     $this->assertEquals($expected, $actual, $message);
   }
