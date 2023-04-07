@@ -18,16 +18,20 @@ class ExecShellCommand extends BaseExecCommand {
     parent::configure();
 
     $this->setName('exec');
-    $this->setAliases(['exec:shell', 'exs']);
+    $this->setAliases(['ex', 'exec:shell', 'exs']);
     $this->setDescription('Execute a command.');
     $this->addUsage('drush core:status');
+    $this->addUsage('./vendor/bin/drush core:status');
     $this->addUsage('ls web/sites/@@uri/settings.php');
     $this->addUsage('echo "Working on @@site" && drush @@site.local core:status');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);
-    $this->showDeprecationWarning();
+
+    if (!in_array($input->getFirstArgument(), ['exec', 'ex'])) {
+      $this->showDeprecationWarning();
+    }
 
     return $this->doExecute($this->getCommand(), $input, $output);
   }
