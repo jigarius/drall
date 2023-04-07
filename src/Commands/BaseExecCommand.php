@@ -15,7 +15,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * A command to execute a drush command on multiple sites.
+ * A command to execute a command on multiple sites.
  */
 abstract class BaseExecCommand extends BaseCommand {
 
