@@ -17,23 +17,6 @@ class RawCommandTest extends TestCase {
     $this->assertEquals('hello world', (string) $command);
   }
 
-  public function testHasPlaceholder() {
-    $command = new RawCommand('drush --uri=@@uri st');
-    $this->assertTrue($command->hasPlaceholder('uri'));
-
-    $command = new RawCommand('@@site.dev st');
-    $this->assertTrue($command->hasPlaceholder('site'));
-
-    $command = new RawCommand('/path/to/@@uri/files');
-    $this->assertTrue($command->hasPlaceholder('uri'));
-
-    $command = new RawCommand('drush --uri=@@uri st');
-    $this->assertFalse($command->hasPlaceholder('URI'));
-
-    $command = new RawCommand('drush @@urinal');
-    $this->assertFalse($command->hasPlaceholder('uri'));
-  }
-
   public function testWith() {
     $command = new RawCommand('Hello @@human.dev! Good @@time.');
     $this->assertEquals(
@@ -41,7 +24,6 @@ class RawCommandTest extends TestCase {
       $command->with(['human' => 'Jerry', 'time' => 'afternoon'])
     );
 
-    // @todo Fix this.
     $command = new RawCommand('Hello @@humanoid!');
     $this->assertEquals(
       'Hello @@humanoid!',

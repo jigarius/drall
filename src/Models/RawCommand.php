@@ -14,17 +14,12 @@ class RawCommand {
     return $this->command;
   }
 
-  /**
-   * Whether the command contains a given placeholder.
-   *
-   * @param string $name
-   *   Name of the placeholder. E.g. "site" searches for "@@site".
-   *
-   * @return bool
-   *   TRUE or FALSE.
-   */
-  public function hasPlaceholder(string $name): bool {
-    return preg_match("/(@@$name)\b/", $this->command);
+  public function getPlaceholders(): array {
+    $command = $this->command;
+    $result = array_filter(Placeholder::cases(), function($placeholder) use ($command) {
+      return str_contains($command, $placeholder->token());
+    });
+    return array_unique($result);
   }
 
   /**
