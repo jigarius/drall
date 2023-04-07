@@ -68,4 +68,4 @@ lint:
 
 .PHONY: test
 test:
-	composer --working-dir=/opt/drall run test
+	DRALL_ENVIRONMENT=test composer --working-dir=/opt/drall run test

@@ -19,6 +19,8 @@ services:
       - .docker/main/composer.json:/opt/drupal/composer.json
       - .docker/main/drush:/opt/drupal/drush
       - ./Makefile:/opt/drupal/Makefile
+    environment:
+      - DRALL_ENVIRONMENT=development
 
   database:
     image: mariadb:10
