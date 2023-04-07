@@ -11,6 +11,7 @@ use Drall\Traits\SiteDetectorAwareTrait;
 use Drush\SiteAlias\SiteAliasFileLoader;
 use DrupalFinder\DrupalFinder;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -111,6 +112,22 @@ final class Drall extends Application {
     $siteAliasManager->addSearchLocation($drupalFinder->getComposerRoot() . '/drush/sites');
 
     return new SiteDetector($drupalFinder, $siteAliasManager);
+  }
+
+  public function find(string $name) {
+    try {
+      return parent::find($name);
+    }
+    catch (CommandNotFoundException) {
+      throw new CommandNotFoundException(<<<EOT
+The command "$name" was not understood. Did you mean one of the following?
+
+drall exec $name
+drall exec drush $name
+
+Alternatively, run "drall list" to see a list of all available commands.
+EOT);
+    }
   }
 
 }
