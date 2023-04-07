@@ -24,8 +24,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: Prepare
         run: |
-          docker compose build -q
-          docker compose up -d
+          docker compose up -d --build --quiet-pull
           docker compose exec -T main make provision
       - name: Test
         run: docker compose exec -T --workdir=/opt/drall -e XDEBUG_MODE=coverage main make test
