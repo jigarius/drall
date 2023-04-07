@@ -10,12 +10,11 @@ use Drall\Services\SiteDetector;
 use Drall\TestCase;
 
 /**
- * @covers \Drall\Commands\BaseCommand
- * @covers \Drall\Commands\BaseExecCommand
+ * @covers \Drall\Commands\ExecCommand
  */
-class BaseExecCommandTest extends TestCase {
+class ExecCommandTest extends TestCase {
 
-  public function testExecuteWithNoSitesFound() {
+  public function testNoSitesFound() {
     $drupalFinder = new DrupalFinder();
     $siteAliasManager = new SiteAliasManager();
 
@@ -30,7 +29,7 @@ class BaseExecCommandTest extends TestCase {
 
     $app = new Drall($siteDetectorMock);
     $input = ['cmd' => 'cat @@uri'];
-    $command = $app->find('exec:shell')
+    $command = $app->find('exec')
       ->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
     $tester->execute($input);
@@ -42,7 +41,7 @@ class BaseExecCommandTest extends TestCase {
     );
   }
 
-  public function testExecuteWithNonZeroExitCode() {
+  public function testNonZeroExitCode() {
     $drupalFinder = new DrupalFinder();
     $siteAliasManager = new SiteAliasManager();
 
@@ -58,18 +57,18 @@ class BaseExecCommandTest extends TestCase {
     $app = new Drall($siteDetectorMock);
     $input = ['cmd' => 'drush @@site.dev core:rebuild'];
     /** @var ExecCommand $command */
-    $command = $app->find('exec:shell')
+    $command = $app->find('exec')
       ->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
 
     $this->assertEquals(1, $tester->execute($input));
   }
 
-  public function testExecuteWithoutPlaceholders() {
+  public function testWithNoPlaceholders() {
     $app = new Drall();
     $input = ['cmd' => 'ls'];
     /** @var ExecCommand $command */
-    $command = $app->find('exec:shell')
+    $command = $app->find('exec')
       ->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
 
@@ -80,11 +79,11 @@ class BaseExecCommandTest extends TestCase {
     );
   }
 
-  public function testExecuteWithMixedPlaceholders() {
+  public function testWithMixedPlaceholders() {
     $app = new Drall();
     $input = ['cmd' => 'drush @@site.local core:status && drush --uri=@@uri core:status'];
     /** @var ExecCommand $command */
-    $command = $app->find('exec:shell')
+    $command = $app->find('exec')
       ->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
 
@@ -98,7 +97,7 @@ class BaseExecCommandTest extends TestCase {
   /**
    * Drall caps the maximum number of workers.
    */
-  public function testExecuteWithWorkerLimit() {
+  public function testWorkerLimit() {
     $input = [
       'cmd' => 'drush --uri=@@uri core:status --fields=site',
       '--root' => $this->drupalDir(),
@@ -108,7 +107,7 @@ class BaseExecCommandTest extends TestCase {
 
     $app = new Drall(NULL, new ArrayInput($input));
     /** @var \Drall\Commands\ExecCommand $command */
-    $command = $app->find('exec:shell');
+    $command = $app->find('exec');
     $command->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
     $tester->execute($input);
@@ -120,7 +119,7 @@ class BaseExecCommandTest extends TestCase {
     );
   }
 
-  public function testExecuteWithWorkers() {
+  public function testWithWorkers() {
     $input = [
       'cmd' => 'drush --uri=@@uri core:status --fields=site',
       '--root' => $this->drupalDir(),
@@ -130,7 +129,7 @@ class BaseExecCommandTest extends TestCase {
 
     $app = new Drall(NULL, new ArrayInput($input));
     /** @var \Drall\Commands\ExecCommand $command */
-    $command = $app->find('exec:shell');
+    $command = $app->find('exec');
     $command->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
     $tester->execute($input, [
@@ -144,7 +143,7 @@ class BaseExecCommandTest extends TestCase {
   }
 
   /**
-   * Converts an array of input into a $argv like array.
+   * Converts an array of input into an $argv like array.
    *
    * @param array $input
    *   Array of input as expected by CommandTester::execute().
@@ -152,7 +151,7 @@ class BaseExecCommandTest extends TestCase {
    * @return array
    *   Array resembling $argv.
    *
-   * @see \Drall\Commands\ExecDrushCommand::setArgv()
+   * @see \Drall\Commands\ExecCommand::setArgv()
    */
   private static function arrayInputAsArgv(array $input): array {
     array_unshift($input, '/opt/drall/bin/drall', 'exec');
