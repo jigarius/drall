@@ -2,7 +2,7 @@ version: '4'
 
 services:
   main:
-    image: drupal:9-apache
+    image: drupal:drall
     container_name: drall-main
     build:
       context: .
