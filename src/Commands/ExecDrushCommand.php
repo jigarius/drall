@@ -8,6 +8,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * A command to execute a drush command on multiple sites.
+ *
+ * @todo Remove in v3.
  */
 class ExecDrushCommand extends BaseExecCommand {
 

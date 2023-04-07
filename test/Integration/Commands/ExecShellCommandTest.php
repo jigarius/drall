@@ -22,15 +22,34 @@ class ExecShellCommandTest extends IntegrationTestCase {
   }
 
   /**
-   * Run a command that has none of Drall's placeholders.
+   * Run a non-drush command that has no placeholders.
    */
-  public function testExecuteWithNoPlaceholders(): void {
-    chdir('/tmp');
-    $output = shell_exec('drall exec:shell drush core:status 2>&1');
+  public function testExecuteShellWithNoPlaceholders(): void {
+    $output = shell_exec('drall exec:shell foo 2>&1');
     $this->assertOutputEquals(
       '[error] The command has no placeholders and it can be run without Drall.' . PHP_EOL,
       $output
     );
+  }
+
+  /**
+   * Run drush command that has no placeholders.
+   */
+  public function testExecuteDrushWithNoPlaceholders(): void {
+    $output = shell_exec('drall exec:shell drush core:status --fields=site 2>&1');
+    $this->assertOutputEquals(<<<EOF
+Current site: default
+Site path : sites/default
+Current site: donnie
+Site path : sites/donnie
+Current site: leo
+Site path : sites/leo
+Current site: mikey
+Site path : sites/mikey
+Current site: ralph
+Site path : sites/ralph
+
+EOF, $output);
   }
 
   /**

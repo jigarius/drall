@@ -67,7 +67,7 @@ class BaseExecCommandTest extends TestCase {
 
   public function testExecuteWithoutPlaceholders() {
     $app = new Drall();
-    $input = ['cmd' => 'drush core:status'];
+    $input = ['cmd' => 'ls'];
     /** @var ExecCommand $command */
     $command = $app->find('exec:shell')
       ->setArgv(self::arrayInputAsArgv($input));
