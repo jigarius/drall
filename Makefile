@@ -4,27 +4,24 @@ ssh:
 
 
 .PHONY: provision
-provision:
-	@make provision/drall
-	@make provision/drupal
+provision: provision/drall provision/drupal
 
 
 .PHONY: provision/drupal
 provision/drupal:
-	cd /opt/drupal
+	mkdir -p /opt/drupal/web/sites/donnie
+	mkdir -p /opt/drupal/web/sites/leo
+	mkdir -p /opt/drupal/web/sites/mikey
+	mkdir -p /opt/drupal/web/sites/ralph
 
-	composer install
+	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/default/settings.php
+	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/donnie/settings.php
+	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/leo/settings.php
+	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/mikey/settings.php
+	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/ralph/settings.php
 
-	mkdir -p web/sites/donnie
-	mkdir -p web/sites/leo
-	mkdir -p web/sites/mikey
-	mkdir -p web/sites/ralph
-
-	cp web/sites/default/default.settings.php web/sites/default/settings.php
-	cp web/sites/default/default.settings.php web/sites/donnie/settings.php
-	cp web/sites/default/default.settings.php web/sites/leo/settings.php
-	cp web/sites/default/default.settings.php web/sites/mikey/settings.php
-	cp web/sites/default/default.settings.php web/sites/ralph/settings.php
+	rm -Rf /opt/drupal/composer.lock
+	composer --working-dir=/opt/drupal install --no-progress
 
 	@echo 'Drupal databases can be provisioned with: make provision/drupal/database'
 
