@@ -1,4 +1,4 @@
-FROM drupal:9-apache
+FROM drupal:9-php8.1-apache
 
 ENV PATH="/opt/drall/bin:${PATH}:/opt/drall/vendor/bin"
 ENV PHP_INI_PATH="$PHP_INI_DIR/conf.d/php.ini"
