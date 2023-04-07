@@ -36,20 +36,38 @@ class ExecShellCommandTest extends IntegrationTestCase {
    * Run drush command that has no placeholders.
    */
   public function testExecuteDrushWithNoPlaceholders(): void {
-    $output = shell_exec('drall exec:shell drush core:status --fields=site 2>&1');
+    $output = shell_exec('drall exec "drush core:status --fields=site && drush core:status --fields=uri"');
     $this->assertOutputEquals(<<<EOF
 Current site: default
 Site path : sites/default
+Site URI : http://default
 Current site: donnie
 Site path : sites/donnie
+Site URI : http://donnie
 Current site: leo
 Site path : sites/leo
+Site URI : http://leo
 Current site: mikey
 Site path : sites/mikey
+Site URI : http://mikey
 Current site: ralph
 Site path : sites/ralph
+Site URI : http://ralph
 
 EOF, $output);
+  }
+
+  /**
+   * Run a drush with no placeholders, but "drush" is present in a path.
+   *
+   * Drall should not append --uri to this "drush".
+   */
+  public function testExecuteDrushWithNoPlaceholders2(): void {
+    $output = shell_exec('drall exec:shell ls ./vendor/drush/src 2>&1');
+    $this->assertOutputEquals(
+      '[error] The command has no placeholders and it can be run without Drall.' . PHP_EOL,
+      $output
+    );
   }
 
   /**

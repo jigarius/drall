@@ -44,13 +44,13 @@ class ExecShellCommand extends BaseExecCommand {
     // @todo Is there a way to catch all options from $input?
     $command = RawCommand::fromArgv($this->argv);
 
-    if (!str_starts_with($command, 'drush')) {
+    if (!str_contains($command, 'drush')) {
       return $command;
     }
 
     // Inject --uri=@@uri for Drush commands without placeholders.
     if (!$command->hasPlaceholder('uri') && !$command->hasPlaceholder('site')) {
-      $sCommand = preg_replace('/^(drush)\b/', 'drush --uri=@@uri', $command, 1);
+      $sCommand = preg_replace('/\b(drush) /', 'drush --uri=@@uri ', $command, -1, $count);
       $command = new RawCommand($sCommand);
       $this->logger->debug('Injected --uri parameter for Drush command.');
     }
