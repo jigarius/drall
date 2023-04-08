@@ -28,7 +28,7 @@ class ExecCommandTest extends TestCase {
       ->willReturn([]);
 
     $app = new Drall($siteDetectorMock);
-    $input = ['cmd' => 'cat @@uri'];
+    $input = ['cmd' => 'cat @@dir'];
     $command = $app->find('exec')
       ->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
@@ -81,7 +81,7 @@ class ExecCommandTest extends TestCase {
 
   public function testWithMixedPlaceholders() {
     $app = new Drall();
-    $input = ['cmd' => 'drush @@site.local core:status && drush --uri=@@uri core:status'];
+    $input = ['cmd' => 'drush @@site.local core:status && drush --uri=@@dir core:status'];
     /** @var ExecCommand $command */
     $command = $app->find('exec')
       ->setArgv(self::arrayInputAsArgv($input));
@@ -89,7 +89,7 @@ class ExecCommandTest extends TestCase {
 
     $this->assertEquals(1, $tester->execute($input));
     $this->assertEquals(
-      '[error] The command contains: @@site, @@uri. Please use only one.' . PHP_EOL,
+      '[error] The command contains: @@site, @@dir. Please use only one.' . PHP_EOL,
       $tester->getDisplay()
     );
   }
@@ -99,7 +99,7 @@ class ExecCommandTest extends TestCase {
    */
   public function testWorkerLimit() {
     $input = [
-      'cmd' => 'drush --uri=@@uri core:status --fields=site',
+      'cmd' => 'drush --uri=@@dir core:status --fields=site',
       '--root' => $this->drupalDir(),
       '--drall-workers' => 17,
       '--drall-verbose' => TRUE,
@@ -121,7 +121,7 @@ class ExecCommandTest extends TestCase {
 
   public function testWithWorkers() {
     $input = [
-      'cmd' => 'drush --uri=@@uri core:status --fields=site',
+      'cmd' => 'drush --uri=@@dir core:status --fields=site',
       '--root' => $this->drupalDir(),
       '--drall-workers' => 2,
       '--drall-verbose' => TRUE,

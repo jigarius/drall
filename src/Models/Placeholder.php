@@ -9,7 +9,7 @@ enum Placeholder: string {
 
   // Represents the site's directory under "DRUPAL/sites/".
   // @todo Rename to @@dir.
-  case Directory = '@@uri';
+  case Directory = '@@dir';
 
   private function getRegExp(): string {
     return "/($this->value)\b/";

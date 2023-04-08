@@ -14,7 +14,7 @@ class ExecCommandTest extends IntegrationTestCase {
    */
   public function testWithNoDrupal(): void {
     chdir('/tmp');
-    $output = shell_exec('drall exec drush --uri=@@uri core:status');
+    $output = shell_exec('drall exec drush --uri=@@dir core:status');
     $this->assertOutputEquals('[warning] No Drupal sites found.' . PHP_EOL, $output);
 
     $output = shell_exec('drall exec drush @@site.local core:status');
@@ -33,10 +33,10 @@ class ExecCommandTest extends IntegrationTestCase {
   }
 
   /**
-   * Run drush command with @@uri.
+   * Run drush command with @@dir.
    */
   public function testDrushWithUriPlaceholder(): void {
-    $output = shell_exec('drall exec drush --uri=@@uri core:status --fields=site');
+    $output = shell_exec('drall exec drush --uri=@@dir core:status --fields=site');
     $this->assertOutputEquals(<<<EOF
 Current site: default
 Site path : sites/default
@@ -159,19 +159,19 @@ EOF, $output);
   }
 
   /**
-   * A command with both @@uri and @@site placeholders results in an error.
+   * A command with mixed placeholders causes an error.
    */
   public function testWithMixedPlaceholders(): void {
     chdir('/tmp');
-    $output = shell_exec('drall exec "drush --uri=@@uri core:status && drush @@site.local core:status" 2>&1');
+    $output = shell_exec('drall exec "drush --uri=@@dir core:status && drush @@site.local core:status" 2>&1');
     $this->assertOutputEquals(
-      '[error] The command contains: @@site, @@uri. Please use only one.' . PHP_EOL,
+      '[error] The command contains: @@site, @@dir. Please use only one.' . PHP_EOL,
       $output
     );
   }
 
   public function testWithUriPlaceholder(): void {
-    $output = shell_exec('drall exec ls web/sites/@@uri/settings.php');
+    $output = shell_exec('drall exec ls web/sites/@@dir/settings.php');
     $this->assertOutputEquals(<<<EOF
 Current site: default
 web/sites/default/settings.php
@@ -188,7 +188,7 @@ EOF, $output);
   }
 
   public function testWithUriPlaceholderVerbose(): void {
-    $output = shell_exec('drall exec --drall-debug ls web/sites/@@uri/settings.php');
+    $output = shell_exec('drall exec --drall-debug ls web/sites/@@dir/settings.php');
     $this->assertOutputEquals(<<<EOF
 Current site: default
 [debug] Running: ls web/sites/default/settings.php
@@ -210,7 +210,7 @@ EOF, $output);
   }
 
   public function testWithUriPlaceholderAndGroup(): void {
-    $output = shell_exec('drall exec --drall-group=bluish ls web/sites/@@uri/settings.php');
+    $output = shell_exec('drall exec --drall-group=bluish ls web/sites/@@dir/settings.php');
     $this->assertOutputEquals(<<<EOF
 Current site: donnie
 web/sites/donnie/settings.php

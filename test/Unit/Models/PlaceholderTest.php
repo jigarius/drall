@@ -20,7 +20,7 @@ class PlaceholderTest extends TestCase {
 
     $this->assertEquals(
       [Placeholder::Directory],
-      Placeholder::search('drush --uri=@@uri uli')
+      Placeholder::search('drush --uri=@@dir uli')
     );
   }
 
@@ -39,7 +39,7 @@ class PlaceholderTest extends TestCase {
 
     $this->assertEquals(
       'drush --uri=example.com uli',
-      Placeholder::replace(['@@uri' => 'example.com'], 'drush --uri=@@uri uli')
+      Placeholder::replace(['@@dir' => 'example.com'], 'drush --uri=@@dir uli')
     );
   }
 
@@ -52,8 +52,8 @@ class PlaceholderTest extends TestCase {
 
   public function testReplaceWithWordBoundary() {
     $this->assertEquals(
-      'Current site: @@urinal',
-      Placeholder::replace(['@@uri' => 'example.com'], 'Current site: @@urinal')
+      'Current site: @@directory',
+      Placeholder::replace(['@@dir' => 'default'], 'Current site: @@directory')
     );
   }
 
