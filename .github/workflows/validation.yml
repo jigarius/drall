@@ -14,18 +14,20 @@ jobs:
       - name: Lint
         run: composer lint
   test:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: ['ubuntu-latest', 'windows-latest']
         php-versions: ['8.1', '8.2']
     needs:
       - lint
     steps:
       - uses: actions/checkout@v2
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
       - name: Prepare
-        run: |
-          docker compose up -d --build --quiet-pull
-          docker compose exec -T main make provision
+        run: make provision
       - name: Test
         run: docker compose exec -T --workdir=/opt/drall -e XDEBUG_MODE=coverage main make test
       - name: Coverage
