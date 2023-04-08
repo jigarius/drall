@@ -112,6 +112,8 @@ class ExecCommand extends BaseCommand {
     $values = match ($placeholder) {
       Placeholder::Directory => $this->siteDetector()->getSiteDirNames($siteGroup),
       Placeholder::Site => $this->siteDetector()->getSiteAliasNames($siteGroup),
+      Placeholder::Key => $this->siteDetector()->getSiteKeys($siteGroup),
+      Placeholder::UniqueKey => $this->siteDetector()->getSiteKeys($siteGroup, TRUE),
       default => throw new \RuntimeException('Unrecognized placeholder: ' . $placeholder->value),
     };
 

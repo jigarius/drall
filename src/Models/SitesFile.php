@@ -32,12 +32,13 @@ class SitesFile {
    * @return array
    *   Contents of the $sites array.
    */
-  private function getEntries() {
+  private function getEntries(): array {
     if (!is_file($this->path)) {
       throw new \RuntimeException("Cannot read sites file: $this->path");
     }
 
     require $this->path;
+
     if (!isset($sites) || !is_array($sites)) {
       throw new \RuntimeException("Site declarations not found in file: $this->path");
     }
@@ -46,13 +47,30 @@ class SitesFile {
   }
 
   /**
-   * Get an array of site directories.
+   * Get an array of site directory names.
    *
    * @return array
    *   Site directory names.
    */
   public function getDirNames(): array {
-    return array_unique(array_values($this->entries));
+    return array_values(array_unique($this->entries));
+  }
+
+  /**
+   * Get keys of the $sites array.
+   *
+   * @param bool $unique
+   *   If TRUE, only one key (the last one) will be returned for each site.
+   *
+   * @return array
+   *   Site keys from $sites.
+   */
+  public function getKeys(bool $unique = FALSE): array {
+    if (!$unique) {
+      return array_keys($this->entries);
+    }
+
+    return array_keys(array_flip(array_flip($this->entries)));
   }
 
 }

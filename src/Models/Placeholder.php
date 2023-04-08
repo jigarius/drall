@@ -11,6 +11,12 @@ enum Placeholder: string {
   // @todo Rename to @@dir.
   case Directory = '@@dir';
 
+  // Represents keys in the $sites array.
+  case Key = '@@key';
+
+  // Represents the site's unique URI as deduced from keys in $sites.
+  case UniqueKey = '@@ukey';
+
   private function getRegExp(): string {
     return "/($this->value)\b/";
   }

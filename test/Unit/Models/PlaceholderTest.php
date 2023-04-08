@@ -22,6 +22,16 @@ class PlaceholderTest extends TestCase {
       [Placeholder::Directory],
       Placeholder::search('drush --uri=@@dir uli')
     );
+
+    $this->assertEquals(
+      [Placeholder::Key],
+      Placeholder::search('drush --uri=@@key uli')
+    );
+
+    $this->assertEquals(
+      [Placeholder::UniqueKey],
+      Placeholder::search('drush --uri=@@ukey uli')
+    );
   }
 
   public function testWithUnrecognizedPlaceholder() {
@@ -38,8 +48,18 @@ class PlaceholderTest extends TestCase {
     );
 
     $this->assertEquals(
+      'drush --uri=default uli',
+      Placeholder::replace(['@@dir' => 'default'], 'drush --uri=@@dir uli')
+    );
+
+    $this->assertEquals(
       'drush --uri=example.com uli',
-      Placeholder::replace(['@@dir' => 'example.com'], 'drush --uri=@@dir uli')
+      Placeholder::replace(['@@key' => 'example.com'], 'drush --uri=@@key uli')
+    );
+
+    $this->assertEquals(
+      'drush --uri=example.com uli',
+      Placeholder::replace(['@@ukey' => 'example.com'], 'drush --uri=@@ukey uli')
     );
   }
 

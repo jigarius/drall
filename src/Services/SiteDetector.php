@@ -28,7 +28,7 @@ class SiteDetector {
    *   A site group, if any.
    *
    * @return array
-   *   Contents of the $sites variable.
+   *   Site directory names.
    */
   public function getSiteDirNames(string $group = NULL): array {
     if (!$sitesFile = $this->getSitesFile($group)) {
@@ -36,6 +36,25 @@ class SiteDetector {
     }
 
     return $sitesFile->getDirNames();
+  }
+
+  /**
+   * Get a list of site URIs.
+   *
+   * @param string|null $group
+   *   A site group, if any.
+   * @param bool $unique
+   *   Whether to return unique keys only.
+   *
+   * @return array
+   *   Keys from the $sites array.
+   */
+  public function getSiteKeys(string $group = NULL, bool $unique = FALSE): array {
+    if (!$sitesFile = $this->getSitesFile($group)) {
+      return [];
+    }
+
+    return $sitesFile->getKeys($unique);
   }
 
   /**
