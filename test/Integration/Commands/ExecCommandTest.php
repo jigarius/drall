@@ -27,7 +27,7 @@ class ExecCommandTest extends IntegrationTestCase {
   public function testWithNoPlaceholders(): void {
     $output = shell_exec('drall exec foo 2>&1');
     $this->assertOutputEquals(
-      '[error] The command has no placeholders and it can be run without Drall.' . PHP_EOL,
+      '[error] The command contains no placeholders. Please run it directly without Drall.' . PHP_EOL,
       $output
     );
   }
@@ -125,7 +125,7 @@ EOF, $output);
   public function testDrushInPath(): void {
     $output = shell_exec('drall exec ls ./vendor/drush/src 2>&1');
     $this->assertOutputEquals(
-      '[error] The command has no placeholders and it can be run without Drall.' . PHP_EOL,
+      '[error] The command contains no placeholders. Please run it directly without Drall.' . PHP_EOL,
       $output
     );
   }
@@ -165,7 +165,7 @@ EOF, $output);
     chdir('/tmp');
     $output = shell_exec('drall exec "drush --uri=@@uri core:status && drush @@site.local core:status" 2>&1');
     $this->assertOutputEquals(
-      '[error] The command cannot contain both @@uri and @@site placeholders.' . PHP_EOL,
+      '[error] The command contains: @@site, @@uri. Please use only one.' . PHP_EOL,
       $output
     );
   }

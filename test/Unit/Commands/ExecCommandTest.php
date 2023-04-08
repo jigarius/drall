@@ -74,7 +74,7 @@ class ExecCommandTest extends TestCase {
 
     $this->assertEquals(1, $tester->execute($input));
     $this->assertEquals(
-      '[error] The command has no placeholders and it can be run without Drall.' . PHP_EOL,
+      '[error] The command contains no placeholders. Please run it directly without Drall.' . PHP_EOL,
       $tester->getDisplay()
     );
   }
@@ -89,7 +89,7 @@ class ExecCommandTest extends TestCase {
 
     $this->assertEquals(1, $tester->execute($input));
     $this->assertEquals(
-      '[error] The command cannot contain both @@uri and @@site placeholders.' . PHP_EOL,
+      '[error] The command contains: @@site, @@uri. Please use only one.' . PHP_EOL,
       $tester->getDisplay()
     );
   }

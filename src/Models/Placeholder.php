@@ -4,20 +4,61 @@ namespace Drall\Models;
 
 enum Placeholder: string {
 
-  /**
-   * Represents the first part of the site's Drush alias.
-   */
-  case Site = 'site';
+  // Represents the first part of the site's Drush alias.
+  case Site = '@@site';
+
+  // Represents the site's directory under "DRUPAL/sites/".
+  // @todo Rename to @@dir.
+  case Directory = '@@uri';
+
+  private function getRegExp(): string {
+    return "/($this->value)\b/";
+  }
 
   /**
-   * Represents the site's directory under "DRUPAL/sites/".
+   * Detect all valid placeholders present in a string.
    *
-   * @todo Rename @@uri to @@dir.
+   * @param string $haystack
+   *   A string.
+   *
+   * @return \Drall\Models\Placeholder[]
+   *   All placeholders that were found (if any).
    */
-  case Directory = 'uri';
+  public static function search(string $haystack): array {
+    $result = array_filter(self::cases(), function ($p) use ($haystack) {
+      return preg_match($p->getRegExp(), $haystack);
+    });
 
-  public function token(): string {
-    return "@@$this->value";
+    return array_values($result);
+  }
+
+  /**
+   * Replace placeholders with values in a given string.
+   *
+   * @param array $data
+   *   An array with @@placeholder as keys and replacements as values.
+   * @param string $subject
+   *   The string on which to operate.
+   *
+   * @return string
+   *   The subject string with placeholders replaced with values.
+   *
+   * @todo Revisit when PHP allows enum as array keys.
+   */
+  public static function replace(array $data, string $subject): string {
+    $search = [];
+    $replace = [];
+
+    foreach ($data as $key => $value) {
+      if (!$placeholder = Placeholder::tryFrom($key)) {
+        continue;
+      }
+
+      $search[] = $placeholder->getRegExp();
+      $replace[] = $value;
+    }
+
+    return preg_replace($search, $replace, $subject);
   }
 
 }

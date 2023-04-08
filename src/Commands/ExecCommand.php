@@ -103,13 +103,16 @@ class ExecCommand extends BaseCommand {
 
     $command = $this->getCommand();
     $siteGroup = $this->getDrallGroup($input);
-    $placeholder = $this->getUniquePlaceholder($command);
+
+    if (!$placeholder = $this->getUniquePlaceholder($command)) {
+      return 1;
+    }
 
     // Get all possible values for the placeholder.
     $values = match ($placeholder) {
       Placeholder::Directory => $this->siteDetector()->getSiteDirNames($siteGroup),
       Placeholder::Site => $this->siteDetector()->getSiteAliasNames($siteGroup),
-      default => throw new \RuntimeException('Unrecognized placeholder: ' . $placeholder->token()),
+      default => throw new \RuntimeException('Unrecognized placeholder: ' . $placeholder->value),
     };
 
     if (empty($values)) {
@@ -139,8 +142,7 @@ class ExecCommand extends BaseCommand {
         Iterator\fromIterable($values),
         new LocalSemaphore($w),
         function ($value) use ($command, $placeholder, $output, $logger, &$hasErrors) {
-          // @todo Revisit when PHP supports Enum as array key.
-          $sCommand = $command->with([$placeholder->name => $value]);
+          $sCommand = Placeholder::replace([$placeholder->value => $value], $command);
           $process = new Process($sCommand);
 
           $output->writeln("Current site: $value");
@@ -177,7 +179,7 @@ class ExecCommand extends BaseCommand {
     }
 
     // Inject --uri=@@uri for Drush commands without placeholders.
-    if (!$command->getPlaceholders()) {
+    if (!Placeholder::search($command)) {
       $sCommand = preg_replace('/\b(drush) /', 'drush --uri=@@uri ', $command, -1, $count);
       $command = new RawCommand($sCommand);
       $this->logger->debug('Injected --uri parameter for Drush command.');
@@ -188,18 +190,16 @@ class ExecCommand extends BaseCommand {
 
   /**
    * Get unique placeholder from a command.
-   *
-   * @todo Move to RawCommand::getUniquePlaceholder().
    */
   private function getUniquePlaceholder(RawCommand $command): ?Placeholder {
-    if (!$placeholders = $command->getPlaceholders()) {
-      $this->logger->error('The command has no placeholders. Please run it directly without Drall.');
+    if (!$placeholders = Placeholder::search($command)) {
+      $this->logger->error('The command contains no placeholders. Please run it directly without Drall.');
       return NULL;
     }
 
     if (count($placeholders) > 1) {
-      $tokens = array_map(fn($p) => $p->token(), $placeholders);
-      $this->logger->error('The command cannot contain multiple placeholders: ' . implode(', ', $tokens));
+      $tokens = array_column($placeholders, 'value');
+      $this->logger->error('The command contains: ' . implode(', ', $tokens) . '. Please use only one.');
       return NULL;
     }
 

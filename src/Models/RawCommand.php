@@ -14,35 +14,6 @@ class RawCommand {
     return $this->command;
   }
 
-  public function getPlaceholders(): array {
-    $command = $this->command;
-    $result = array_filter(Placeholder::cases(), function($placeholder) use ($command) {
-      return str_contains($command, $placeholder->token());
-    });
-    return array_unique($result);
-  }
-
-  /**
-   * Build an executable command with placeholders replaced.
-   *
-   * @param array $values
-   *   Associative array of values with placeholders as keys.
-   *
-   * @return string
-   *   Command with @@placeholders replaced with real values.
-   */
-  public function with(array $values = []): string {
-    $search = [];
-    $replace = [];
-
-    foreach ($values as $k => $v) {
-      $search[] = "/(@@$k)\b/";
-      $replace[] = $v;
-    }
-
-    return preg_replace($search, $replace, $this->command);
-  }
-
   /**
    * Extracts a Drall sub-command from $argv, ignoring parts that are only for Drall.
    *
