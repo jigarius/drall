@@ -15,40 +15,6 @@ class RawCommand {
   }
 
   /**
-   * Whether the command contains a given placeholder.
-   *
-   * @param string $name
-   *   Name of the placeholder. E.g. "site" searches for "@@site".
-   *
-   * @return bool
-   *   TRUE or FALSE.
-   */
-  public function hasPlaceholder(string $name): bool {
-    return preg_match("/(@@$name)\b/", $this->command);
-  }
-
-  /**
-   * Build an executable command with placeholders replaced.
-   *
-   * @param array $values
-   *   Associative array of values with placeholders as keys.
-   *
-   * @return string
-   *   Command with @@placeholders replaced with real values.
-   */
-  public function with(array $values = []): string {
-    $search = [];
-    $replace = [];
-
-    foreach ($values as $k => $v) {
-      $search[] = "/(@@$k)\b/";
-      $replace[] = $v;
-    }
-
-    return preg_replace($search, $replace, $this->command);
-  }
-
-  /**
    * Extracts a Drall sub-command from $argv, ignoring parts that are only for Drall.
    *
    * @param array $argv

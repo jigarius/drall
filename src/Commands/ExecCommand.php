@@ -8,6 +8,7 @@ use Amp\Loop;
 use Amp\Process\Process;
 use Amp\Sync\ConcurrentIterator;
 use Amp\Sync\LocalSemaphore;
+use Drall\Models\Placeholder;
 use Drall\Models\RawCommand;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -102,25 +103,17 @@ class ExecCommand extends BaseCommand {
 
     $command = $this->getCommand();
     $siteGroup = $this->getDrallGroup($input);
-    $placeholder = $this->getPlaceholderName($command);
+
+    if (!$placeholder = $this->getUniquePlaceholder($command)) {
+      return 1;
+    }
 
     // Get all possible values for the placeholder.
-    switch ($placeholder) {
-      case 'uri':
-        // @todo Should the keys of the $sites array be used instead?
-        // @todo Can sites exist with sites/GROUP/SITE/settings.php?
-        //   If yes, then does --uri=GROUP/SITE work correctly?
-        $values = $this->siteDetector()->getSiteDirNames($siteGroup);
-        break;
-
-      case 'site':
-        $values = $this->siteDetector()->getSiteAliasNames($siteGroup);
-        break;
-
-      default:
-        // @todo Log error message.
-        return 1;
-    }
+    $values = match ($placeholder) {
+      Placeholder::Directory => $this->siteDetector()->getSiteDirNames($siteGroup),
+      Placeholder::Site => $this->siteDetector()->getSiteAliasNames($siteGroup),
+      default => throw new \RuntimeException('Unrecognized placeholder: ' . $placeholder->value),
+    };
 
     if (empty($values)) {
       $this->logger->warning('No Drupal sites found.');
@@ -149,7 +142,7 @@ class ExecCommand extends BaseCommand {
         Iterator\fromIterable($values),
         new LocalSemaphore($w),
         function ($value) use ($command, $placeholder, $output, $logger, &$hasErrors) {
-          $sCommand = $command->with([$placeholder => $value]);
+          $sCommand = Placeholder::replace([$placeholder->value => $value], $command);
           $process = new Process($sCommand);
 
           $output->writeln("Current site: $value");
@@ -186,7 +179,7 @@ class ExecCommand extends BaseCommand {
     }
 
     // Inject --uri=@@uri for Drush commands without placeholders.
-    if (!$command->hasPlaceholder('uri') && !$command->hasPlaceholder('site')) {
+    if (!Placeholder::search($command)) {
       $sCommand = preg_replace('/\b(drush) /', 'drush --uri=@@uri ', $command, -1, $count);
       $command = new RawCommand($sCommand);
       $this->logger->debug('Injected --uri parameter for Drush command.');
@@ -197,28 +190,20 @@ class ExecCommand extends BaseCommand {
 
   /**
    * Get unique placeholder from a command.
-   *
-   * @todo Move to RawCommand::getUniquePlaceholder().
    */
-  private function getPlaceholderName(RawCommand $command): ?string {
-    $hasUri = $command->hasPlaceholder('uri');
-    $hasSite = $command->hasPlaceholder('site');
-
-    if ($hasUri && $hasSite) {
-      $this->logger->error('The command cannot contain both @@uri and @@site placeholders.');
+  private function getUniquePlaceholder(RawCommand $command): ?Placeholder {
+    if (!$placeholders = Placeholder::search($command)) {
+      $this->logger->error('The command contains no placeholders. Please run it directly without Drall.');
       return NULL;
     }
 
-    if (!$hasUri && !$hasSite) {
-      $this->logger->error('The command has no placeholders and it can be run without Drall.');
+    if (count($placeholders) > 1) {
+      $tokens = array_column($placeholders, 'value');
+      $this->logger->error('The command contains: ' . implode(', ', $tokens) . '. Please use only one.');
       return NULL;
     }
 
-    if ($hasUri) {
-      return 'uri';
-    }
-
-    return 'site';
+    return reset($placeholders);
   }
 
 }
