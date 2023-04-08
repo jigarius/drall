@@ -16,29 +16,100 @@ Thus, it can easily be installed using `composer` as follows:
 
     composer require jigarius/drall
 
+## Placeholders
+
+Drall's functioning depends on its _Placeholders_. Here's how Drall works
+under the hood:
+
+1. Receive a command, say, `drall exec COMMAND`.
+2. Ensure there is a `@@placeholder` in `COMMAND`.
+3. Run `COMMAND` after replacing `@@placeholder` with site-specific values.
+4. Display the result.
+
+Drall supports the following placeholders:
+
+### @@dir
+
+This placeholder is replaced with the name of the site's directory under
+Drupal's `sites` directory. These are the values of the `$sites` array
+usually defined in `sites.php`.
+
+```php
+# @@dir is replaced with "ralph" and "leo".
+$sites['raphael.com'] = 'ralph';
+$sites['leonardo.com'] = 'leo';
+```
+
+**Note:** In older versions of Drall, this was called `@@uri`.
+
+### @@key
+
+This placeholder is replaced with keys of the `$sites` array.
+
+```php
+# @@key is replaced with "raphael.com", "raphael.local" and "leonardo.com".
+$sites['raphael.com'] = 'ralph';
+$sites['raphael.local'] = 'ralph';
+$sites['leonardo.com'] = 'leo';
+```
+
+### @@ukey
+
+This placeholder is replaced with unique keys of the `$sites` array. If a site
+has multiple keys, the last one is used as its unique key.
+
+```php
+# @@key is replaced with "raphael.local" and "leonardo.local".
+$sites['raphael.com'] = 'ralph';
+$sites['raphael.local'] = 'ralph';
+$sites['leonardo.com'] = 'leo';
+$sites['leonardo.local'] = 'leo';
+```
+
+### @@site
+
+This placeholder is replaced with the first part of the site's alias.
+
+```shell
+# @@site is replaced with "@ralph" and "@leo".
+@ralph.local
+@leo.local
+```
+
+**Note:** This placeholder only works for sites with Drush aliases.
+
 ## Commands
 
 To see a list of commands offered by Drall, run `drall list`. If you feel lost,
 run `drall help` or continue reading this documentation.
 
-### exec:drush
+### exec
 
-There are a number of ways to run `drush` commands on multiple sites.
+With `exec` you can execute drush as well as non-drush commands on multiple
+sites in your Drupal installation.
 
-#### With @@uri
+**Note:** In older versions of Drall, this was done with `drall exec:drush`.
+
+#### Drush with @@dir
 
 In this method, the `--uri` option is sent to `drush`.
 
-    drall exec:drush --uri=@@uri core:status
+    drall exec drush --uri=@@dir core:status
 
-Or simplify omit the `--uri=@@uri` and it will be added automatically.
+If it is a Drush command and no valid `@@placeholder` are present, then
+`--uri=@@dir` is automatically added after each occurrence of `drush`.
 
-    drall exec:drush core:status
+```shell
+# Raw drush command (no placeholders)
+drall exec drush core:status
+# Command that is executed (placeholders injected)
+drall exec drush --uri=@@dir core:status
+```
 
 ##### Example
 
-```
-$ drall core:status
+```shell
+$ drall exec drush core:status
 drush --uri=default core:status
 drush --uri=donnie core:status
 drush --uri=leo core:status
@@ -46,10 +117,7 @@ drush --uri=mikey core:status
 drush --uri=ralph core:status
 ```
 
-Here, the `--uri` is populated with names of the subdirectories under `sites`
-in which the various sites live.
-
-#### With @@site
+#### Drush with @@site
 
 In this method, a site alias is sent to `drush`.
 
@@ -58,7 +126,7 @@ In this method, a site alias is sent to `drush`.
 ##### Example
 
 ```shell
-$ drall exec:drush @@site.local core:status
+$ drall exec drush @@site.local core:status
 drush @tmnt.local core:status
 drush @donnie.local core:status
 drush @leo.local core:status
@@ -66,25 +134,18 @@ drush @mikey.local core:status
 drush @ralph.local core:status
 ```
 
-Here, `@@site` is replaced with site names detected from various site alias
-definitions.
+#### Non-drush commands
 
-### exec:shell
-
-If you want to run non-drush commands on your sites, or run multiple commands
-on each site in your multi-site Drupal installation, this command comes to the
-rescue.
-
-This command simply takes one or more shell commands, replaces placeholders
-like `@@uri` or `@@site` and executes them.
+You can run non-Drush commands the same was as you run Drush commands. Just
+make sure that the command has valid placeholders.
 
 **Important:** You can only use any one of the possible placeholders, e.g. if
-you use `@@uri` and you cannot mix it with `@@site`.
+you use `@@dir` and you cannot mix it with `@@site`.
 
-#### Example: Usage
+#### Example: Shell command
 
 ```shell
-$ drall exec:shell cat web/sites/@@uri/settings.local.php
+$ drall exec cat web/sites/@@uri/settings.local.php
 cat web/sites/default/settings.local.php
 cat web/sites/donnie/settings.local.php
 cat web/sites/leo/settings.local.php
@@ -94,7 +155,7 @@ cat web/sites/ralph/settings.local.php
 
 #### Example: Multiple commands
 
-    drall exec:shell "drush @@site.dev updb -y && drush @@site.dev cim -y && drush @@site.dev cr"
+    drall exec "drush @@site.dev updb -y && drush @@site.dev cim -y && drush @@site.dev cr"
 
 ### site:directories
 
@@ -104,7 +165,7 @@ individual sites.
 
 #### Example: Usage
 
-```
+```shell
 $ drall site:directories
 default
 donnie.com
@@ -233,7 +294,7 @@ conflict between the Drall workers.
 
 The command below launches 3 instances of Drall to run `core:rebuild` command.
 
-  drall exec:drush core:rebuild --drall-workers=3
+    drall exec:drush core:rebuild --drall-workers=3
 
 When a worker runs out of work, it terminates automatically.
 
@@ -261,7 +322,7 @@ To access the dev sites in your browser, add the following line to your hosts
 file. It is usually located at `/etc/hosts`. This is completely optional, so
 do this only if you need it.
 
-  127.0.0.1 tmnt.drall.local donnie.drall.local leo.drall.local mikey.drall.local ralph.drall.local
+    127.0.0.1 tmnt.drall.local donnie.drall.local leo.drall.local mikey.drall.local ralph.drall.local
 
 The sites should then be available at:
 - [tmnt.drall.local](http://tmnt.drall.local/)

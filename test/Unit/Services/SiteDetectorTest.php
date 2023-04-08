@@ -51,7 +51,56 @@ class SiteDetectorTest extends TestCase {
   public function testGetSiteDirNamesWithNoDrupal() {
     $this->subject = new SiteDetector(new DrupalFinder(), new SiteAliasManager());
 
-    $this->assertEquals([], $this->subject->getSiteDirNames('reddish'));
+    $this->assertEquals([], $this->subject->getSiteDirNames());
+  }
+
+  public function testGetSiteKeys() {
+    $this->assertEquals(
+      [
+        'tmnt.com',
+        'cowabunga.com',
+        'tmnt.drall.local',
+        'donatello.com',
+        '8080.donatello.com',
+        'donnie.drall.local',
+        'leonardo.com',
+        'leo.drall.local',
+        'michelangelo.com',
+        'mikey.drall.local',
+        'raphael.com',
+        'ralph.drall.local',
+      ],
+      $this->subject->getSiteKeys()
+    );
+
+    $this->assertEquals(
+      [
+        'michelangelo.com',
+        'mikey.drall.local',
+        'raphael.com',
+        'ralph.drall.local',
+      ],
+      $this->subject->getSiteKeys('reddish')
+    );
+  }
+
+  public function testGetUniqueSiteKeys() {
+    $this->assertEquals(
+      [
+        'tmnt.drall.local',
+        'donnie.drall.local',
+        'leo.drall.local',
+        'mikey.drall.local',
+        'ralph.drall.local',
+      ],
+      $this->subject->getSiteKeys(NULL, TRUE)
+    );
+  }
+
+  public function testGetSiteKeysWithNoDrupal() {
+    $this->subject = new SiteDetector(new DrupalFinder(), new SiteAliasManager());
+
+    $this->assertEquals([], $this->subject->getSiteKeys());
   }
 
   public function testGetSiteAliasNames() {

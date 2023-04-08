@@ -47,7 +47,7 @@ class ExecCommand extends BaseCommand {
     $this->setDescription('Execute a command on multiple Drupal sites.');
     $this->addUsage('drush core:status');
     $this->addUsage('./vendor/bin/drush core:status');
-    $this->addUsage('ls web/sites/@@uri/settings.php');
+    $this->addUsage('ls web/sites/@@dir/settings.php');
     $this->addUsage('echo "Working on @@site" && drush @@site.local core:status');
 
     $this->addArgument(
@@ -112,6 +112,8 @@ class ExecCommand extends BaseCommand {
     $values = match ($placeholder) {
       Placeholder::Directory => $this->siteDetector()->getSiteDirNames($siteGroup),
       Placeholder::Site => $this->siteDetector()->getSiteAliasNames($siteGroup),
+      Placeholder::Key => $this->siteDetector()->getSiteKeys($siteGroup),
+      Placeholder::UniqueKey => $this->siteDetector()->getSiteKeys($siteGroup, TRUE),
       default => throw new \RuntimeException('Unrecognized placeholder: ' . $placeholder->value),
     };
 
@@ -178,9 +180,9 @@ class ExecCommand extends BaseCommand {
       return $command;
     }
 
-    // Inject --uri=@@uri for Drush commands without placeholders.
+    // Inject --uri=@@dir for Drush commands without placeholders.
     if (!Placeholder::search($command)) {
-      $sCommand = preg_replace('/\b(drush) /', 'drush --uri=@@uri ', $command, -1, $count);
+      $sCommand = preg_replace('/\b(drush) /', 'drush --uri=@@dir ', $command, -1, $count);
       $command = new RawCommand($sCommand);
       $this->logger->debug('Injected --uri parameter for Drush command.');
     }
