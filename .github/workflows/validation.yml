@@ -19,6 +19,16 @@ jobs:
         run: |
           echo "/opt/drall/bin" >> $GITHUB_PATH
           echo "/opt/drall/vendor/bin" >> $GITHUB_PATH
+      - name: Determine Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('/opt/*/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
       - name: Prepare
         run: |
           cp -r . /opt/drall
