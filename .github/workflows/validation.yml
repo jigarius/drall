@@ -33,13 +33,9 @@ jobs:
         run: |
           cp -r . /opt/drall
           make provision
-        shell: bash
       - name: Lint
         run: make lint
-        shell: bash
       - name: Test
         run: make test
-        shell: bash
       - name: Coverage
         run: make coverage-report/text
-        shell: bash
