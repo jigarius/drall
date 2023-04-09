@@ -96,7 +96,7 @@ EOF, $output);
    * Run multiple drush commands with no placeholders.
    */
   public function testMultipleDrushWithNoPlaceholders(): void {
-    $output = shell_exec('drall exec "drush core:status --fields=site && drush core:status --fields=uri"');
+    $output = shell_exec('drall exec "drush st --fields=site; drush st --fields=uri"');
     $this->assertOutputEquals(<<<EOF
 Current site: default
 Site path : sites/default
