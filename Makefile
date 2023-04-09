@@ -58,12 +58,12 @@ provision/drall:
 	drall --version || exit 1
 
 
-.PHONY: coverage-text
+.PHONY: coverage-report/text
 coverage-report/text:
-	cat .coverage/text
+	cat /opt/drall/.coverage/text
 
 
-.PHONY: coverage-html
+.PHONY: coverage-report/html
 coverage-report/html:
 	open .coverage/html/dashboard.html
 
