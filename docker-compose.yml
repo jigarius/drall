@@ -13,9 +13,9 @@ services:
       - "8080:80"
     volumes:
       - .:/opt/drall
-      - .docker/main/sites.php:/opt/drupal/web/sites/sites.php
-      - .docker/main/sites.reddish.php:/opt/drupal/web/sites/sites.reddish.php
-      - .docker/main/sites.bluish.php:/opt/drupal/web/sites/sites.bluish.php
+      - .docker/main/sites/sites.php:/opt/drupal/web/sites/sites.php
+      - .docker/main/sites/sites.reddish.php:/opt/drupal/web/sites/sites.reddish.php
+      - .docker/main/sites/sites.bluish.php:/opt/drupal/web/sites/sites.bluish.php
       - .docker/main/composer.json:/opt/drupal/composer.json
       - .docker/main/drush:/opt/drupal/drush
       - ./Makefile:/opt/drupal/Makefile
