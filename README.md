@@ -231,6 +231,21 @@ information on site groups.
 If `--drall-group` is not set, then the Drall uses the environment variable
 `DRALL_GROUP`, if it is set.
 
+### --drall-filter
+
+Filter placeholder values with an expression. This is helpful for running
+commands on specific sites.
+
+```shell
+# Run only on the "leo" site.
+drall exec --drall-filter=leo core:status
+# Run only on "leo" and "ralph" sites.
+drall exec --drall-filter="leo||ralph" core:status
+```
+
+For more on using filter expressions, refer to the documentation on
+[consolidation/filter-via-dot-access-data](https://github.com/consolidation/filter-via-dot-access-data).
+
 ### --drall-verbose
 
 Whether Drall should display verbose output.

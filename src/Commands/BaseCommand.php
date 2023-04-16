@@ -22,6 +22,13 @@ abstract class BaseCommand extends Command {
       InputOption::VALUE_OPTIONAL,
       'Site group identifier.'
     );
+
+    $this->addOption(
+      'drall-filter',
+      NULL,
+      InputOption::VALUE_OPTIONAL,
+      'Filter sites based on provided expression.'
+    );
   }
 
   /**
@@ -39,6 +46,21 @@ abstract class BaseCommand extends Command {
     }
 
     return getenv('DRALL_GROUP') ?: NULL;
+  }
+
+  /**
+   * Get the --filter parameter (if any).
+   *
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   *   The input.
+   *
+   * @return null|string
+   *   A filter expression.
+   *
+   * @see https://packagist.org/packages/consolidation/filter-via-dot-access-data
+   */
+  protected function getDrallFilter(InputInterface $input): ?string {
+    return $input->getOption('drall-filter') ?: NULL;
   }
 
   protected function preExecute(InputInterface $input, OutputInterface $output) {

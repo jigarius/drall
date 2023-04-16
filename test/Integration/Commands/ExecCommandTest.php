@@ -187,6 +187,15 @@ web/sites/ralph/settings.php
 EOF, $output);
   }
 
+  public function testWithFilter(): void {
+    $output = shell_exec('drall exec --drall-filter=leo ls web/sites/@@dir/settings.php');
+    $this->assertOutputEquals(<<<EOF
+Current site: leo
+web/sites/leo/settings.php
+
+EOF, $output);
+  }
+
   public function testWithUriPlaceholderVerbose(): void {
     $output = shell_exec('drall exec --drall-debug ls web/sites/@@dir/settings.php');
     $this->assertOutputEquals(<<<EOF

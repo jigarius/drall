@@ -24,7 +24,10 @@ class SiteAliasesCommand extends BaseCommand {
     $this->preExecute($input, $output);
 
     $aliases = $this->siteDetector()
-      ->getSiteAliases($this->getDrallGroup($input));
+      ->getSiteAliases(
+        $this->getDrallGroup($input),
+        $this->getDrallFilter($input),
+      );
 
     if (count($aliases) === 0) {
       $this->logger->warning('No site aliases found.');

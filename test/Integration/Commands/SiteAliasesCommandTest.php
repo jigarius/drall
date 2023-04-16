@@ -34,6 +34,18 @@ EOF, $output);
   }
 
   /**
+   * Run site:aliases with --filter.
+   */
+  public function testExecuteWithFilter(): void {
+    $output = shell_exec('drall site:aliases --drall-filter="leo||ralph"');
+    $this->assertOutputEquals(<<<EOF
+@leo.local
+@ralph.local
+
+EOF, $output);
+  }
+
+  /**
    * Run site:aliases with --drall-group.
    */
   public function testWithGroup(): void {
