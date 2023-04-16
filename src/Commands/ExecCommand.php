@@ -102,7 +102,8 @@ class ExecCommand extends BaseCommand {
     $this->preExecute($input, $output);
 
     $command = $this->getCommand();
-    $siteGroup = $this->getDrallGroup($input);
+    $group = $this->getDrallGroup($input);
+    $filter = $this->getDrallFilter($input);
 
     if (!$placeholder = $this->getUniquePlaceholder($command)) {
       return 1;
@@ -110,10 +111,10 @@ class ExecCommand extends BaseCommand {
 
     // Get all possible values for the placeholder.
     $values = match ($placeholder) {
-      Placeholder::Directory => $this->siteDetector()->getSiteDirNames($siteGroup),
-      Placeholder::Site => $this->siteDetector()->getSiteAliasNames($siteGroup),
-      Placeholder::Key => $this->siteDetector()->getSiteKeys($siteGroup),
-      Placeholder::UniqueKey => $this->siteDetector()->getSiteKeys($siteGroup, TRUE),
+      Placeholder::Directory => $this->siteDetector()->getSiteDirNames($group, $filter),
+      Placeholder::Site => $this->siteDetector()->getSiteAliasNames($group, $filter),
+      Placeholder::Key => $this->siteDetector()->getSiteKeys($group, $filter),
+      Placeholder::UniqueKey => $this->siteDetector()->getSiteKeys($group, $filter, TRUE),
       default => throw new \RuntimeException('Unrecognized placeholder: ' . $placeholder->value),
     };
 

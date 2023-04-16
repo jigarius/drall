@@ -34,6 +34,18 @@ EOF, $output);
   }
 
   /**
+   * Run site:directories with --filter.
+   */
+  public function testExecuteWithFilter(): void {
+    $output = shell_exec('drall site:directories --drall-filter="leo||ralph"');
+    $this->assertOutputEquals(<<<EOF
+leo
+ralph
+
+EOF, $output);
+  }
+
+  /**
    * Run site:directories with --drall-group.
    */
   public function testWithGroup(): void {

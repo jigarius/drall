@@ -24,7 +24,10 @@ class SiteDirectoriesCommand extends BaseCommand {
     $this->preExecute($input, $output);
 
     $dirNames = $this->siteDetector()
-      ->getSiteDirNames($this->getDrallGroup($input));
+      ->getSiteDirNames(
+        $this->getDrallGroup($input),
+        $this->getDrallFilter($input),
+      );
 
     if (count($dirNames) === 0) {
       $this->logger->warning('No Drupal sites found.');

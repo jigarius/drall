@@ -121,7 +121,7 @@ drush --uri=ralph core:status
 
 In this method, a site alias is sent to `drush`.
 
-    drall exec:drush @@site.local core:status
+    drall exec drush @@site.local core:status
 
 ##### Example
 
@@ -226,10 +226,25 @@ Specify a Drupal project root or document root directory.
 Specify the target site group. See the section *site groups* for more
 information on site groups.
 
-    drall exec:drush --drall-group=GROUP core:status --field=site
+    drall exec --drall-group=GROUP core:status --field=site
 
 If `--drall-group` is not set, then the Drall uses the environment variable
 `DRALL_GROUP`, if it is set.
+
+### --drall-filter
+
+Filter placeholder values with an expression. This is helpful for running
+commands on specific sites.
+
+```shell
+# Run only on the "leo" site.
+drall exec --drall-filter=leo core:status
+# Run only on "leo" and "ralph" sites.
+drall exec --drall-filter="leo||ralph" core:status
+```
+
+For more on using filter expressions, refer to the documentation on
+[consolidation/filter-via-dot-access-data](https://github.com/consolidation/filter-via-dot-access-data).
 
 ### --drall-verbose
 
@@ -294,7 +309,7 @@ conflict between the Drall workers.
 
 The command below launches 3 instances of Drall to run `core:rebuild` command.
 
-    drall exec:drush core:rebuild --drall-workers=3
+    drall exec drush core:rebuild --drall-workers=3
 
 When a worker runs out of work, it terminates automatically.
 

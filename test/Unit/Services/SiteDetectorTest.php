@@ -36,15 +36,19 @@ class SiteDetectorTest extends TestCase {
       ['default', 'donnie', 'leo', 'mikey', 'ralph'],
       $this->subject->getSiteDirNames()
     );
+  }
 
+  public function testGetSiteDirNamesWithGroup() {
     $this->assertEquals(
       ['donnie', 'leo'],
       $this->subject->getSiteDirNames('bluish')
     );
+  }
 
+  public function testGetSiteDirNamesWithFilter() {
     $this->assertEquals(
-      ['mikey', 'ralph'],
-      $this->subject->getSiteDirNames('reddish')
+      ['leo', 'ralph'],
+      $this->subject->getSiteDirNames(NULL, 'leo||ralph')
     );
   }
 
@@ -84,6 +88,13 @@ class SiteDetectorTest extends TestCase {
     );
   }
 
+  public function testGetSiteKeysWithFilter() {
+    $this->assertEquals(
+      ['cowabunga.com'],
+      $this->subject->getSiteKeys(NULL, 'cowabunga')
+    );
+  }
+
   public function testGetUniqueSiteKeys() {
     $this->assertEquals(
       [
@@ -93,7 +104,14 @@ class SiteDetectorTest extends TestCase {
         'mikey.drall.local',
         'ralph.drall.local',
       ],
-      $this->subject->getSiteKeys(NULL, TRUE)
+      $this->subject->getSiteKeys(NULL, NULL, TRUE)
+    );
+  }
+
+  public function testGetUniqueSiteKeysWithFilter() {
+    $this->assertEquals(
+      ['leo.drall.local', 'ralph.drall.local'],
+      $this->subject->getSiteKeys(NULL, 'leo||ralph', TRUE)
     );
   }
 
@@ -103,20 +121,58 @@ class SiteDetectorTest extends TestCase {
     $this->assertEquals([], $this->subject->getSiteKeys());
   }
 
+  public function testGetSiteAliases() {
+    $this->assertEquals(
+      [
+        '@donnie.local',
+        '@leo.local',
+        '@mikey.local',
+        '@ralph.local',
+        '@tmnt.local',
+      ],
+      $this->subject->getSiteAliases()
+    );
+  }
+
+  public function testGetSiteAliasesWithGroup() {
+    $this->assertEquals(
+      ['@donnie.local', '@leo.local'],
+      $this->subject->getSiteAliases('bluish')
+    );
+  }
+
+  public function getGetSiteAliasesWithFilter() {
+    $this->assertEquals(
+      ['@leo.local', '@ralph.local'],
+      $this->subject->getSiteAliases(NULL, 'leo||ralph')
+    );
+  }
+
   public function testGetSiteAliasNames() {
     $this->assertEquals(
       ['@donnie', '@leo', '@mikey', '@ralph', '@tmnt'],
       $this->subject->getSiteAliasNames()
     );
+  }
 
+  public function testGetSiteAliasNamesWithGroup() {
     $this->assertEquals(
       ['@donnie', '@leo'],
       $this->subject->getSiteAliasNames('bluish')
     );
+  }
 
+  public function testGetSiteAliasNamesWithFilter() {
     $this->assertEquals(
-      ['@mikey', '@ralph'],
-      $this->subject->getSiteAliasNames('reddish')
+      ['@leo', '@ralph'],
+      $this->subject->getSiteAliasNames(NULL, 'leo||ralph')
+    );
+  }
+
+  public function testGetSiteAliasNamesWithNothingToFilter() {
+    $this->assertEquals(
+      [],
+      $this->subject->getSiteAliasNames('unknown', 'leo||ralph')
     );
   }
 

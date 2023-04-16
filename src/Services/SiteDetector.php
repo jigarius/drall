@@ -2,6 +2,8 @@
 
 namespace Drall\Services;
 
+use Consolidation\Filter\FilterOutputData;
+use Consolidation\Filter\LogicalOpFactory;
 use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
 use Consolidation\SiteAlias\SiteAliasManagerInterface;
 use Drall\Traits\DrupalFinderAwareTrait;
@@ -26,16 +28,26 @@ class SiteDetector {
    *
    * @param string|null $group
    *   A site group, if any.
+   * @param string|null $filter
+   *   A filter expression.
    *
    * @return array
    *   Site directory names.
    */
-  public function getSiteDirNames(string $group = NULL): array {
+  public function getSiteDirNames(
+    string $group = NULL,
+    ?string $filter = NULL,
+  ): array {
     if (!$sitesFile = $this->getSitesFile($group)) {
       return [];
     }
 
-    return $sitesFile->getDirNames();
+    $result = $sitesFile->getDirNames();
+    if ($filter) {
+      $result = $this->filter($result, $filter);
+    }
+
+    return $result;
   }
 
   /**
@@ -43,18 +55,29 @@ class SiteDetector {
    *
    * @param string|null $group
    *   A site group, if any.
+   * @param string|null $filter
+   *   A filter expression.
    * @param bool $unique
    *   Whether to return unique keys only.
    *
    * @return array
    *   Keys from the $sites array.
    */
-  public function getSiteKeys(string $group = NULL, bool $unique = FALSE): array {
+  public function getSiteKeys(
+    string $group = NULL,
+    ?string $filter = NULL,
+    bool $unique = FALSE,
+  ): array {
     if (!$sitesFile = $this->getSitesFile($group)) {
       return [];
     }
 
-    return $sitesFile->getKeys($unique);
+    $result = $sitesFile->getKeys($unique);
+    if ($filter) {
+      $result = $this->filter($result, $filter);
+    }
+
+    return $result;
   }
 
   /**
@@ -62,12 +85,17 @@ class SiteDetector {
    *
    * @param string|null $group
    *   A site group, if any.
+   * @param string|null $filter
+   *   A filter expression.
    *
    * @return string[]
    *   Site aliases.
    */
-  public function getSiteAliases(string $group = NULL): array {
-    $result = $this->siteAliasManager()->getMultiple();
+  public function getSiteAliases(
+    ?string $group = NULL,
+    ?string $filter = NULL,
+  ): array {
+    $result = array_values($this->siteAliasManager()->getMultiple());
 
     if ($group) {
       $result = array_filter($result, function ($alias) use ($group) {
@@ -75,7 +103,12 @@ class SiteDetector {
       });
     }
 
-    return array_map(fn($a) => $a->name(), $result);
+    $result = array_map(fn($a) => $a->name(), $result);
+    if ($filter) {
+      $result = $this->filter($result, $filter);
+    }
+
+    return $result;
   }
 
   /**
@@ -86,15 +119,26 @@ class SiteDetector {
    *
    * @param string|null $group
    *   A site group, if any.
+   * @param string|null $filter
+   *   A filter expression.
    *
    * @return array
    *   An array of site alias names with the @ prefix.
    */
-  public function getSiteAliasNames(?string $group = NULL): array {
+  public function getSiteAliasNames(
+    ?string $group = NULL,
+    ?string $filter = NULL,
+  ): array {
     $result = array_map(function ($siteAlias) {
       return explode('.', $siteAlias)[0];
     }, $this->getSiteAliases($group));
-    return array_unique(array_values($result));
+
+    $result = array_unique(array_values($result));
+    if ($filter) {
+      $result = $this->filter($result, $filter);
+    }
+
+    return $result;
   }
 
   /**
@@ -124,6 +168,47 @@ class SiteDetector {
     }
 
     return new SitesFile("$drupalRoot/sites/$basename");
+  }
+
+  /**
+   * Filter data by expressions.
+   *
+   * @param array $data
+   *   The data.
+   * @param string $expression
+   *   A filter expression.
+   * @param string $default_filter_field
+   *   The default field by which to filter.
+   *
+   * @return array
+   *   Filtered data.
+   *
+   * @see https://packagist.org/packages/consolidation/filter-via-dot-access-data
+   */
+  private function filter(
+    array $data,
+    string $expression,
+    string $default_filter_field = 'value'
+  ): array {
+    if (empty($data)) {
+      return $data;
+    }
+
+    if ($is_flat = !is_array(reset($data))) {
+      $data = array_map(fn($r) => [$default_filter_field => $r], $data);
+    }
+
+    $factory = LogicalOpFactory::get();
+    $op = $factory->evaluate($expression, $default_filter_field);
+    $expression = new FilterOutputData();
+
+    $result = $expression->filter($data, $op);
+
+    if ($is_flat) {
+      $result = array_column($result, $default_filter_field);
+    }
+
+    return $result;
   }
 
 }
