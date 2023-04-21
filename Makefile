@@ -14,8 +14,8 @@ provision/drupal:
 	rm -f /opt/drupal/composer.lock
 	composer --working-dir=/opt/drupal install --no-progress
 
-	cp -r /opt/drall/.docker/main/drush /opt/drupal/
-	cp -r /opt/drall/.docker/main/sites /opt/drupal/web/
+	cp -r /opt/drall/.docker/main/drush /opt/drupal/ || echo "Skipping drush directory."
+	cp -r /opt/drall/.docker/main/sites /opt/drupal/web/ || echo "Skipping sites directory."
 
 	mkdir -p /opt/drupal/web/sites/default
 	mkdir -p /opt/drupal/web/sites/donnie

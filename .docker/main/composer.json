@@ -18,7 +18,8 @@
         "composer/installers": "^1.9",
         "drupal/core-composer-scaffold": "*",
         "drupal/core-recommended": "^9",
-        "drupal/core-vendor-hardening": "*"
+        "drupal/core-vendor-hardening": "*",
+        "drush/drush": "*"
     },
     "conflict": {
         "drupal/drupal": "*"
