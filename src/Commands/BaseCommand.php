@@ -67,6 +67,14 @@ abstract class BaseCommand extends Command {
     if (!$this->logger) {
       $this->logger = new ConsoleLogger($output);
     }
+
+    if ($group = $this->getDrallGroup($input)) {
+      $this->logger->debug('Detected group: {group}', ['group' => $group]);
+    }
+
+    if ($filter = $this->getDrallFilter($input)) {
+      $this->logger->debug('Detected filter: {filter}', ['filter' => $filter]);
+    }
   }
 
 }

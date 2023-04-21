@@ -127,12 +127,12 @@ class ExecCommand extends BaseCommand {
     $w = $input->getOption('drall-workers');
 
     if ($w > self::WORKER_LIMIT) {
-      $this->logger->warning(sprintf('Limiting workers to %d, which is the maximum.', self::WORKER_LIMIT));
+      $this->logger->warning('Limiting workers to {count}, which is the maximum.', ['count' => self::WORKER_LIMIT]);
       $w = self::WORKER_LIMIT;
     }
 
     if ($w > 1) {
-      $this->logger->info("Executing with $w workers.");
+      $this->logger->info("Executing with {count} workers.", ['count' => $w]);
     }
 
     $logger = $this->logger;
@@ -151,7 +151,7 @@ class ExecCommand extends BaseCommand {
           $output->writeln("Current site: $value");
 
           yield $process->start();
-          $logger->debug("Running: $sCommand");
+          $logger->debug("Running: {command}", ['command' => $sCommand]);
 
           $sOutput = yield ByteStream\buffer($process->getStdout());
           $exitCode = yield $process->join();
