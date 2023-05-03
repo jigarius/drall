@@ -279,4 +279,20 @@ Site path : sites/leo
 EOF, $output);
   }
 
+  public function testCatchStdErrOutput(): void {
+    $output = shell_exec('drall exec --drall-filter=default drush version --verbose');
+
+    // Ignore the Drush Version.
+    $output = preg_replace('@(Drush version :) (\d+\.\d+\.\d+)@', '$1 x.y.z', $output);
+
+    $this->assertOutputEquals(<<<EOF
+Current site: default
+ [info] Starting bootstrap to none
+ [info] Drush bootstrap phase 0
+ [info] Try to validate bootstrap phase 0
+Drush version : x.y.z
+
+EOF, $output);
+  }
+
 }
