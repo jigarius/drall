@@ -9,6 +9,15 @@ provision: provision/drall provision/drupal
 
 .PHONY: provision/drupal
 provision/drupal:
+	mkdir -p /opt/drupal
+	cp /opt/drall/.docker/main/composer.json /opt/drupal/ || echo "Skipping drupal/composer.json"
+	rm -f /opt/drupal/composer.lock
+	composer --working-dir=/opt/drupal install --no-progress
+
+	cp -r /opt/drall/.docker/main/drush /opt/drupal/ || echo "Skipping drush directory."
+	cp -r /opt/drall/.docker/main/sites /opt/drupal/web/ || echo "Skipping sites directory."
+
+	mkdir -p /opt/drupal/web/sites/default
 	mkdir -p /opt/drupal/web/sites/donnie
 	mkdir -p /opt/drupal/web/sites/leo
 	mkdir -p /opt/drupal/web/sites/mikey
@@ -19,9 +28,6 @@ provision/drupal:
 	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/leo/settings.php
 	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/mikey/settings.php
 	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/ralph/settings.php
-
-	rm -Rf /opt/drupal/composer.lock
-	composer --working-dir=/opt/drupal install --no-progress
 
 	@echo 'Drupal databases can be provisioned with: make provision/drupal/database'
 
@@ -58,7 +64,7 @@ provision/drall:
 
 .PHONY: coverage-text
 coverage-report/text:
-	cat .coverage/text
+	cat /opt/drall/.coverage/text
 
 
 .PHONY: coverage-html

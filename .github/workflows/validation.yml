@@ -1,6 +1,8 @@
 name: validation
 on:
   - push
+env:
+  DRUPAL_PATH: /opt/drupal
 jobs:
   test:
     runs-on: ${{ matrix.os }}

@@ -15,4 +15,12 @@ class DrallTest extends IntegrationTestCase {
     $this->assertEquals(Drall::NAME . ' ' . Drall::VERSION . PHP_EOL, $output);
   }
 
+  public function testWorkingDirectory() {
+    $output = shell_exec('pwd');
+    $this->assertEquals(<<<EOT
+{$this->drupalDir()}
+
+EOT, $output);
+  }
+
 }
