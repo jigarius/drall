@@ -1,32 +1,42 @@
 name: validation
 on:
   - push
+env:
+  DRUPAL_PATH: /opt/drupal
 jobs:
-  lint:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ 'ubuntu-latest' ]
+        php-versions: [ '8.0', '8.1' ]
     steps:
       - uses: actions/checkout@v2
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.0'
-      - name: Prepare
-        run: composer install
-      - name: Lint
-        run: composer lint
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        php-versions: ['7.4', '8.0']
-    needs:
-      - lint
-    steps:
-      - uses: actions/checkout@v2
+          php-version: ${{ matrix.php-versions }}
+      - name: Path Setup
+        run: |
+          echo "/opt/drupal/vendor/bin" >> $GITHUB_PATH
+      - name: Determine Composer Cache Directory
+        id: composer-cache
+        run: |
+          echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('/opt/*/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
       - name: Prepare
         run: |
-          docker compose up -d --build --quiet-pull
-          docker compose exec -T main make provision
+          cp -r . /opt/drall
+          make provision
+      - name: Info
+        run: make info
+      - name: Lint
+        run: make lint
       - name: Test
-        run: docker compose exec -T --workdir=/opt/drall -e XDEBUG_MODE=coverage main make test
+        run: make test
       - name: Coverage
         run: make coverage-report/text

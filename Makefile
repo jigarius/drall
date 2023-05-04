@@ -9,6 +9,15 @@ provision: provision/drall provision/drupal
 
 .PHONY: provision/drupal
 provision/drupal:
+	mkdir -p /opt/drupal
+	cp /opt/drall/.docker/main/composer.json /opt/drupal/ || echo "Skipping drupal/composer.json"
+	rm -f /opt/drupal/composer.lock
+	composer --working-dir=/opt/drupal install --no-progress
+
+	cp -r /opt/drall/.docker/main/drush /opt/drupal/ || echo "Skipping drush directory."
+	cp -r /opt/drall/.docker/main/sites /opt/drupal/web/ || echo "Skipping sites directory."
+
+	mkdir -p /opt/drupal/web/sites/default
 	mkdir -p /opt/drupal/web/sites/donnie
 	mkdir -p /opt/drupal/web/sites/leo
 	mkdir -p /opt/drupal/web/sites/mikey
@@ -19,9 +28,6 @@ provision/drupal:
 	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/leo/settings.php
 	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/mikey/settings.php
 	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/ralph/settings.php
-
-	rm -Rf /opt/drupal/composer.lock
-	composer --working-dir=/opt/drupal install --no-progress
 
 	@echo 'Drupal databases can be provisioned with: make provision/drupal/database'
 
@@ -50,10 +56,15 @@ provision/drupal/database:
 provision/drall:
 	composer install --working-dir=/opt/drall --no-progress
 
+	# The GitHub Action shivammathur/setup-php@v2 gives higher priority to
+  # the executables present in /opt/drall/vendor/bin. Thus, we remove
+  # Drush from this directory to force /opt/drupal/vendor/bin/drush.
+	rm -f /opt/drall/vendor/bin/drush
+
 
 .PHONY: coverage-text
 coverage-report/text:
-	cat .coverage/text
+	cat /opt/drall/.coverage/text
 
 
 .PHONY: coverage-html
@@ -69,3 +80,20 @@ lint:
 .PHONY: test
 test:
 	DRALL_ENVIRONMENT=test composer --working-dir=/opt/drall run test
+
+
+.PHONY: info
+info:
+	@cd /opt/drupal
+
+	which php
+	@php --version
+
+	which composer
+	@composer --version
+
+	which drush
+	@drush --version
+
+	which drall
+	@drall --version
