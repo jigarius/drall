@@ -17,8 +17,7 @@ jobs:
           php-version: ${{ matrix.php-versions }}
       - name: Path Setup
         run: |
-          echo "/opt/drall/bin" >> $GITHUB_PATH
-          echo "/opt/drall/vendor/bin" >> $GITHUB_PATH
+          echo "/opt/drupal/vendor/bin" >> $GITHUB_PATH
       - name: Determine Composer Cache Directory
         id: composer-cache
         run: |
@@ -33,6 +32,8 @@ jobs:
         run: |
           cp -r . /opt/drall
           make provision
+      - name: Info
+        run: make info
       - name: Lint
         run: make lint
       - name: Test

@@ -32,6 +32,17 @@ class ExecCommandTest extends IntegrationTestCase {
     );
   }
 
+  public function testWorkingDirectory(): void {
+    $output = shell_exec('drall exec --drall-filter=tmnt "echo \"Site: @@site\" && pwd && which drush"');
+    $this->assertOutputEquals(<<<EOT
+Current site: @tmnt
+Site: @tmnt
+/opt/drupal
+/opt/drupal/vendor/bin/drush
+
+EOT, $output);
+  }
+
   /**
    * Run drush command with @@dir.
    */

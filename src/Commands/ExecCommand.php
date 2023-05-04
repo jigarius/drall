@@ -146,7 +146,7 @@ class ExecCommand extends BaseCommand {
         new LocalSemaphore($w),
         function ($value) use ($command, $placeholder, $output, $logger, &$hasErrors) {
           $sCommand = Placeholder::replace([$placeholder->value => $value], $command);
-          $process = new Process("($sCommand) 2>&1");
+          $process = new Process("($sCommand) 2>&1", getcwd());
 
           $output->writeln("Current site: $value");
 
