@@ -88,7 +88,10 @@ run `drall help` or continue reading this documentation.
 With `exec` you can execute drush as well as non-drush commands on multiple
 sites in your Drupal installation.
 
-**Note:** In older versions of Drall, this was done with `drall exec:drush`.
+In Drall 2.x there were 2 exec commands. These are now unified into a single
+command just like version 1.x.
+- `drall exec:drush ...` is now `drall exec drush ...`
+- `drall exec:shell ...` is now `drall exec ...`
 
 #### Drush with @@dir
 
@@ -142,7 +145,7 @@ make sure that the command has valid placeholders.
 **Important:** You can only use any one of the possible placeholders, e.g. if
 you use `@@dir` and you cannot mix it with `@@site`.
 
-#### Example: Shell command
+##### Example: Shell command
 
 ```shell
 $ drall exec cat web/sites/@@uri/settings.local.php
@@ -153,9 +156,22 @@ cat web/sites/mikey/settings.local.php
 cat web/sites/ralph/settings.local.php
 ```
 
-#### Example: Multiple commands
+##### Example: Multiple commands
 
     drall exec "drush @@site.dev updb -y && drush @@site.dev cim -y && drush @@site.dev cr"
+
+#### Options
+
+For the `drall exec` command, all Drall parameters must be passed right
+after the `drall exec`. Here's an example:
+
+```shell
+# This will work.
+drall exec --drall-workers=4 drush cache:rebuild
+
+# This won't work.
+drall exec drush cache:rebuild --drall-workers=4
+```
 
 ### site:directories
 
