@@ -143,7 +143,7 @@ abstract class BaseExecCommand extends BaseCommand {
         new LocalSemaphore($w),
         function ($value) use ($command, $placeholder, $output, $logger, &$hasErrors) {
           $sCommand = $command->with([$placeholder => $value]);
-          $process = new Process($sCommand);
+          $process = new Process("($sCommand) 2>&1");
 
           $output->writeln("Current site: $value");
 
