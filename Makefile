@@ -50,6 +50,11 @@ provision/drupal/database:
 provision/drall:
 	composer install --working-dir=/opt/drall --no-progress
 
+	# The GitHub Action shivammathur/setup-php@v2 gives higher priority to
+  # the executables present in /opt/drall/vendor/bin. Thus, we remove
+  # Drush from this directory to force /opt/drupal/vendor/bin/drush.
+	rm -f /opt/drall/vendor/bin/drush
+
 
 .PHONY: coverage-text
 coverage-report/text:
@@ -69,3 +74,20 @@ lint:
 .PHONY: test
 test:
 	DRALL_ENVIRONMENT=test composer --working-dir=/opt/drall run test
+
+
+.PHONY: info
+info:
+	@cd /opt/drupal
+
+	which php
+	@php --version
+
+	which composer
+	@composer --version
+
+	which drush
+	@drush --version
+
+	which drall
+	@drall --version
