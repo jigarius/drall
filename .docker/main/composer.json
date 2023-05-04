@@ -12,6 +12,13 @@
         {
             "type": "composer",
             "url": "https://packages.drupal.org/8"
+        },
+        {
+            "type": "path",
+            "url": "/opt/drall",
+            "options": {
+                "symlink": true
+            }
         }
     ],
     "require": {
@@ -19,7 +26,8 @@
         "drupal/core-composer-scaffold": "*",
         "drupal/core-recommended": "^9",
         "drupal/core-vendor-hardening": "*",
-        "drush/drush": "*"
+        "drush/drush": "*",
+        "jigarius/drall": "*"
     },
     "conflict": {
         "drupal/drupal": "*"
