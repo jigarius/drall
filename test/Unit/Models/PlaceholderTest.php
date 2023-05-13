@@ -72,8 +72,8 @@ class PlaceholderTest extends TestCase {
 
   public function testReplaceWithWordBoundary() {
     $this->assertEquals(
-      'Current site: @@directory',
-      Placeholder::replace(['@@dir' => 'default'], 'Current site: @@directory')
+      'Finished: @@directory',
+      Placeholder::replace(['@@dir' => 'default'], 'Finished: @@directory')
     );
   }
 

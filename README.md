@@ -173,6 +173,44 @@ drall exec --drall-workers=4 drush cache:rebuild
 drall exec drush cache:rebuild --drall-workers=4
 ```
 
+Besides the global options, the `exec` command supports the following options.
+
+#### --drall-workers
+
+Say you have 100 sites in a Drupal installation. By default, Drall runs
+commands on these sites one after the other. To speed up the execution, you
+can ask Drall to execute multiple commands in parallel. You can specify the
+number of workers with the `--drall-workers=n` option, where `n` is the
+number of processes you want to run in parallel.
+
+Please keep in mind that the performance of the workers depends on your
+resources available on the computer executing the command. If you have low
+memory, and you run Drall with 4 workers, performance might suffer. Also,
+some operations need to be executed sequentially to avoid competition and
+conflict between the Drall workers.
+
+##### Example: Parallel execution
+
+The command below launches 3 instances of Drall to run `core:rebuild` command.
+
+    drall exec drush core:rebuild --drall-workers=3
+
+When a worker runs out of work, it terminates automatically.
+
+#### --drall-no-progress
+
+By default, Drall displays a progress bar that indicates how many sites have
+been processed and how many are remaining. In verbose mode, this progress
+indicator also displays the time elapsed.
+
+However, the progress display that can mess with some terminals or scripts
+which don't handle backspace characters. For these environments, the progress
+bar can be disabled using the `--drall-no-progress` option.
+
+##### Example: Hide progress bar
+
+    drall exec --drall-no-progress drush core:rebuild
+
 ### site:directories
 
 Get a list of all available site directory names in the Drupal installation.
@@ -306,28 +344,6 @@ $sites['leo.drall.local'] = 'leo';
 ```
 
 This puts the sites `donnie` and `leo` in a group named `bluish`.
-
-## Parallel execution
-
-Say you have 100 sites in a Drupal installation. By default, Drall runs
-commands on these sites one after the other. To speed up the execution, you
-can ask Drall to execute multiple commands in parallel. You can specify the
-number of workers with the `--drall-workers=n` option, where `n` is the
-number of processes you want to run in parallel.
-
-Please keep in mind that the performance of the workers depends on your
-resources available on the computer executing the command. If you have low
-memory, and you run Drall with 4 workers, performance might suffer. Also,
-some operations need to be executed sequentially to avoid competition and
-conflict between the Drall workers.
-
-### Example: Parallel execution
-
-The command below launches 3 instances of Drall to run `core:rebuild` command.
-
-    drall exec drush core:rebuild --drall-workers=3
-
-When a worker runs out of work, it terminates automatically.
 
 ## Development
 

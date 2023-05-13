@@ -8,11 +8,15 @@ use Amp\Loop;
 use Amp\Process\Process;
 use Amp\Sync\ConcurrentIterator;
 use Amp\Sync\LocalSemaphore;
+use Drall\Drall;
+use Drall\Models\EnvironmentId;
 use Drall\Models\Placeholder;
 use Drall\Models\RawCommand;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -64,6 +68,14 @@ class ExecCommand extends BaseCommand {
       InputOption::VALUE_OPTIONAL,
       'Number of commands to execute in parallel.',
       1,
+    );
+
+    $this->addOption(
+      'drall-no-progress',
+      NULL,
+      InputOption::VALUE_OPTIONAL,
+      'Do not show a progress bar.',
+      0
     );
 
     $this->ignoreValidationErrors();
@@ -126,49 +138,53 @@ class ExecCommand extends BaseCommand {
     }
 
     // Determine number of workers.
-    $w = $input->getOption('drall-workers');
+    $workers = $input->getOption('drall-workers');
 
-    if ($w > self::WORKER_LIMIT) {
+    if ($workers > self::WORKER_LIMIT) {
       $this->logger->warning('Limiting workers to {count}, which is the maximum.', ['count' => self::WORKER_LIMIT]);
-      $w = self::WORKER_LIMIT;
+      $workers = self::WORKER_LIMIT;
     }
 
-    if ($w > 1) {
-      $this->logger->info("Executing with {count} workers.", ['count' => $w]);
+    if ($workers > 1) {
+      $this->logger->notice("Executing with {count} workers.", ['count' => $workers]);
     }
 
-    $logger = $this->logger;
-    $hasErrors = FALSE;
-    Loop::run(function () use ($command, $placeholder, $values, $w, $output, $logger, &$hasErrors) {
-      // Removing the following line results in a segmentation fault.
-      $logger;
+    $progressBar = new ProgressBar(
+      $this->isProgressBarHidden($input) ? new NullOutput() : $output,
+      count($values)
+    );
+    $exitCode = 0;
 
+    Loop::run(function () use ($values, $command, $placeholder, $output, $progressBar, $workers, &$exitCode) {
       yield ConcurrentIterator\each(
         Iterator\fromIterable($values),
-        new LocalSemaphore($w),
-        function ($value) use ($command, $placeholder, $output, $logger, &$hasErrors) {
+        new LocalSemaphore($workers),
+        function ($value) use ($command, $placeholder, $output, $progressBar, &$exitCode) {
           $sCommand = Placeholder::replace([$placeholder->value => $value], $command);
           $process = new Process("($sCommand) 2>&1", getcwd());
 
-          $output->writeln("Current site: $value");
-
           yield $process->start();
-          $logger->debug("Running: {command}", ['command' => $sCommand]);
+          $this->logger->debug('Running: {command}', ['command' => $sCommand]);
 
           $sOutput = yield ByteStream\buffer($process->getStdout());
-          $exitCode = yield $process->join();
-
-          if ($exitCode !== 0) {
-            $hasErrors = TRUE;
+          if (0 !== yield $process->join()) {
+            $exitCode = 1;
           }
 
+          $progressBar->clear();
+          $output->writeln("Finished: $value");
           $output->write($sOutput);
+
+          $progressBar->advance();
+          $progressBar->display();
         }
       );
     });
 
+    $progressBar->finish();
     $output->writeln('');
-    return $hasErrors ? 1 : 0;
+
+    return $exitCode;
   }
 
   protected function getCommand(): RawCommand {
@@ -185,7 +201,7 @@ class ExecCommand extends BaseCommand {
 
     // Inject --uri=@@dir for Drush commands without placeholders.
     if (!Placeholder::search($command)) {
-      $sCommand = preg_replace('/\b(drush) /', 'drush --uri=@@dir ', $command, -1, $count);
+      $sCommand = preg_replace('/\b(drush) /', 'drush --uri=@@dir ', $command, -1);
       $command = new RawCommand($sCommand);
       $this->logger->debug('Injected --uri parameter for Drush command.');
     }
@@ -209,6 +225,26 @@ class ExecCommand extends BaseCommand {
     }
 
     return reset($placeholders);
+  }
+
+  /**
+   * Whether the Drall progress bar should be hidden.
+   *
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   *   The input.
+   *
+   * @return bool
+   *   True or false.
+   */
+  private function isProgressBarHidden(InputInterface $input): bool {
+    if (
+      Drall::isEnvironment(EnvironmentId::Test) ||
+      $input->getOption('drall-no-progress')
+    ) {
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
 }
