@@ -126,23 +126,23 @@ class ExecCommand extends BaseCommand {
     }
 
     // Determine number of workers.
-    $w = $input->getOption('drall-workers');
+    $workers = $input->getOption('drall-workers');
 
-    if ($w > self::WORKER_LIMIT) {
+    if ($workers > self::WORKER_LIMIT) {
       $this->logger->warning('Limiting workers to {count}, which is the maximum.', ['count' => self::WORKER_LIMIT]);
-      $w = self::WORKER_LIMIT;
+      $workers = self::WORKER_LIMIT;
     }
 
-    if ($w > 1) {
-      $this->logger->info("Executing with {count} workers.", ['count' => $w]);
+    if ($workers > 1) {
+      $this->logger->info("Executing with {count} workers.", ['count' => $workers]);
     }
 
-    $hasErrors = FALSE;
-    Loop::run(function () use ($command, $placeholder, $values, $w, $output, &$hasErrors) {
+    $exitCode = 0;
+    Loop::run(function () use ($values, $command, $placeholder, $output, $workers, &$exitCode) {
       yield ConcurrentIterator\each(
         Iterator\fromIterable($values),
-        new LocalSemaphore($w),
-        function ($value) use ($command, $placeholder, $output, &$hasErrors) {
+        new LocalSemaphore($workers),
+        function ($value) use ($command, $placeholder, $output, &$exitCode) {
           $sCommand = Placeholder::replace([$placeholder->value => $value], $command);
           $process = new Process("($sCommand) 2>&1", getcwd());
 
@@ -150,10 +150,8 @@ class ExecCommand extends BaseCommand {
           $this->logger->debug("Running: {command}", ['command' => $sCommand]);
 
           $sOutput = yield ByteStream\buffer($process->getStdout());
-          $exitCode = yield $process->join();
-
-          if ($exitCode !== 0) {
-            $hasErrors = TRUE;
+          if (0 !== yield $process->join()) {
+            $exitCode = 1;
           }
 
           $output->writeln("Finished: $value");
@@ -163,7 +161,8 @@ class ExecCommand extends BaseCommand {
     });
 
     $output->writeln('');
-    return $hasErrors ? 1 : 0;
+
+    return $exitCode;
   }
 
   protected function getCommand(): RawCommand {
