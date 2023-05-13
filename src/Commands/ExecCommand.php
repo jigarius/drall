@@ -137,21 +137,17 @@ class ExecCommand extends BaseCommand {
       $this->logger->info("Executing with {count} workers.", ['count' => $w]);
     }
 
-    $logger = $this->logger;
     $hasErrors = FALSE;
-    Loop::run(function () use ($command, $placeholder, $values, $w, $output, $logger, &$hasErrors) {
-      // Removing the following line results in a segmentation fault.
-      $logger;
-
+    Loop::run(function () use ($command, $placeholder, $values, $w, $output, &$hasErrors) {
       yield ConcurrentIterator\each(
         Iterator\fromIterable($values),
         new LocalSemaphore($w),
-        function ($value) use ($command, $placeholder, $output, $logger, &$hasErrors) {
+        function ($value) use ($command, $placeholder, $output, &$hasErrors) {
           $sCommand = Placeholder::replace([$placeholder->value => $value], $command);
           $process = new Process("($sCommand) 2>&1", getcwd());
 
           yield $process->start();
-          $logger->debug("Running: {command}", ['command' => $sCommand]);
+          $this->logger->debug("Running: {command}", ['command' => $sCommand]);
 
           $sOutput = yield ByteStream\buffer($process->getStdout());
           $exitCode = yield $process->join();
