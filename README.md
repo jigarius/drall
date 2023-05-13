@@ -211,6 +211,19 @@ bar can be disabled using the `--drall-no-progress` option.
 
     drall exec --drall-no-progress drush core:rebuild
 
+#### --drall-no-execute
+
+This option allows you to see what commands will be executed without actually
+executing them.
+
+##### Example: Dry run
+
+```shell
+$ drall exec --drall-no-execute --drall-group=bluish core:status
+drush --uri=donnie core:status
+drush --uri=leo core:status
+```
+
 ### site:directories
 
 Get a list of all available site directory names in the Drupal installation.

@@ -341,4 +341,33 @@ sites/ralph
 EOF, $output);
   }
 
+  public function testWithNoExecute(): void {
+    $output = shell_exec('drall exec --drall-no-execute drush core:status');
+    $this->assertOutputEquals(<<<EOF
+drush --uri=default core:status
+drush --uri=donnie core:status
+drush --uri=leo core:status
+drush --uri=mikey core:status
+drush --uri=ralph core:status
+
+EOF, $output);
+  }
+
+  public function testWithNoExecuteVerbose(): void {
+    $output = shell_exec('drall exec --drall-no-execute --drall-verbose drush core:status');
+    $this->assertOutputEquals(<<<EOF
+# Item: default
+drush --uri=default core:status
+# Item: donnie
+drush --uri=donnie core:status
+# Item: leo
+drush --uri=leo core:status
+# Item: mikey
+drush --uri=mikey core:status
+# Item: ralph
+drush --uri=ralph core:status
+
+EOF, $output);
+  }
+
 }

@@ -71,11 +71,17 @@ class ExecCommand extends BaseCommand {
     );
 
     $this->addOption(
+      'drall-no-execute',
+      NULL,
+      InputOption::VALUE_NONE,
+      'Do not execute commands, only display them.'
+    );
+
+    $this->addOption(
       'drall-no-progress',
       NULL,
-      InputOption::VALUE_OPTIONAL,
-      'Do not show a progress bar.',
-      0
+      InputOption::VALUE_NONE,
+      'Do not show a progress bar.'
     );
 
     $this->ignoreValidationErrors();
@@ -147,6 +153,17 @@ class ExecCommand extends BaseCommand {
 
     if ($workers > 1) {
       $this->logger->notice("Using {count} workers.", ['count' => $workers]);
+    }
+
+    // Display commands without executing them.
+    if ($input->getOption('drall-no-execute')) {
+      foreach ($values as $value) {
+        $sCommand = Placeholder::replace([$placeholder->value => $value], $command);
+        $output->writeln("# Item: $value", OutputInterface::VERBOSITY_VERBOSE);
+        $output->writeln($sCommand);
+      }
+
+      return 0;
     }
 
     $progressBar = new ProgressBar(
