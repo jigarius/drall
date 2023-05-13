@@ -146,7 +146,7 @@ class ExecCommand extends BaseCommand {
     }
 
     if ($workers > 1) {
-      $this->logger->notice("Executing with {count} workers.", ['count' => $workers]);
+      $this->logger->notice("Using {count} workers.", ['count' => $workers]);
     }
 
     $progressBar = new ProgressBar(

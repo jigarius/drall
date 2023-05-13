@@ -137,7 +137,7 @@ class ExecCommandTest extends TestCase {
     ]);
 
     $this->assertStringStartsWith(
-      '[notice] Executing with 2 workers.',
+      '[notice] Using 2 workers.',
       $tester->getDisplay()
     );
   }
