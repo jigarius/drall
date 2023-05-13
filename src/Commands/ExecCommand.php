@@ -150,8 +150,6 @@ class ExecCommand extends BaseCommand {
           $sCommand = Placeholder::replace([$placeholder->value => $value], $command);
           $process = new Process("($sCommand) 2>&1", getcwd());
 
-          $output->writeln("Current site: $value");
-
           yield $process->start();
           $logger->debug("Running: {command}", ['command' => $sCommand]);
 
@@ -162,6 +160,7 @@ class ExecCommand extends BaseCommand {
             $hasErrors = TRUE;
           }
 
+          $output->writeln("Finished: $value");
           $output->write($sOutput);
         }
       );
@@ -185,7 +184,7 @@ class ExecCommand extends BaseCommand {
 
     // Inject --uri=@@dir for Drush commands without placeholders.
     if (!Placeholder::search($command)) {
-      $sCommand = preg_replace('/\b(drush) /', 'drush --uri=@@dir ', $command, -1, $count);
+      $sCommand = preg_replace('/\b(drush) /', 'drush --uri=@@dir ', $command, -1);
       $command = new RawCommand($sCommand);
       $this->logger->debug('Injected --uri parameter for Drush command.');
     }

@@ -35,7 +35,7 @@ class ExecCommandTest extends IntegrationTestCase {
   public function testWorkingDirectory(): void {
     $output = shell_exec('drall exec --drall-filter=tmnt "echo \"Site: @@site\" && pwd && which drush"');
     $this->assertOutputEquals(<<<EOT
-Current site: @tmnt
+Finished: @tmnt
 Site: @tmnt
 /opt/drupal
 /opt/drupal/vendor/bin/drush
@@ -49,15 +49,15 @@ EOT, $output);
   public function testDrushWithUriPlaceholder(): void {
     $output = shell_exec('drall exec drush --uri=@@dir core:status --fields=site');
     $this->assertOutputEquals(<<<EOF
-Current site: default
+Finished: default
 Site path : sites/default
-Current site: donnie
+Finished: donnie
 Site path : sites/donnie
-Current site: leo
+Finished: leo
 Site path : sites/leo
-Current site: mikey
+Finished: mikey
 Site path : sites/mikey
-Current site: ralph
+Finished: ralph
 Site path : sites/ralph
 
 EOF, $output);
@@ -69,15 +69,15 @@ EOF, $output);
   public function testDrushWithSitePlaceholder(): void {
     $output = shell_exec('drall exec drush @@site.local core:status --fields=site');
     $this->assertOutputEquals(<<<EOF
-Current site: @donnie
+Finished: @donnie
 Site path : sites/donnie
-Current site: @leo
+Finished: @leo
 Site path : sites/leo
-Current site: @mikey
+Finished: @mikey
 Site path : sites/mikey
-Current site: @ralph
+Finished: @ralph
 Site path : sites/ralph
-Current site: @tmnt
+Finished: @tmnt
 Site path : sites/default
 
 EOF, $output);
@@ -89,15 +89,15 @@ EOF, $output);
   public function testDrushWithNoPlaceholders(): void {
     $output = shell_exec('drall exec drush core:status --fields=site');
     $this->assertOutputEquals(<<<EOF
-Current site: default
+Finished: default
 Site path : sites/default
-Current site: donnie
+Finished: donnie
 Site path : sites/donnie
-Current site: leo
+Finished: leo
 Site path : sites/leo
-Current site: mikey
+Finished: mikey
 Site path : sites/mikey
-Current site: ralph
+Finished: ralph
 Site path : sites/ralph
 
 EOF, $output);
@@ -109,19 +109,19 @@ EOF, $output);
   public function testMultipleDrushWithNoPlaceholders(): void {
     $output = shell_exec('drall exec "drush st --fields=site; drush st --fields=uri"');
     $this->assertOutputEquals(<<<EOF
-Current site: default
+Finished: default
 Site path : sites/default
 Site URI : http://default
-Current site: donnie
+Finished: donnie
 Site path : sites/donnie
 Site URI : http://donnie
-Current site: leo
+Finished: leo
 Site path : sites/leo
 Site URI : http://leo
-Current site: mikey
+Finished: mikey
 Site path : sites/mikey
 Site URI : http://mikey
-Current site: ralph
+Finished: ralph
 Site path : sites/ralph
 Site URI : http://ralph
 
@@ -150,19 +150,19 @@ EOF, $output);
   public function testDrushCapitalized(): void {
     $output = shell_exec('drall exec "echo \"Drush status\" && drush st --fields=site"');
     $this->assertOutputEquals(<<<EOF
-Current site: default
+Finished: default
 Drush status
 Site path : sites/default
-Current site: donnie
+Finished: donnie
 Drush status
 Site path : sites/donnie
-Current site: leo
+Finished: leo
 Drush status
 Site path : sites/leo
-Current site: mikey
+Finished: mikey
 Drush status
 Site path : sites/mikey
-Current site: ralph
+Finished: ralph
 Drush status
 Site path : sites/ralph
 
@@ -184,15 +184,15 @@ EOF, $output);
   public function testWithUriPlaceholder(): void {
     $output = shell_exec('drall exec ls web/sites/@@dir/settings.php');
     $this->assertOutputEquals(<<<EOF
-Current site: default
+Finished: default
 web/sites/default/settings.php
-Current site: donnie
+Finished: donnie
 web/sites/donnie/settings.php
-Current site: leo
+Finished: leo
 web/sites/leo/settings.php
-Current site: mikey
+Finished: mikey
 web/sites/mikey/settings.php
-Current site: ralph
+Finished: ralph
 web/sites/ralph/settings.php
 
 EOF, $output);
@@ -201,7 +201,7 @@ EOF, $output);
   public function testWithFilter(): void {
     $output = shell_exec('drall exec --drall-filter=leo ls web/sites/@@dir/settings.php');
     $this->assertOutputEquals(<<<EOF
-Current site: leo
+Finished: leo
 web/sites/leo/settings.php
 
 EOF, $output);
@@ -210,20 +210,20 @@ EOF, $output);
   public function testWithUriPlaceholderVerbose(): void {
     $output = shell_exec('drall exec --drall-debug ls web/sites/@@dir/settings.php');
     $this->assertOutputEquals(<<<EOF
-Current site: default
 [debug] Running: ls web/sites/default/settings.php
+Finished: default
 web/sites/default/settings.php
-Current site: donnie
 [debug] Running: ls web/sites/donnie/settings.php
+Finished: donnie
 web/sites/donnie/settings.php
-Current site: leo
 [debug] Running: ls web/sites/leo/settings.php
+Finished: leo
 web/sites/leo/settings.php
-Current site: mikey
 [debug] Running: ls web/sites/mikey/settings.php
+Finished: mikey
 web/sites/mikey/settings.php
-Current site: ralph
 [debug] Running: ls web/sites/ralph/settings.php
+Finished: ralph
 web/sites/ralph/settings.php
 
 EOF, $output);
@@ -232,9 +232,9 @@ EOF, $output);
   public function testWithUriPlaceholderAndGroup(): void {
     $output = shell_exec('drall exec --drall-group=bluish ls web/sites/@@dir/settings.php');
     $this->assertOutputEquals(<<<EOF
-Current site: donnie
+Finished: donnie
 web/sites/donnie/settings.php
-Current site: leo
+Finished: leo
 web/sites/leo/settings.php
 
 EOF, $output);
@@ -243,15 +243,15 @@ EOF, $output);
   public function testWithSitePlaceholder(): void {
     $output = shell_exec('drall exec drush @@site.local core:status --fields=site');
     $this->assertOutputEquals(<<<EOF
-Current site: @donnie
+Finished: @donnie
 Site path : sites/donnie
-Current site: @leo
+Finished: @leo
 Site path : sites/leo
-Current site: @mikey
+Finished: @mikey
 Site path : sites/mikey
-Current site: @ralph
+Finished: @ralph
 Site path : sites/ralph
-Current site: @tmnt
+Finished: @tmnt
 Site path : sites/default
 
 EOF, $output);
@@ -260,20 +260,20 @@ EOF, $output);
   public function testWithSitePlaceholderVerbose(): void {
     $output = shell_exec('drall exec --drall-debug drush @@site.local st --fields=site');
     $this->assertOutputEquals(<<<EOF
-Current site: @donnie
 [debug] Running: drush @donnie.local st --fields=site
+Finished: @donnie
 Site path : sites/donnie
-Current site: @leo
 [debug] Running: drush @leo.local st --fields=site
+Finished: @leo
 Site path : sites/leo
-Current site: @mikey
 [debug] Running: drush @mikey.local st --fields=site
+Finished: @mikey
 Site path : sites/mikey
-Current site: @ralph
 [debug] Running: drush @ralph.local st --fields=site
+Finished: @ralph
 Site path : sites/ralph
-Current site: @tmnt
 [debug] Running: drush @tmnt.local st --fields=site
+Finished: @tmnt
 Site path : sites/default
 
 EOF, $output);
@@ -282,9 +282,9 @@ EOF, $output);
   public function testWithSitePlaceholderAndGroup(): void {
     $output = shell_exec('drall exec drush --drall-group=bluish @@site.local st --fields=site');
     $this->assertOutputEquals(<<<EOF
-Current site: @donnie
+Finished: @donnie
 Site path : sites/donnie
-Current site: @leo
+Finished: @leo
 Site path : sites/leo
 
 EOF, $output);
@@ -297,7 +297,7 @@ EOF, $output);
     $output = preg_replace('@(Drush version :) (\d+\.\d+\.\d+)@', '$1 x.y.z', $output);
 
     $this->assertOutputEquals(<<<EOF
-Current site: default
+Finished: default
  [info] Starting bootstrap to none
  [info] Drush bootstrap phase 0
  [info] Try to validate bootstrap phase 0
