@@ -306,4 +306,39 @@ Drush version : x.y.z
 EOF, $output);
   }
 
+  public function testWithProgressBarVisible(): void {
+    $output = shell_exec('DRALL_ENVIRONMENT=unknown drall exec drush st --field=site 2>&1');
+    $this->assertOutputEquals(<<<EOF
+Finished: default
+sites/default
+ 1/5 [=====>----------------------]  20%Finished: donnie
+sites/donnie
+ 2/5 [===========>----------------]  40%Finished: leo
+sites/leo
+ 3/5 [================>-----------]  60%Finished: mikey
+sites/mikey
+ 4/5 [======================>-----]  80%Finished: ralph
+sites/ralph
+ 5/5 [============================] 100%
+
+EOF, $output);
+  }
+
+  public function testWithProgressBarHidden(): void {
+    $output = shell_exec('DRALL_ENVIRONMENT=foo drall exec --drall-no-progress drush st --field=site 2>&1');
+    $this->assertOutputEquals(<<<EOF
+Finished: default
+sites/default
+Finished: donnie
+sites/donnie
+Finished: leo
+sites/leo
+Finished: mikey
+sites/mikey
+Finished: ralph
+sites/ralph
+
+EOF, $output);
+  }
+
 }

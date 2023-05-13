@@ -6,6 +6,7 @@ use Consolidation\SiteAlias\SiteAliasManager;
 use Drall\Commands\ExecCommand;
 use Drall\Commands\SiteDirectoriesCommand;
 use Drall\Commands\SiteAliasesCommand;
+use Drall\Models\EnvironmentId;
 use Drall\Services\SiteDetector;
 use Drall\Traits\SiteDetectorAwareTrait;
 use Drush\SiteAlias\SiteAliasFileLoader;
@@ -128,6 +129,23 @@ drall exec drush $name
 Alternatively, run "drall list" to see a list of all available commands.
 EOT);
     }
+  }
+
+  /**
+   * Whether Drall is running in a specific environment.
+   *
+   * This helps with development and testing. For example, during tests,
+   * Drall progress bars can pollute the output. Thus, we hide them for
+   * the "test" environment.
+   *
+   * @param \Drall\Models\EnvironmentId $id
+   *   Environment ID.
+   *
+   * @return bool
+   *   True or False.
+   */
+  public static function isEnvironment(EnvironmentId $id): bool {
+    return getenv('DRALL_ENVIRONMENT') === $id->value;
   }
 
 }
