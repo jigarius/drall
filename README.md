@@ -321,6 +321,18 @@ Whether Drall should display verbose output.
 
 Whether Drall should display debugging output.
 
+## Auto-detect sites
+
+Drall uses `sites.php` to determine site hostnames and site directories.
+However, some Drupal multi-site installations do not have a `sites.php`
+because the content of the `DRUPAL/sites` directory changes very frequently,
+thereby making it difficult to maintain such a `sites.php`.
+
+In such cases, it is suggested that you create a `DRUPAL/sites/sites.php`
+based on [misc/example.sites.php](misc/example.sites.php) so that Drall can
+detect the sites in your Drupal installation. Additionally, in this file you
+can alter the `$sites` variable based on your requirements.
+
 ## Site groups
 
 Drall allows you to group your sites so that you can run commands on these
