@@ -3,12 +3,12 @@
 namespace Drall;
 
 use Consolidation\SiteAlias\SiteAliasManager;
-use Drall\Commands\ExecCommand;
-use Drall\Commands\SiteDirectoriesCommand;
-use Drall\Commands\SiteAliasesCommand;
-use Drall\Models\EnvironmentId;
-use Drall\Services\SiteDetector;
-use Drall\Traits\SiteDetectorAwareTrait;
+use Drall\Command\ExecCommand;
+use Drall\Command\SiteDirectoriesCommand;
+use Drall\Command\SiteAliasesCommand;
+use Drall\Model\EnvironmentId;
+use Drall\Service\SiteDetector;
+use Drall\Trait\SiteDetectorAwareTrait;
 use Drush\SiteAlias\SiteAliasFileLoader;
 use DrupalFinder\DrupalFinder;
 use Symfony\Component\Console\Application;
@@ -138,7 +138,7 @@ EOT);
    * Drall progress bars can pollute the output. Thus, we hide them for
    * the "test" environment.
    *
-   * @param \Drall\Models\EnvironmentId $id
+   * @param \Drall\Model\EnvironmentId $id
    *   Environment ID.
    *
    * @return bool
