@@ -195,4 +195,18 @@ class SiteDetectorTest extends TestCase {
     );
   }
 
+  public function testDetectFromDirectory(): void {
+    $this->assertEquals([
+      'default' => 'default',
+      'donnie' => 'donnie',
+      'leo' => 'leo',
+      'mikey' => 'mikey',
+      'ralph' => 'ralph',
+    ], SiteDetector::detectFromDirectory($this->drupalDir() . '/web/sites'));
+  }
+
+  public function testDetectFromIncorrectDirectory(): void {
+    $this->assertEquals([], SiteDetector::detectFromDirectory('/foo'));
+  }
+
 }

@@ -211,4 +211,32 @@ class SiteDetector {
     return $result;
   }
 
+  /**
+   * Detects sites in a "sites" directory.
+   *
+   * Builds a $sites array based on the contents of a given "sites" directory.
+   * The detection is based on the presence of settings.php.
+   *
+   * @param string $path
+   *   Path to a DRUPAL/sites directory.
+   *
+   * @return array<string, string>
+   *   An associative array for use as $sites.
+   */
+  public static function detectFromDirectory(string $path): array {
+    $pattern = implode(DIRECTORY_SEPARATOR, [$path, '*', 'settings.php']);
+
+    $result = [];
+    foreach (glob($pattern) as $item) {
+      if (!is_file($item)) {
+        continue;
+      }
+
+      $dirname = basename(dirname($item));
+      $result[$dirname] = $dirname;
+    }
+
+    return $result;
+  }
+
 }
