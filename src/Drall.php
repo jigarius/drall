@@ -115,7 +115,7 @@ final class Drall extends Application {
     return new SiteDetector($drupalFinder, $siteAliasManager);
   }
 
-  public function find(string $name) {
+  public function find($name) {
     try {
       return parent::find($name);
     }
