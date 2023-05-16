@@ -6,36 +6,37 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * A command to get a list of values in the $sites array.
+ * A command to get a list of keys in the $sites array.
  */
-class SiteDirectoriesCommand extends BaseCommand {
+class SiteKeysCommand extends BaseCommand {
 
   protected function configure() {
     parent::configure();
 
-    $this->setName('site:directories');
-    $this->setAliases(['sd']);
-    $this->setDescription('List the values of the $sites array.');
-    $this->addUsage('site:directories');
-    $this->addUsage('--drall-group=GROUP site:directories');
+    $this->setName('site:keys');
+    $this->setAliases(['sk']);
+    $this->setDescription('List the keys of the $sites array.');
+    $this->addUsage('site:keys');
+    $this->addUsage('--drall-group=GROUP site:keys');
+    $this->addUsage('--drall-filter=FILTER site:keys');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {
     $this->preExecute($input, $output);
 
-    $dirNames = $this->siteDetector()
-      ->getSiteDirNames(
+    $keys = $this->siteDetector()
+      ->getSiteKeys(
         $this->getDrallGroup($input),
         $this->getDrallFilter($input),
       );
 
-    if (count($dirNames) === 0) {
+    if (count($keys) === 0) {
       $this->logger->warning('No Drupal sites found.');
       return 0;
     }
 
-    foreach ($dirNames as $dirName) {
-      $output->writeln($dirName);
+    foreach ($keys as $key) {
+      $output->writeln($key);
     }
 
     return 0;

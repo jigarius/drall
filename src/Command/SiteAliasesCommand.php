@@ -15,9 +15,10 @@ class SiteAliasesCommand extends BaseCommand {
 
     $this->setName('site:aliases');
     $this->setAliases(['sa']);
-    $this->setDescription('Get a list of site aliases.');
+    $this->setDescription('List all Drush site aliases.');
     $this->addUsage('site:aliases');
     $this->addUsage('--drall-group=GROUP site:aliases');
+    $this->addUsage('--drall-filter=FILTER  site:aliases');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output) {

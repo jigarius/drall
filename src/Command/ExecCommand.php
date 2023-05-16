@@ -50,9 +50,10 @@ class ExecCommand extends BaseCommand {
     $this->setAliases(['ex']);
     $this->setDescription('Execute a command on multiple Drupal sites.');
     $this->addUsage('drush core:status');
-    $this->addUsage('--drall-group=bluish drush core:status');
-    $this->addUsage('--drall-workers=4 drush cache:rebuild');
     $this->addUsage('./vendor/bin/drush core:status');
+    $this->addUsage('--drall-group=GROUP drush core:status');
+    $this->addUsage('--drall-filter=FILTER drush core:status');
+    $this->addUsage('--drall-workers=4 drush cache:rebuild');
     $this->addUsage('ls web/sites/@@dir/settings.php');
     $this->addUsage('echo "Working on @@site" && drush @@site.local core:status');
 
