@@ -144,17 +144,7 @@ class ExecCommand extends BaseCommand {
       return 0;
     }
 
-    // Determine number of workers.
-    $workers = $input->getOption('drall-workers');
-
-    if ($workers > self::WORKER_LIMIT) {
-      $this->logger->warning('Limiting workers to {count}, which is the maximum.', ['count' => self::WORKER_LIMIT]);
-      $workers = self::WORKER_LIMIT;
-    }
-
-    if ($workers > 1) {
-      $this->logger->notice("Using {count} workers.", ['count' => $workers]);
-    }
+    $workers = $this->getWorkerCount($input);
 
     // Display commands without executing them.
     if ($input->getOption('drall-no-execute')) {
@@ -225,6 +215,30 @@ class ExecCommand extends BaseCommand {
     }
 
     return $command;
+  }
+
+  /**
+   * Gets the number of workers that should be used.
+   *
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   *   The input.
+   *
+   * @return int
+   *   Number of workers to be used.
+   */
+  protected function getWorkerCount(InputInterface $input): int {
+    $result = $input->getOption('drall-workers');
+
+    if ($result > self::WORKER_LIMIT) {
+      $this->logger->warning('Limiting workers to {count}, which is the maximum.', ['count' => self::WORKER_LIMIT]);
+      $result = self::WORKER_LIMIT;
+    }
+
+    if ($result > 1) {
+      $this->logger->notice("Using {count} workers.", ['count' => $result]);
+    }
+
+    return $result;
   }
 
   /**

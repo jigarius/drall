@@ -98,7 +98,7 @@ class ExecCommandTest extends TestCase {
   }
 
   /**
-   * Drall caps the maximum number of workers.
+   * Drall caps the maximum number of workers to pre-determined limit.
    */
   public function testWorkerLimit() {
     $input = [
