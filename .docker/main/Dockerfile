@@ -11,6 +11,9 @@ RUN cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_PATH" \
     && pear config-set php_ini "$PHP_INI_PATH" \
     && pecl install --force xdebug
 
+RUN docker-php-ext-configure pcntl --enable-pcntl \
+  && docker-php-ext-install pcntl
+
 # Provision Drall.
 COPY . /opt/drall
 
