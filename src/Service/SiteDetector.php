@@ -4,11 +4,13 @@ namespace Drall\Service;
 
 use Consolidation\Filter\FilterOutputData;
 use Consolidation\Filter\LogicalOpFactory;
+use Consolidation\SiteAlias\SiteAliasManager;
 use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
 use Consolidation\SiteAlias\SiteAliasManagerInterface;
 use Drall\Model\SitesFile;
 use Drall\Trait\DrupalFinderAwareTrait;
 use DrupalFinder\DrupalFinder;
+use Drush\SiteAlias\SiteAliasFileLoader;
 
 class SiteDetector {
 
@@ -209,6 +211,25 @@ class SiteDetector {
     }
 
     return $result;
+  }
+
+  /**
+   * Create a SiteDetector given a Drupal project root.
+   *
+   * @param string $root
+   *   Composer project root directory.
+   *
+   * @return static
+   *   A SiteDetector.
+   */
+  public static function create(string $root): static {
+    $drupalFinder = new DrupalFinder();
+    $drupalFinder->locateRoot($root);
+
+    $siteAliasManager = new SiteAliasManager(new SiteAliasFileLoader());
+    $siteAliasManager->addSearchLocation($drupalFinder->getComposerRoot() . '/drush/sites');
+
+    return new SiteDetector($drupalFinder, $siteAliasManager);
   }
 
   /**

@@ -5,7 +5,6 @@ use Drall\Drall;
 use Drall\Service\SiteDetector;
 use Drall\TestCase;
 use DrupalFinder\DrupalFinder;
-use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -27,8 +26,11 @@ class SiteAliasesCommandTest extends TestCase {
       ->method('getSiteAliases')
       ->willReturn(['@leo.local', '@ralph.local']);
 
-    $app = new Drall($siteDetectorMock);
-    $tester = new CommandTester($app->find('site:aliases'));
+    $app = new Drall();
+    /** @var \Drall\Command\SiteAliasesCommand $command */
+    $command = $app->find('site:aliases');
+    $command->setSiteDetector($siteDetectorMock);
+    $tester = new CommandTester($command);
     $tester->execute([]);
 
     $tester->assertCommandIsSuccessful();
@@ -58,8 +60,11 @@ EOF
       ->with('bluish')
       ->willReturn(['@tmnt.local']);
 
-    $app = new Drall($siteDetectorMock);
-    $tester = new CommandTester($app->find('site:aliases'));
+    $app = new Drall();
+    /** @var \Drall\Command\SiteAliasesCommand $command */
+    $command = $app->find('site:aliases');
+    $command->setSiteDetector($siteDetectorMock);
+    $tester = new CommandTester($command);
     $tester->execute(['--drall-group' => 'bluish']);
 
     $tester->assertCommandIsSuccessful();
@@ -78,10 +83,11 @@ EOF
       ->method('getSiteAliases')
       ->willReturn([]);
 
-    $output = new BufferedOutput();
-
-    $app = new Drall($siteDetectorMock);
-    $tester = new CommandTester($app->find('site:aliases'));
+    $app = new Drall();
+    /** @var \Drall\Command\SiteAliasesCommand $command */
+    $command = $app->find('site:aliases');
+    $command->setSiteDetector($siteDetectorMock);
+    $tester = new CommandTester($command);
     $tester->execute([]);
 
     $tester->assertCommandIsSuccessful();
