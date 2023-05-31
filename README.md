@@ -9,6 +9,10 @@ on multi-site Drupal installations.
 A big thanks and shout-out to [Symetris](https://symetris.ca/) for sponsoring
 the initial development of Drall.
 
+## Preview
+
+![A preview of using Drall](misc/demo.gif)
+
 ## Installation
 
 Drall is listed on [Packagist.org](https://packagist.org/packages/jigarius/drall).
