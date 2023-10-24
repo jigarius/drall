@@ -53,6 +53,9 @@
         },
         "sort-packages": true
     },
+    "extra": {
+        "phpcodesniffer-search-depth": 5
+    },
     "scripts": {
         "lint": "composer exec phpcs",
         "test": "XDEBUG_MODE=coverage composer exec phpunit"
