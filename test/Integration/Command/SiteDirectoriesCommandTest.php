@@ -34,7 +34,7 @@ EOF, $output);
   }
 
   /**
-   * Run site:directories with --filter.
+   * Run site:directories with --drall-filter.
    */
   public function testExecuteWithFilter(): void {
     $output = shell_exec('drall site:directories --drall-filter="leo||ralph"');

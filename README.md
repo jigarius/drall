@@ -256,6 +256,32 @@ do
 done;
 ```
 
+### site:keys
+
+Get a list of all keys in `$sites`. Usually, these are site URIs.
+
+#### Example: Usage
+
+```shell
+$ drall site:keys
+tmnt.com
+donatello.com
+leonardo.com
+michelangelo.com
+raphael.com
+```
+
+The output can then be iterated with scripts.
+
+#### Example: Iterating
+
+```shell
+for site in $(drall site:keys)
+do
+  echo "Current site: $site";
+done;
+```
+
 ### site:aliases
 
 Get a list of site aliases.

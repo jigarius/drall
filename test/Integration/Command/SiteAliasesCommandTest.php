@@ -34,7 +34,7 @@ EOF, $output);
   }
 
   /**
-   * Run site:aliases with --filter.
+   * Run site:aliases with --drall-filter.
    */
   public function testExecuteWithFilter(): void {
     $output = shell_exec('drall site:aliases --drall-filter="leo||ralph"');

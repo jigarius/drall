@@ -1,11 +1,11 @@
 <?php
 
 use Consolidation\SiteAlias\SiteAliasManager;
-use Symfony\Component\Console\Tester\CommandTester;
-use DrupalFinder\DrupalFinder;
 use Drall\Drall;
 use Drall\Service\SiteDetector;
 use Drall\TestCase;
+use DrupalFinder\DrupalFinder;
+use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * @covers \Drall\Command\BaseCommand
