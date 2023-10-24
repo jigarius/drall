@@ -4,14 +4,14 @@ namespace Drall;
 
 use Consolidation\SiteAlias\SiteAliasManager;
 use Drall\Command\ExecCommand;
-use Drall\Command\SiteDirectoriesCommand;
 use Drall\Command\SiteAliasesCommand;
+use Drall\Command\SiteDirectoriesCommand;
 use Drall\Command\SiteKeysCommand;
 use Drall\Model\EnvironmentId;
 use Drall\Service\SiteDetector;
 use Drall\Trait\SiteDetectorAwareTrait;
-use Drush\SiteAlias\SiteAliasFileLoader;
 use DrupalFinder\DrupalFinder;
+use Drush\SiteAlias\SiteAliasFileLoader;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Input\ArgvInput;

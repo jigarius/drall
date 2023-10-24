@@ -6,9 +6,9 @@ use Consolidation\Filter\FilterOutputData;
 use Consolidation\Filter\LogicalOpFactory;
 use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
 use Consolidation\SiteAlias\SiteAliasManagerInterface;
+use Drall\Model\SitesFile;
 use Drall\Trait\DrupalFinderAwareTrait;
 use DrupalFinder\DrupalFinder;
-use Drall\Model\SitesFile;
 
 class SiteDetector {
 
