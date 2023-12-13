@@ -26,7 +26,6 @@
         "drupal/core-composer-scaffold": "*",
         "drupal/core-recommended": "^10",
         "drupal/core-vendor-hardening": "*",
-        "drush/drush": "^11",
         "jigarius/drall": "*"
     },
     "conflict": {

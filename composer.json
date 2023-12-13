@@ -22,8 +22,8 @@
         "amphp/process": "^1.1",
         "amphp/sync": "^1.4",
         "consolidation/filter-via-dot-access-data": "^2.0",
-        "consolidation/site-alias": "^3.1",
-        "drush/drush": "^11.0",
+        "consolidation/site-alias": "^3 || ^4",
+        "drush/drush": "^11 || ^12",
         "webflo/drupal-finder": "^1.2"
     },
     "require-dev": {
@@ -48,8 +48,8 @@
     "config": {
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "phpro/grumphp": true,
-            "ergebnis/composer-normalize": true
+            "ergebnis/composer-normalize": true,
+            "phpro/grumphp": true
         },
         "sort-packages": true
     },
