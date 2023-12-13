@@ -24,7 +24,7 @@ final class Drall extends Application {
 
   const NAME = 'Drall';
 
-  const VERSION = '3.0.0-alpha1';
+  const VERSION = '3.0.0';
 
   use SiteDetectorAwareTrait;
 
