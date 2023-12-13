@@ -294,7 +294,7 @@ EOF, $output);
     $output = shell_exec('drall exec --drall-filter=default drush version --verbose');
 
     // Ignore the Drush Version.
-    $output = preg_replace('@(Drush version :) (\d+\.\d+\.\d+)@', '$1 x.y.z', $output);
+    $output = preg_replace('@(Drush version :) ([\d|\.|-]+)@', '$1 x.y.z', $output);
 
     $this->assertOutputEquals(<<<EOF
 Finished: default
