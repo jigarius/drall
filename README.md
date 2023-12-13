@@ -97,6 +97,13 @@ command just like version 1.x.
 - `drall exec:drush ...` is now `drall exec drush ...`
 - `drall exec:shell ...` is now `drall exec ...`
 
+#### Interrupting a command
+
+When `drall exec` receives a signal to interrupt (usually `ctrl + c`), Drall
+stops after processing the site that is currently being processed. This
+prevents the current command from terminating abruptly. However, if a second
+interrupt signal is received, then Drall stops immediately.
+
 #### Drush with @@dir
 
 In this method, the `--uri` option is sent to `drush`.

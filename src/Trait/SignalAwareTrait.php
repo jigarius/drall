@@ -26,4 +26,21 @@ trait SignalAwareTrait {
     return TRUE;
   }
 
+  /**
+   * Register a listener for SIGINT.
+   *
+   * @param callable $handler
+   *   A callable event listener.
+   *
+   * @return bool
+   *   True if the listener was registered.
+   */
+  protected function registerInterruptionListener(callable $handler): bool {
+    if (!defined('SIGINT')) {
+      return FALSE;
+    }
+
+    return self::registerSignalListener(SIGINT, $handler);
+  }
+
 }

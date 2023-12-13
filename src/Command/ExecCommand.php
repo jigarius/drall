@@ -12,6 +12,7 @@ use Drall\Drall;
 use Drall\Model\EnvironmentId;
 use Drall\Model\Placeholder;
 use Drall\Model\RawCommand;
+use Drall\Trait\SignalAwareTrait;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,6 +24,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  * A command to execute a shell command on multiple sites.
  */
 class ExecCommand extends BaseCommand {
+
+  use SignalAwareTrait;
 
   /**
    * Maximum number of Drall workers.
@@ -163,11 +166,40 @@ class ExecCommand extends BaseCommand {
     );
     $exitCode = 0;
 
-    Loop::run(function () use ($values, $command, $placeholder, $output, $progressBar, $workers, &$exitCode) {
+    // Handle interruption signals to stop Drall gracefully.
+    $isStopping = FALSE;
+    $this->registerInterruptionListener(function () use (&$isStopping, $output) {
+      $output->writeln('');
+
+      // If a previous SIGINT was received, then stop immediately.
+      if ($isStopping) {
+        $this->logger->error('Interrupted by user.');
+        exit(1);
+      }
+
+      // Prepare to stop after the current item is processed.
+      $this->logger->warning('Stopping after current item.');
+      $isStopping = TRUE;
+    });
+
+    Loop::run(function () use (
+      $values,
+      $command,
+      $placeholder,
+      $output,
+      $progressBar,
+      $workers,
+      &$exitCode,
+      &$isStopping
+    ) {
       yield ConcurrentIterator\each(
         Iterator\fromIterable($values),
         new LocalSemaphore($workers),
-        function ($value) use ($command, $placeholder, $output, $progressBar, &$exitCode) {
+        function ($value) use ($command, $placeholder, $output, $progressBar, &$exitCode, &$isStopping) {
+          if ($isStopping) {
+            return;
+          }
+
           $sCommand = Placeholder::replace([$placeholder->value => $value], $command);
           $process = new Process("($sCommand) 2>&1", getcwd());
 
@@ -189,8 +221,16 @@ class ExecCommand extends BaseCommand {
       );
     });
 
-    $progressBar->finish();
+    if (!$isStopping) {
+      $progressBar->finish();
+    }
+
     $output->writeln('');
+
+    if ($isStopping) {
+      $this->logger->error('Interrupted by user.');
+      return 1;
+    }
 
     return $exitCode;
   }
