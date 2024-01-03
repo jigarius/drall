@@ -27,10 +27,12 @@ class ExecCommandTest extends TestCase {
       ->method('getSiteDirNames')
       ->willReturn([]);
 
-    $app = new Drall($siteDetectorMock);
+    $app = new Drall();
     $input = ['cmd' => 'cat @@dir'];
-    $command = $app->find('exec')
-      ->setArgv(self::arrayInputAsArgv($input));
+    /** @var \Drall\Command\ExecCommand $command */
+    $command = $app->find('exec');
+    $command->setSiteDetector($siteDetectorMock);
+    $command->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
     $tester->execute($input);
 
@@ -54,11 +56,12 @@ class ExecCommandTest extends TestCase {
       ->method('getSiteAliasNames')
       ->willReturn(['@splinter', '@shredder']);
 
-    $app = new Drall($siteDetectorMock);
+    $app = new Drall();
     $input = ['cmd' => 'drush @@site.dev core:rebuild'];
-    /** @var ExecCommand $command */
-    $command = $app->find('exec')
-      ->setArgv(self::arrayInputAsArgv($input));
+    /** @var \Drall\Command\ExecCommand $command */
+    $command = $app->find('exec');
+    $command->setSiteDetector($siteDetectorMock);
+    $command->setArgv(self::arrayInputAsArgv($input));
     $tester = new CommandTester($command);
 
     $this->assertEquals(1, $tester->execute($input));
@@ -95,7 +98,7 @@ class ExecCommandTest extends TestCase {
   }
 
   /**
-   * Drall caps the maximum number of workers.
+   * Drall caps the maximum number of workers to pre-determined limit.
    */
   public function testWorkerLimit() {
     $input = [

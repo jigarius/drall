@@ -2,19 +2,14 @@
 
 namespace Drall;
 
-use Consolidation\SiteAlias\SiteAliasManager;
 use Drall\Command\ExecCommand;
 use Drall\Command\SiteAliasesCommand;
 use Drall\Command\SiteDirectoriesCommand;
 use Drall\Command\SiteKeysCommand;
 use Drall\Model\EnvironmentId;
-use Drall\Service\SiteDetector;
 use Drall\Trait\SiteDetectorAwareTrait;
-use DrupalFinder\DrupalFinder;
-use Drush\SiteAlias\SiteAliasFileLoader;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
-use Symfony\Component\Console\Input\ArgvInput;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -31,39 +26,16 @@ final class Drall extends Application {
   /**
    * Creates a Phpake Application instance.
    */
-  public function __construct(
-    SiteDetector $siteDetector = NULL,
-    ?InputInterface $input = NULL
-  ) {
+  public function __construct() {
     parent::__construct();
     $this->setName(self::NAME);
     $this->setVersion(self::VERSION);
     $this->setAutoExit(FALSE);
 
-    // @todo Instead of using $input to create a SiteDetector here, we can
-    //   create the SiteDetector in BaseCommand::preExecute(). That way,
-    //   we won't need this extra dependency injection, thereby simplifying
-    //   the code and the tests.
-    $input = $input ?? new ArgvInput();
-    $root = $input->getParameterOption('--root') ?: getcwd();
-    $siteDetector ??= $this->createDefaultSiteDetector($root);
-    $this->setSiteDetector($siteDetector);
-
-    $cmd = new SiteDirectoriesCommand();
-    $cmd->setSiteDetector($siteDetector);
-    $this->add($cmd);
-
-    $cmd = new SiteKeysCommand();
-    $cmd->setSiteDetector($siteDetector);
-    $this->add($cmd);
-
-    $cmd = new SiteAliasesCommand();
-    $cmd->setSiteDetector($siteDetector);
-    $this->add($cmd);
-
-    $cmd = new ExecCommand();
-    $cmd->setSiteDetector($siteDetector);
-    $this->add($cmd);
+    $this->add(new SiteDirectoriesCommand());
+    $this->add(new SiteKeysCommand());
+    $this->add(new SiteAliasesCommand());
+    $this->add(new ExecCommand());
   }
 
   protected function configureIO(InputInterface $input, OutputInterface $output) {
@@ -108,16 +80,6 @@ final class Drall extends Application {
     ));
 
     return $definition;
-  }
-
-  private function createDefaultSiteDetector(string $root): SiteDetector {
-    $drupalFinder = new DrupalFinder();
-    $drupalFinder->locateRoot($root);
-
-    $siteAliasManager = new SiteAliasManager(new SiteAliasFileLoader());
-    $siteAliasManager->addSearchLocation($drupalFinder->getComposerRoot() . '/drush/sites');
-
-    return new SiteDetector($drupalFinder, $siteAliasManager);
   }
 
   public function find($name) {

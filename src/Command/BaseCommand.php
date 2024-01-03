@@ -2,6 +2,7 @@
 
 namespace Drall\Command;
 
+use Drall\Service\SiteDetector;
 use Drall\Trait\SiteDetectorAwareTrait;
 use Psr\Log\LoggerAwareTrait;
 use Symfony\Component\Console\Command\Command;
@@ -66,6 +67,12 @@ abstract class BaseCommand extends Command {
   protected function preExecute(InputInterface $input, OutputInterface $output) {
     if (!$this->logger) {
       $this->logger = new ConsoleLogger($output);
+    }
+
+    if (!$this->hasSiteDetector()) {
+      $root = $input->getParameterOption('--root') ?: getcwd();
+      $siteDetector = SiteDetector::create($root);
+      $this->setSiteDetector($siteDetector);
     }
 
     if ($group = $this->getDrallGroup($input)) {

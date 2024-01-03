@@ -28,8 +28,12 @@ class SiteKeysCommandTest extends TestCase {
       ->method('getSiteKeys')
       ->willReturn(['donatello.com', 'leonardo.com']);
 
-    $app = new Drall($siteDetectorMock);
-    $tester = new CommandTester($app->find('site:keys'));
+    $app = new Drall();
+    /** @var \Drall\Command\SiteKeysCommand $command */
+    $command = $app->find('site:keys');
+    $command->setSiteDetector($siteDetectorMock);
+
+    $tester = new CommandTester($command);
     $tester->execute([]);
 
     $tester->assertCommandIsSuccessful();
@@ -55,12 +59,17 @@ EOF,
     $siteDetectorMock
       ->expects($this->once())
       ->method('getSiteKeys')
-      ->with('bluish')
+      ->with('none')
       ->willReturn(['tmnt.com']);
 
-    $app = new Drall($siteDetectorMock);
-    $tester = new CommandTester($app->find('site:keys'));
-    $tester->execute(['--drall-group' => 'bluish']);
+    $app = new Drall();
+
+    /** @var \Drall\Command\SiteKeysCommand $command */
+    $command = $app->find('site:keys');
+    $command->setSiteDetector($siteDetectorMock);
+
+    $tester = new CommandTester($command);
+    $tester->execute(['--drall-group' => 'none']);
 
     $tester->assertCommandIsSuccessful();
 
@@ -86,8 +95,12 @@ EOF,
       ->method('getSiteKeys')
       ->willReturn([]);
 
-    $app = new Drall($siteDetectorMock);
-    $tester = new CommandTester($app->find('site:keys'));
+    $app = new Drall();
+    /** @var \Drall\Command\SiteKeysCommand $command */
+    $command = $app->find('site:keys');
+    $command->setSiteDetector($siteDetectorMock);
+
+    $tester = new CommandTester($command);
     $tester->execute([]);
 
     $tester->assertCommandIsSuccessful();

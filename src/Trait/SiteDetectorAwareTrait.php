@@ -30,7 +30,7 @@ trait SiteDetectorAwareTrait {
   public function siteDetector(): SiteDetector {
     if (!$this->hasSiteDetector()) {
       throw new \BadMethodCallException(
-        'A site detecetor instance must first be assigned'
+        'A site detector instance must first be assigned'
       );
     }
 

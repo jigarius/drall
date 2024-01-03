@@ -26,7 +26,10 @@ class SiteDirectoriesCommandTest extends TestCase {
       ->method('getSiteDirNames')
       ->willReturn(['donnie', 'leo']);
 
-    $app = new Drall($siteDetectorMock);
+    $app = new Drall();
+    /** @var \Drall\Command\SiteDirectoriesCommand $command */
+    $command = $app->find('site:directories');
+    $command->setSiteDetector($siteDetectorMock);
     $tester = new CommandTester($app->find('site:directories'));
     $tester->execute([]);
 
@@ -57,8 +60,11 @@ EOF
       ->with('bluish')
       ->willReturn(['default']);
 
-    $app = new Drall($siteDetectorMock);
-    $tester = new CommandTester($app->find('site:directories'));
+    $app = new Drall();
+    /** @var \Drall\Command\SiteDirectoriesCommand $command */
+    $command = $app->find('site:directories');
+    $command->setSiteDetector($siteDetectorMock);
+    $tester = new CommandTester($command);
     $tester->execute(['--drall-group' => 'bluish']);
 
     $tester->assertCommandIsSuccessful();
@@ -77,8 +83,11 @@ EOF
       ->method('getSiteDirNames')
       ->willReturn([]);
 
-    $app = new Drall($siteDetectorMock);
-    $tester = new CommandTester($app->find('site:directories'));
+    $app = new Drall();
+    /** @var \Drall\Command\SiteDirectoriesCommand $command */
+    $command = $app->find('site:directories');
+    $command->setSiteDetector($siteDetectorMock);
+    $tester = new CommandTester($command);
     $tester->execute([]);
 
     $tester->assertCommandIsSuccessful();
