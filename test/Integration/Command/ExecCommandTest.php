@@ -291,7 +291,7 @@ EOF, $output);
   }
 
   public function testCatchStdErrOutput(): void {
-    $output = shell_exec('drall exec --drall-filter=default drush version --verbose');
+    $output = shell_exec('drall exec --drall-filter=default drush version --no-ansi --verbose');
 
     // Ignore the Drush Version.
     $output = preg_replace('@(Drush version :) ([\d|\.|-]+)@', '$1 x.y.z', $output);

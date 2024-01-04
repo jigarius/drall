@@ -19,12 +19,12 @@ final class Drall extends Application {
 
   const NAME = 'Drall';
 
-  const VERSION = '3.0.0';
+  const VERSION = '3.1.0-rc1';
 
   use SiteDetectorAwareTrait;
 
   /**
-   * Creates a Phpake Application instance.
+   * Creates a Drall Application instance.
    */
   public function __construct() {
     parent::__construct();
