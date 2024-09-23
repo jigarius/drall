@@ -41,7 +41,7 @@ class ExecCommand extends BaseCommand {
    */
   protected array $argv;
 
-  public function __construct(string $name) {
+  public function __construct(?string $name = NULL) {
     parent::__construct($name);
     $this->argv = $GLOBALS['argv'];
   }
