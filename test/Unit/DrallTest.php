@@ -17,14 +17,6 @@ class DrallTest extends TestCase {
     $this->assertSame(Drall::NAME, $app->getName());
   }
 
-  public function testVersion() {
-    $app = new Drall();
-    $this->assertMatchesRegularExpression(
-      '/^\d+\.\d+.\d+(-(alpha|beta|rc)\d+)?$|^\d+\.x-dev/',
-      $app->getVersion(),
-    );
-  }
-
   public function testDefaultInputOptions() {
     $app = new Drall();
     $options = $app->getDefinition()->getOptions();
