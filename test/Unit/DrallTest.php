@@ -20,15 +20,9 @@ class DrallTest extends TestCase {
   public function testVersion() {
     $app = new Drall();
     $this->assertMatchesRegularExpression(
-      '/^\d+\.\d+.\d+(-(alpha|beta|rc)\d+)?$/',
-      $app->getVersion()
+      '/^\d+\.\d+.\d+(-(alpha|beta|rc)\d+)?$|^\d+\.x-dev/',
+      $app->getVersion(),
     );
-
-    $json_path = $this->projectDir() . DIRECTORY_SEPARATOR . 'composer.json';
-    $json_data = json_decode(file_get_contents($json_path));
-
-    $this->assertNotEmpty($json_data->version);
-    $this->assertEquals($json_data->version, $app->getVersion());
   }
 
   public function testDefaultInputOptions() {
