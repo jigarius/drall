@@ -2,6 +2,7 @@
 
 namespace Drall;
 
+use Composer\InstalledVersions;
 use Drall\Command\ExecCommand;
 use Drall\Command\SiteAliasesCommand;
 use Drall\Command\SiteDirectoriesCommand;
@@ -19,8 +20,6 @@ final class Drall extends Application {
 
   const NAME = 'Drall';
 
-  const VERSION = '3.1.0-rc1';
-
   use SiteDetectorAwareTrait;
 
   /**
@@ -29,7 +28,7 @@ final class Drall extends Application {
   public function __construct() {
     parent::__construct();
     $this->setName(self::NAME);
-    $this->setVersion(self::VERSION);
+    $this->setVersion(InstalledVersions::getPrettyVersion('jigarius/drall') ?? 'unknown');
     $this->setAutoExit(FALSE);
 
     $this->add(new SiteDirectoriesCommand());

@@ -2,6 +2,7 @@
 
 namespace Drall\Test\Integration;
 
+use Composer\InstalledVersions;
 use Drall\Drall;
 use Drall\IntegrationTestCase;
 
@@ -12,7 +13,8 @@ class DrallTest extends IntegrationTestCase {
 
   public function testVersion() {
     $output = shell_exec('drall --version');
-    $this->assertEquals(Drall::NAME . ' ' . Drall::VERSION . PHP_EOL, $output);
+    $version = InstalledVersions::getPrettyVersion('jigarius/drall');
+    $this->assertEquals(Drall::NAME . ' ' . $version . PHP_EOL, $output);
   }
 
   public function testWorkingDirectory() {
