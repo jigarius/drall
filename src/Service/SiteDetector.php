@@ -9,7 +9,7 @@ use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
 use Consolidation\SiteAlias\SiteAliasManagerInterface;
 use Drall\Model\SitesFile;
 use Drall\Trait\DrupalFinderAwareTrait;
-use DrupalFinder\DrupalFinder;
+use DrupalFinder\DrupalFinderComposerRuntime;
 use Drush\SiteAlias\SiteAliasFileLoader;
 
 class SiteDetector {
@@ -18,7 +18,7 @@ class SiteDetector {
   use DrupalFinderAwareTrait;
 
   public function __construct(
-    DrupalFinder $drupalFinder,
+    DrupalFinderComposerRuntime $drupalFinder,
     SiteAliasManagerInterface $siteAliasManager,
   ) {
     $this->setDrupalFinder($drupalFinder);
@@ -216,15 +216,11 @@ class SiteDetector {
   /**
    * Create a SiteDetector given a Drupal project root.
    *
-   * @param string $root
-   *   Composer project root directory.
-   *
    * @return static
    *   A SiteDetector.
    */
-  public static function create(string $root): static {
-    $drupalFinder = new DrupalFinder();
-    $drupalFinder->locateRoot($root);
+  public static function create(): static {
+    $drupalFinder = new DrupalFinderComposerRuntime();
 
     $siteAliasManager = new SiteAliasManager(new SiteAliasFileLoader());
     $siteAliasManager->addSearchLocation($drupalFinder->getComposerRoot() . '/drush/sites');

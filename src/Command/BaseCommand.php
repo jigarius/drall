@@ -70,8 +70,7 @@ abstract class BaseCommand extends Command {
     }
 
     if (!$this->hasSiteDetector()) {
-      $root = $input->getParameterOption('--root') ?: getcwd();
-      $siteDetector = SiteDetector::create($root);
+      $siteDetector = SiteDetector::create();
       $this->setSiteDetector($siteDetector);
     }
 

@@ -92,7 +92,8 @@ test:
 
 .PHONY: info
 info:
-	@cd /opt/drupal
+	@cd $(DRUPAL_PATH)
+	@echo "Drupal path: $(DRUPAL_PATH)"
 
 	which php
 	@php --version

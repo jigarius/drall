@@ -22,7 +22,7 @@
         }
     ],
     "require": {
-        "composer/installers": "^1.9",
+        "composer/installers": "^2",
         "drupal/core-composer-scaffold": "*",
         "drupal/core-recommended": "^11",
         "drupal/core-vendor-hardening": "*",

@@ -1,6 +1,5 @@
 FROM drupal:11-php8.3-apache
 
-ENV PATH="${PATH}:/opt/drall/vendor/bin"
 ENV PHP_INI_PATH="$PHP_INI_DIR/conf.d/php.ini"
 ENV DRUPAL_PATH="/opt/drupal"
 
@@ -19,4 +18,3 @@ COPY . /opt/drall
 
 # Provision Drupal.
 COPY Makefile /opt/drupal/Makefile
-RUN make provision/drupal

@@ -6,7 +6,7 @@ use Consolidation\SiteAlias\SiteAliasManager;
 use Drall\Drall;
 use Drall\Service\SiteDetector;
 use Drall\TestCase;
-use DrupalFinder\DrupalFinder;
+use DrupalFinder\DrupalFinderComposerRuntime;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
@@ -16,7 +16,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 class SiteKeysCommandTest extends TestCase {
 
   public function testExecute() {
-    $drupalFinder = new DrupalFinder();
+    $drupalFinder = new DrupalFinderComposerRuntime();
     $siteAliasManager = new SiteAliasManager();
 
     $siteDetectorMock = $this->getMockBuilder(SiteDetector::class)
@@ -49,7 +49,7 @@ EOF,
   }
 
   public function testExecuteWithGroup() {
-    $drupalFinder = new DrupalFinder();
+    $drupalFinder = new DrupalFinderComposerRuntime();
     $siteAliasManager = new SiteAliasManager();
 
     $siteDetectorMock = $this->getMockBuilder(SiteDetector::class)
@@ -83,7 +83,7 @@ EOF,
   }
 
   public function testExecuteWithNoSiteDirectories() {
-    $drupalFinder = new DrupalFinder();
+    $drupalFinder = new DrupalFinderComposerRuntime();
     $siteAliasManager = new SiteAliasManager();
 
     $siteDetectorMock = $this->getMockBuilder(SiteDetector::class)

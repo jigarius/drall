@@ -4,7 +4,7 @@ use Consolidation\SiteAlias\SiteAliasManager;
 use Drall\Service\SiteDetector;
 use Drall\TestCase;
 use Drall\Trait\SiteDetectorAwareTrait;
-use DrupalFinder\DrupalFinder;
+use DrupalFinder\DrupalFinderComposerRuntime;
 
 /**
  * @covers \Drall\Trait\SiteDetectorAwareTrait
@@ -12,7 +12,7 @@ use DrupalFinder\DrupalFinder;
 class SiteDetectorAwareTraitTest extends TestCase {
 
   public function testSiteDetector() {
-    $drupalFinder = new DrupalFinder();
+    $drupalFinder = new DrupalFinderComposerRuntime();
     $siteAliasManager = new SiteAliasManager();
     $siteDetector = new SiteDetector($drupalFinder, $siteAliasManager);
 
