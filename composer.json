@@ -2,7 +2,6 @@
     "name": "jigarius/drall",
     "description": "Drall is a command-line utility to run drush on multi-site Drupal installations.",
     "license": "GPL-3.0-only",
-    "version": "3.1.0",
     "keywords": [
         "drupal",
         "drush",
