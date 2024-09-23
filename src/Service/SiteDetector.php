@@ -19,7 +19,7 @@ class SiteDetector {
 
   public function __construct(
     DrupalFinder $drupalFinder,
-    SiteAliasManagerInterface $siteAliasManager
+    SiteAliasManagerInterface $siteAliasManager,
   ) {
     $this->setDrupalFinder($drupalFinder);
     $this->setSiteAliasManager($siteAliasManager);
@@ -37,7 +37,7 @@ class SiteDetector {
    *   Site directory names.
    */
   public function getSiteDirNames(
-    string $group = NULL,
+    ?string $group = NULL,
     ?string $filter = NULL,
   ): array {
     if (!$sitesFile = $this->getSitesFile($group)) {
@@ -66,7 +66,7 @@ class SiteDetector {
    *   Keys from the $sites array.
    */
   public function getSiteKeys(
-    string $group = NULL,
+    ?string $group = NULL,
     ?string $filter = NULL,
     bool $unique = FALSE,
   ): array {
@@ -190,7 +190,7 @@ class SiteDetector {
   private function filter(
     array $data,
     string $expression,
-    string $default_filter_field = 'value'
+    string $default_filter_field = 'value',
   ): array {
     if (empty($data)) {
       return $data;
