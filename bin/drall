@@ -9,10 +9,10 @@
 if (php_sapi_name() !== 'cli') exit;
 
 foreach ([
-  // Development environment.
-  __DIR__ . '/../vendor/autoload.php',
   // Regular installation.
   __DIR__ . '/../../../autoload.php',
+  // Development environment.
+  __DIR__ . '/../vendor/autoload.php',
 ] as $candidate) {
   if (is_file($candidate)) {
     require_once $candidate;
