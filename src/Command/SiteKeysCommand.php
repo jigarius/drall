@@ -21,7 +21,7 @@ class SiteKeysCommand extends BaseCommand {
     $this->addUsage('--drall-filter=FILTER site:keys');
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);
 
     $keys = $this->siteDetector()

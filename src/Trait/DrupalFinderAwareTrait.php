@@ -2,19 +2,19 @@
 
 namespace Drall\Trait;
 
-use DrupalFinder\DrupalFinder;
+use DrupalFinder\DrupalFinderComposerRuntime;
 
 /**
  * Inflection trait for Drupal finder.
  */
 trait DrupalFinderAwareTrait {
 
-  protected ?DrupalFinder $drupalFinder;
+  protected ?DrupalFinderComposerRuntime $drupalFinder;
 
   /**
    * Sets a Drupal Finder.
    */
-  public function setDrupalFinder(DrupalFinder $drupalFinder) {
+  public function setDrupalFinder(DrupalFinderComposerRuntime $drupalFinder) {
     $this->drupalFinder = $drupalFinder;
   }
 
@@ -26,7 +26,7 @@ trait DrupalFinderAwareTrait {
    *
    * @throws \BadMethodCallException
    */
-  public function drupalFinder(): DrupalFinder {
+  public function drupalFinder(): DrupalFinderComposerRuntime {
     if (!$this->hasDrupalFinder()) {
       throw new \BadMethodCallException(
         'A Drupal Finder instance must first be assigned'

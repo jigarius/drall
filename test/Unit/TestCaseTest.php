@@ -39,4 +39,20 @@ class TestCaseTest extends TestCase {
     );
   }
 
+  public function testCwd() {
+    chdir('/tmp');
+
+    $this->assertEquals('/tmp', getcwd());
+
+    // Takes us to the Drupal directory.
+    $this->setUp();
+
+    $this->assertEquals($this->drupalDir(), getcwd());
+
+    // Takes us to where we were, i.e. /tmp.
+    $this->tearDown();
+
+    $this->assertEquals('/tmp', getcwd());
+  }
+
 }

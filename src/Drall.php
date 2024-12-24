@@ -10,6 +10,7 @@ use Drall\Command\SiteKeysCommand;
 use Drall\Model\EnvironmentId;
 use Drall\Trait\SiteDetectorAwareTrait;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -27,6 +28,7 @@ final class Drall extends Application {
    */
   public function __construct() {
     parent::__construct();
+
     $this->setName(self::NAME);
     $this->setVersion(InstalledVersions::getPrettyVersion('jigarius/drall') ?? 'unknown');
     $this->setAutoExit(FALSE);
@@ -37,7 +39,7 @@ final class Drall extends Application {
     $this->add(new ExecCommand());
   }
 
-  protected function configureIO(InputInterface $input, OutputInterface $output) {
+  protected function configureIO(InputInterface $input, OutputInterface $output): void {
     parent::configureIO($input, $output);
 
     if ($input->hasParameterOption('--drall-debug', TRUE)) {
@@ -71,17 +73,11 @@ final class Drall extends Application {
       InputOption::VALUE_NONE,
       'Display debugging output for Drall.'
     ));
-    $definition->addOption(new InputOption(
-      'root',
-      NULL,
-      InputOption::VALUE_OPTIONAL,
-      'Drupal root or Composer root.'
-    ));
 
     return $definition;
   }
 
-  public function find($name) {
+  public function find(string $name): Command {
     try {
       return parent::find($name);
     }

@@ -20,7 +20,7 @@ class SiteDirectoriesCommand extends BaseCommand {
     $this->addUsage('--drall-group=GROUP site:directories');
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);
 
     $dirNames = $this->siteDetector()

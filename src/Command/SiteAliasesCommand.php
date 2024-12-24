@@ -21,7 +21,7 @@ class SiteAliasesCommand extends BaseCommand {
     $this->addUsage('--drall-filter=FILTER  site:aliases');
   }
 
-  protected function execute(InputInterface $input, OutputInterface $output) {
+  protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);
 
     $aliases = $this->siteDetector()

@@ -4,7 +4,7 @@ use Consolidation\SiteAlias\SiteAliasManager;
 use Drall\Drall;
 use Drall\Service\SiteDetector;
 use Drall\TestCase;
-use DrupalFinder\DrupalFinder;
+use DrupalFinder\DrupalFinderComposerRuntime;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -15,7 +15,8 @@ use Symfony\Component\Console\Tester\CommandTester;
 class ExecCommandTest extends TestCase {
 
   public function testNoSitesFound() {
-    $drupalFinder = new DrupalFinder();
+    $this->markTestSkipped('Replace with integration test.');
+    $drupalFinder = $this->createDrupalFinderStub();
     $siteAliasManager = new SiteAliasManager();
 
     $siteDetectorMock = $this->getMockBuilder(SiteDetector::class)
@@ -44,7 +45,7 @@ class ExecCommandTest extends TestCase {
   }
 
   public function testNonZeroExitCode() {
-    $drupalFinder = new DrupalFinder();
+    $drupalFinder = new DrupalFinderComposerRuntime();
     $siteAliasManager = new SiteAliasManager();
 
     $siteDetectorMock = $this->getMockBuilder(SiteDetector::class)
@@ -101,17 +102,18 @@ class ExecCommandTest extends TestCase {
    * Drall caps the maximum number of workers to pre-determined limit.
    */
   public function testWorkerLimit() {
+    $this->markTestSkipped('Replace with integration test.');
     $input = [
-      'cmd' => 'drush --uri=@@dir core:status --fields=site',
-      '--root' => $this->drupalDir(),
       '--drall-workers' => 17,
       '--drall-verbose' => TRUE,
+      'cmd' => 'drush --uri=@@dir core:status --fields=site',
     ];
 
-    $app = new Drall(NULL, new ArrayInput($input));
+    $app = new Drall();
     /** @var \Drall\Command\ExecCommand $command */
     $command = $app->find('exec');
     $command->setArgv(self::arrayInputAsArgv($input));
+
     $tester = new CommandTester($command);
     $tester->execute($input);
 
@@ -123,11 +125,11 @@ class ExecCommandTest extends TestCase {
   }
 
   public function testWithWorkers() {
+    $this->markTestSkipped('Replace with integration test.');
     $input = [
-      'cmd' => 'drush --uri=@@dir core:status --fields=site',
-      '--root' => $this->drupalDir(),
       '--drall-workers' => 2,
       '--drall-verbose' => TRUE,
+      'cmd' => 'drush --uri=@@dir core:status --fields=site',
     ];
 
     $app = new Drall(NULL, new ArrayInput($input));

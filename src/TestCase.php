@@ -2,12 +2,29 @@
 
 namespace Drall;
 
+use DrupalFinder\DrupalFinderComposerRuntime;
 use PHPUnit\Framework\TestCase as TestCaseBase;
 
 /**
  * Drall Test Case.
  */
 abstract class TestCase extends TestCaseBase {
+
+  /**
+   * Original current working directory.
+   *
+   * @var string
+   */
+  protected string $cwd = '/';
+
+  protected function setUp(): void {
+    $this->cwd = getcwd();
+    chdir($this->drupalDir());
+  }
+
+  protected function tearDown(): void {
+    chdir($this->cwd);
+  }
 
   /**
    * Get the path to the Drupal project root.
@@ -65,6 +82,15 @@ abstract class TestCase extends TestCaseBase {
     $path = $this->createTempFilePath();
     file_put_contents($path, $data);
     return $path;
+  }
+
+  protected function createDrupalFinderStub(?string $root = NULL): DrupalFinderComposerRuntime {
+    $root ??= $this->drupalDir();
+    $drupalFinder = $this->createStub(DrupalFinderComposerRuntime::class);
+    $drupalFinder->method('getComposerRoot')->willReturn($root);
+    $drupalFinder->method('getDrupalRoot')->willReturn("$root/web");
+    $drupalFinder->method('getVendorDir')->willReturn("$root/vendor");
+    return $drupalFinder;
   }
 
 }

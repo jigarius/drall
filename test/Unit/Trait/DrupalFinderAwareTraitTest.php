@@ -2,7 +2,7 @@
 
 use Drall\TestCase;
 use Drall\Trait\DrupalFinderAwareTrait;
-use DrupalFinder\DrupalFinder;
+use DrupalFinder\DrupalFinderComposerRuntime;
 
 /**
  * @covers \Drall\Trait\DrupalFinderAwareTrait
@@ -11,7 +11,7 @@ class DrupalFinderAwareTraitTest extends TestCase {
 
   public function testDrupalFinder() {
     $subject = $this->getMockForTrait(DrupalFinderAwareTrait::class);
-    $drupalFinder = new DrupalFinder(__DIR__);
+    $drupalFinder = new DrupalFinderComposerRuntime();
     $subject->setDrupalFinder($drupalFinder);
 
     $this->assertSame($drupalFinder, $subject->drupalFinder());
