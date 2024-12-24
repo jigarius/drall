@@ -18,10 +18,18 @@ class SiteDetector {
   use DrupalFinderAwareTrait;
 
   public function __construct(
-    DrupalFinderComposerRuntime $drupalFinder,
-    SiteAliasManagerInterface $siteAliasManager,
+    ?DrupalFinderComposerRuntime $drupalFinder = NULL,
+    ?SiteAliasManagerInterface $siteAliasManager = NULL,
   ) {
+    if (!$drupalFinder) {
+      $drupalFinder = new DrupalFinderComposerRuntime();
+    }
     $this->setDrupalFinder($drupalFinder);
+
+    if (!$siteAliasManager) {
+      $siteAliasManager = new SiteAliasManager(new SiteAliasFileLoader());
+      $siteAliasManager->addSearchLocation($drupalFinder->getComposerRoot() . '/drush/sites');
+    }
     $this->setSiteAliasManager($siteAliasManager);
   }
 
@@ -211,21 +219,6 @@ class SiteDetector {
     }
 
     return $result;
-  }
-
-  /**
-   * Create a SiteDetector given a Drupal project root.
-   *
-   * @return static
-   *   A SiteDetector.
-   */
-  public static function create(): static {
-    $drupalFinder = new DrupalFinderComposerRuntime();
-
-    $siteAliasManager = new SiteAliasManager(new SiteAliasFileLoader());
-    $siteAliasManager->addSearchLocation($drupalFinder->getComposerRoot() . '/drush/sites');
-
-    return new SiteDetector($drupalFinder, $siteAliasManager);
   }
 
   /**

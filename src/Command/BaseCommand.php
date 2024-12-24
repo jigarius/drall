@@ -70,8 +70,7 @@ abstract class BaseCommand extends Command {
     }
 
     if (!$this->hasSiteDetector()) {
-      $siteDetector = SiteDetector::create();
-      $this->setSiteDetector($siteDetector);
+      $this->setSiteDetector(new SiteDetector());
     }
 
     if ($group = $this->getDrallGroup($input)) {
