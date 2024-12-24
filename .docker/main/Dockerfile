@@ -5,7 +5,7 @@ ENV PHP_INI_PATH="$PHP_INI_DIR/conf.d/php.ini"
 ENV DRUPAL_PATH="/opt/drupal"
 
 RUN apt-get update && \
-	apt-get install -qy git make mariadb-client unzip vim
+	apt-get install -qy git make mariadb-client unzip vim rsync
 
 RUN cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_PATH" \
     && pear config-set php_ini "$PHP_INI_PATH" \

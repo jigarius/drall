@@ -11,12 +11,14 @@ if (php_sapi_name() !== 'cli') exit;
 foreach ([
   // Development environment.
   __DIR__ . '/../vendor/autoload.php',
-  // Global installation.
+  // Regular installation.
   __DIR__ . '/../../../autoload.php',
 ] as $candidate) {
   if (is_file($candidate)) {
     require_once $candidate;
+    break;
   }
+
   unset($candidate);
 }
 
