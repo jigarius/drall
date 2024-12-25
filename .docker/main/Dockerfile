@@ -13,8 +13,10 @@ RUN cp "$PHP_INI_DIR/php.ini-development" "$PHP_INI_PATH" \
 RUN docker-php-ext-configure pcntl --enable-pcntl \
   && docker-php-ext-install pcntl
 
-# Provision Drall.
 COPY . /opt/drall
-
-# Provision Drupal.
 COPY Makefile /opt/drupal/Makefile
+COPY Makefile /opt/no-drupal/Makefile
+COPY Makefile /opt/empty-drupal/Makefile
+
+RUN echo ". /opt/drall/.docker/main/.profile" >> /root/.profile
+RUN echo ". /opt/drall/.docker/main/.profile" >> /root/.bashrc

@@ -1,29 +1,40 @@
 <?php
 
-namespace Drall\Test\Integration\Commands;
+namespace Drall\Test\Integration\Command;
 
-use Drall\IntegrationTestCase;
+use Drall\TestCase;
+use Symfony\Component\Process\Process;
 
 /**
+ * @testdox site:keys command.
  * @covers \Drall\Command\SiteDirectoriesCommand
  */
-class SiteKeysCommandTest extends IntegrationTestCase {
+class SiteKeysCommandTest extends TestCase {
 
   /**
-   * Run site:keys with no Drupal installation.
+   * @testdox with no Drupal installation.
    */
   public function testWithNoDrupal(): void {
-    $this->markTestSkipped('Needs work.');
-    chdir('/tmp');
-    $output = shell_exec('drall site:keys');
-    $this->assertOutputEquals("[warning] No Drupal sites found." . PHP_EOL, $output);
+    $process = Process::fromShellCommandline('drall site:keys', static::PATH_NO_DRUPAL);
+    $process->run();
+    $this->assertStringContainsString('Package "drupal/core" is not installed', $process->getErrorOutput());
   }
 
   /**
-   * Run site:keys with a Drupal installation.
+   * @testdox with an empty Drupal installation.
+   */
+  public function testWithEmptyDrupal(): void {
+    $process = Process::fromShellCommandline('drall site:keys', static::PATH_EMPTY_DRUPAL);
+    $process->run();
+    $this->assertStringContainsString('[warning] No Drupal sites found.', $process->getOutput());
+  }
+
+  /**
+   * @testdox with a Drupal installation.
    */
   public function testExecute(): void {
-    $output = shell_exec('drall site:keys');
+    $process = Process::fromShellCommandline('drall site:keys', static::PATH_DRUPAL);
+    $process->run();
     $this->assertOutputEquals(<<<EOF
 tmnt.com
 cowabunga.com
@@ -38,14 +49,15 @@ mikey.drall.local
 raphael.com
 ralph.drall.local
 
-EOF, $output);
+EOF, $process->getOutput());
   }
 
   /**
-   * Run site:keys with --drall-filter.
+   * @testdox with --drall-filter.
    */
   public function testExecuteWithFilter(): void {
-    $output = shell_exec('drall site:keys --drall-filter="value~=@.local\$@"');
+    $process = Process::fromShellCommandline('drall site:keys --drall-filter="value~=@.local\$@"', static::PATH_DRUPAL);
+    $process->run();
     $this->assertOutputEquals(<<<EOF
 tmnt.drall.local
 donnie.drall.local
@@ -53,14 +65,15 @@ leo.drall.local
 mikey.drall.local
 ralph.drall.local
 
-EOF, $output);
+EOF, $process->getOutput());
   }
 
   /**
-   * Run site:keys with --drall-group.
+   * @testdox with --drall-group.
    */
   public function testWithGroup(): void {
-    $output = shell_exec('drall site:keys --drall-group=bluish');
+    $process = Process::fromShellCommandline('drall site:keys --drall-group=bluish', static::PATH_DRUPAL);
+    $process->run();
     $this->assertOutputEquals(<<<EOF
 donatello.com
 8080.donatello.com
@@ -68,14 +81,19 @@ donnie.drall.local
 leonardo.com
 leo.drall.local
 
-EOF, $output);
+EOF, $process->getOutput());
   }
 
   /**
-   * Run site:keys with DRALL_GROUP env var.
+   * @testdox with DRALL_GROUP env var.
    */
   public function testWithGroupEnvVar(): void {
-    $output = shell_exec('DRALL_GROUP=bluish drall site:keys');
+    $process = Process::fromShellCommandline(
+      'drall site:keys',
+      static::PATH_DRUPAL,
+      ['DRALL_GROUP' => 'bluish'],
+    );
+    $process->run();
     $this->assertOutputEquals(<<<EOF
 donatello.com
 8080.donatello.com
@@ -83,7 +101,7 @@ donnie.drall.local
 leonardo.com
 leo.drall.local
 
-EOF, $output);
+EOF, $process->getOutput());
   }
 
 }

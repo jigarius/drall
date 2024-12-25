@@ -15,9 +15,6 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-      - name: Path Setup
-        run: |
-          echo "/opt/drupal/vendor/bin" >> $GITHUB_PATH
       - name: Determine Composer Cache Directory
         id: composer-cache
         run: |

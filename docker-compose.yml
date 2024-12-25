@@ -11,11 +11,9 @@ services:
       - "8080:80"
     volumes:
       - .:/opt/drall
-      - .docker/main/sites/sites.php:/opt/drupal/web/sites/sites.php
-      - .docker/main/sites/sites.reddish.php:/opt/drupal/web/sites/sites.reddish.php
-      - .docker/main/sites/sites.bluish.php:/opt/drupal/web/sites/sites.bluish.php
-      - .docker/main/composer.json:/opt/drupal/composer.json
-      - .docker/main/drush:/opt/drupal/drush
+      - .docker/main/drupal/composer.json:/opt/drupal/composer.json
+      - ./Makefile:/opt/no-drupal/Makefile
+      - ./Makefile:/opt/empty-drupal/Makefile
       - ./Makefile:/opt/drupal/Makefile
     environment:
       - DRALL_ENVIRONMENT=development

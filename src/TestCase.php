@@ -10,51 +10,15 @@ use PHPUnit\Framework\TestCase as TestCaseBase;
  */
 abstract class TestCase extends TestCaseBase {
 
-  /**
-   * Original current working directory.
-   *
-   * @var string
-   */
-  protected string $cwd = '/';
+  const PATH_PROJECT = '/opt/drall';
 
-  protected function setUp(): void {
-    $this->cwd = getcwd();
-    chdir($this->drupalDir());
-  }
+  const PATH_FIXTURES = '/opt/drall/test/fixtures';
 
-  protected function tearDown(): void {
-    chdir($this->cwd);
-  }
+  const PATH_DRUPAL = '/opt/drupal';
 
-  /**
-   * Get the path to the Drupal project root.
-   *
-   * @return string
-   *   /path/to/drupal.
-   */
-  protected function drupalDir(): string {
-    return getenv('DRUPAL_PATH');
-  }
+  const PATH_NO_DRUPAL = '/opt/no-drupal';
 
-  /**
-   * Get the path to the project's root directory.
-   *
-   * @return string
-   *   /path/to/root.
-   */
-  protected function projectDir(): string {
-    return dirname(__DIR__);
-  }
-
-  /**
-   * Get the path to the fixtures directory.
-   *
-   * @return string
-   *   /path/to/fixtures.
-   */
-  protected function fixturesDir(): string {
-    return dirname(__DIR__) . '/test/fixtures';
-  }
+  const PATH_EMPTY_DRUPAL = '/opt/empty-drupal';
 
   /**
    * Creates a temporary file path.
@@ -85,12 +49,27 @@ abstract class TestCase extends TestCaseBase {
   }
 
   protected function createDrupalFinderStub(?string $root = NULL): DrupalFinderComposerRuntime {
-    $root ??= $this->drupalDir();
+    $root ??= static::PATH_DRUPAL;
     $drupalFinder = $this->createStub(DrupalFinderComposerRuntime::class);
     $drupalFinder->method('getComposerRoot')->willReturn($root);
     $drupalFinder->method('getDrupalRoot')->willReturn("$root/web");
     $drupalFinder->method('getVendorDir')->willReturn("$root/vendor");
     return $drupalFinder;
+  }
+
+  /**
+   * Asserts Shell output ignoring unimportant whitespace.
+   *
+   * @param string $expected
+   *   Expected output.
+   * @param mixed $actual
+   *   Actual output.
+   * @param string $message
+   *   Error message.
+   */
+  protected function assertOutputEquals(string $expected, mixed $actual, string $message = ''): void {
+    $actual = preg_replace('@(\s+)\n@', "\n", $actual ?? '');
+    $this->assertEquals($expected, $actual, $message);
   }
 
 }
