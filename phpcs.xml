@@ -35,4 +35,7 @@
     <rule ref="Drupal.NamingConventions.ValidFunctionName.ScopeNotCamelCaps">
         <severity>0</severity>
     </rule>
+    <rule ref="Generic.Files.LineLength.MaxExceeded">
+      <exclude-pattern>test/*.php</exclude-pattern>
+    </rule>
 </ruleset>
