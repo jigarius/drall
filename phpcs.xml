@@ -38,4 +38,7 @@
     <rule ref="Generic.Files.LineLength.MaxExceeded">
       <exclude-pattern>test/*.php</exclude-pattern>
     </rule>
+    <rule ref="Drupal.Commenting.DocComment.MissingShort">
+      <exclude-pattern>test/*.php</exclude-pattern>
+    </rule>
 </ruleset>
