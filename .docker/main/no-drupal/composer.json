@@ -1,0 +1,29 @@
+{
+  "description": "Project that contains Drall without Drupal.",
+  "type": "project",
+  "license": "GPL-2.0-or-later",
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    },
+    {
+      "type": "path",
+      "url": "/opt/drall",
+      "options": {
+        "symlink": false
+      }
+    }
+  ],
+  "require": {
+    "jigarius/drall": "*"
+  },
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "composer/installers": true
+    }
+  }
+}

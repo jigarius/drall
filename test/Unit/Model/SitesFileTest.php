@@ -11,19 +11,19 @@ class SitesFileTest extends TestCase {
   protected SitesFile $subject;
 
   public function setUp(): void {
-    $this->subject = new SitesFile($this->fixturesDir() . '/sites.valid.php');
+    $this->subject = new SitesFile(static::PATH_FIXTURES . '/sites.valid.php');
   }
 
   public function testGetPath() {
     $this->assertEquals(
-      $this->fixturesDir() . '/sites.valid.php',
+      static::PATH_FIXTURES . '/sites.valid.php',
       $this->subject->getPath()
     );
   }
 
-  public function testInvalidPath() {
+  public function testNonExistentPath() {
     $this->expectException(\RuntimeException::class);
-    new SitesFile($this->fixturesDir() . '/sites.invalid.php');
+    new SitesFile(static::PATH_FIXTURES . '/sites.non-existent.php');
   }
 
   public function testSitesNotDefined() {
@@ -38,6 +38,12 @@ class SitesFileTest extends TestCase {
 
     $path = $this->createTempFile('<?php $sites = TRUE;');
     new SitesFile($path);
+  }
+
+  public function testSitesEmptyArray() {
+    $path = $this->createTempFile('<?php $sites = [];');
+    $subject = new SitesFile($path);
+    $this->assertEmpty($subject->getDirNames());
   }
 
   public function testGetDirNames() {

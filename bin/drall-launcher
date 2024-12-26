@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -e
+
+dir=$(pwd)
+while [ "$dir" != "/" ]; do
+    if [ -x "$dir/vendor/bin/drall" ]; then
+        "$dir/vendor/bin/drall" "$@"
+        break
+    fi
+    dir=$(dirname "$dir")
+done
+
+if [ "$dir" == "/" ]; then
+  echo "Drall executable not found."
+  exit 1
+fi

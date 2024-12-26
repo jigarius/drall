@@ -5,13 +5,9 @@ namespace Unit;
 use Drall\TestCase;
 
 /**
- * @covers Drall\TestCase
+ * @covers \Drall\TestCase
  */
 class TestCaseTest extends TestCase {
-
-  public function testDrupalDir() {
-    $this->assertEquals('/opt/drupal', $this->drupalDir());
-  }
 
   public function testCreateTempFilePath() {
     $path = static::createTempFilePath();
@@ -25,34 +21,17 @@ class TestCaseTest extends TestCase {
     $this->assertEquals('Bunny Wabbit', file_get_contents($path));
   }
 
-  public function testFixturesDir() {
-    $this->assertEquals(
-      dirname(__DIR__) . '/fixtures',
-      $this->fixturesDir()
-    );
-  }
+  public function testAssertOutputEquals() {
+    $expected = <<<EOF
+foo
+bar
+baz
 
-  public function testProjectDir() {
-    $this->assertEquals(
-      dirname(dirname(__DIR__)),
-      $this->projectDir()
-    );
-  }
+EOF;
+    // For some reason, drush's output has spaces before EOL.
+    $actual = "foo \nbar \nbaz \n";
 
-  public function testCwd() {
-    chdir('/tmp');
-
-    $this->assertEquals('/tmp', getcwd());
-
-    // Takes us to the Drupal directory.
-    $this->setUp();
-
-    $this->assertEquals($this->drupalDir(), getcwd());
-
-    // Takes us to where we were, i.e. /tmp.
-    $this->tearDown();
-
-    $this->assertEquals('/tmp', getcwd());
+    $this->assertOutputEquals($expected, $actual);
   }
 
 }

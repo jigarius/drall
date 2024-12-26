@@ -6,7 +6,6 @@ use Consolidation\SiteAlias\SiteAliasManager;
 use Consolidation\SiteAlias\Util\YamlDataFileLoader;
 use Drall\Service\SiteDetector;
 use Drall\TestCase;
-use DrupalFinder\DrupalFinderComposerRuntime;
 
 /**
  * @covers \Drall\Service\SiteDetector
@@ -16,13 +15,11 @@ class SiteDetectorTest extends TestCase {
   protected SiteDetector $subject;
 
   protected function setUp(): void {
-    parent::setUp();
-
     $siteAliasFileLoader = new SiteAliasFileLoader(
-      new SiteAliasFileDiscovery(["{$this->drupalDir()}/drush/sites"])
+      new SiteAliasFileDiscovery([static::PATH_DRUPAL . "/drush/sites"])
     );
     $siteAliasFileLoader->addLoader('yml', new YamlDataFileLoader());
-    $siteAliasManager = new SiteAliasManager($siteAliasFileLoader, $this->drupalDir());
+    $siteAliasManager = new SiteAliasManager($siteAliasFileLoader, static::PATH_DRUPAL);
     $siteAliasManager->addSearchLocation('drush/sites');
 
     $this->subject = new SiteDetector($this->createDrupalFinderStub(), $siteAliasManager);
@@ -50,10 +47,18 @@ class SiteDetectorTest extends TestCase {
   }
 
   public function testGetSiteDirNamesWithNoDrupal() {
-    $this->markTestSkipped('Needs work.');
-    $this->subject = new SiteDetector(new DrupalFinderComposerRuntime(), new SiteAliasManager());
+    $subject = new SiteDetector(
+      $this->createDrupalFinderStub(static::PATH_NO_DRUPAL),
+    );
+    $this->expectException(\RuntimeException::class);
+    $subject->getSiteDirNames();
+  }
 
-    $this->assertEquals([], $this->subject->getSiteDirNames());
+  public function testGetSiteDirNamesWithEmptyDrupal() {
+    $subject = new SiteDetector(
+      $this->createDrupalFinderStub(static::PATH_EMPTY_DRUPAL),
+    );
+    $this->assertEquals([], $subject->getSiteDirNames());
   }
 
   public function testGetSiteKeys() {
@@ -114,10 +119,18 @@ class SiteDetectorTest extends TestCase {
   }
 
   public function testGetSiteKeysWithNoDrupal() {
-    $this->markTestSkipped('Needs work.');
-    $this->subject = new SiteDetector(new DrupalFinderComposerRuntime(), new SiteAliasManager());
+    $subject = new SiteDetector(
+      $this->createDrupalFinderStub(static::PATH_NO_DRUPAL),
+    );
+    $this->expectException(\RuntimeException::class);
+    $subject->getSiteKeys();
+  }
 
-    $this->assertEquals([], $this->subject->getSiteKeys());
+  public function testGetSiteKeysWithEmptyDrupal() {
+    $subject = new SiteDetector(
+      $this->createDrupalFinderStub(static::PATH_EMPTY_DRUPAL),
+    );
+    $this->assertEquals([], $subject->getSiteKeys());
   }
 
   public function testGetSiteAliases() {
@@ -182,22 +195,6 @@ class SiteDetectorTest extends TestCase {
     );
   }
 
-  /**
-   * Drush path is "drush" when a Drupal installation is not found.
-   */
-  public function testGetDrushPathWithoutDrupal() {
-    $this->markTestSkipped('Needs work.');
-    chdir('/');
-
-    $drupalFinder = new DrupalFinderComposerRuntime();
-    $subject = new SiteDetector($drupalFinder, new SiteAliasManager());
-
-    $this->assertEquals(
-      'drush',
-      $subject->getDrushPath()
-    );
-  }
-
   public function testDetectFromDirectory(): void {
     $this->assertEquals([
       'default' => 'default',
@@ -205,7 +202,7 @@ class SiteDetectorTest extends TestCase {
       'leo' => 'leo',
       'mikey' => 'mikey',
       'ralph' => 'ralph',
-    ], SiteDetector::detectFromDirectory($this->drupalDir() . '/web/sites'));
+    ], SiteDetector::detectFromDirectory(static::PATH_DRUPAL . '/web/sites'));
   }
 
   public function testDetectFromIncorrectDirectory(): void {

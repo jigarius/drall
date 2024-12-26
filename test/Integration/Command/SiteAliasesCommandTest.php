@@ -1,29 +1,40 @@
 <?php
 
-namespace Drall\Test\Integration\Commands;
+namespace Drall\Test\Integration\Command;
 
-use Drall\IntegrationTestCase;
+use Drall\TestCase;
+use Symfony\Component\Process\Process;
 
 /**
+ * @testdox site:aliases command
  * @covers \Drall\Command\SiteDirectoriesCommand
  */
-class SiteAliasesCommandTest extends IntegrationTestCase {
+class SiteAliasesCommandTest extends TestCase {
 
   /**
-   * Run site:aliases with no Drupal installation.
+   * @testdox with no Drupal installation.
    */
   public function testWithNoDrupal(): void {
-    $this->markTestSkipped('Needs work.');
-    chdir('/tmp');
-    $output = shell_exec('drall site:aliases');
-    $this->assertOutputEquals("[warning] No site aliases found." . PHP_EOL, $output);
+    $process = Process::fromShellCommandline('drall site:aliases', static::PATH_NO_DRUPAL);
+    $process->run();
+    $this->assertStringContainsString('Package "drupal/core" is not installed', $process->getErrorOutput());
   }
 
   /**
-   * Run site:aliases with a Drupal installation.
+   * @testdox with an empty Drupal installation.
+   */
+  public function testWithEmptyDrupal(): void {
+    $process = Process::fromShellCommandline('drall site:aliases', static::PATH_EMPTY_DRUPAL);
+    $process->run();
+    $this->assertStringContainsString('[warning] No site aliases found.', $process->getOutput());
+  }
+
+  /**
+   * @testdox with a valid Drupal installation.
    */
   public function testExecute(): void {
-    $output = shell_exec('drall site:aliases');
+    $process = Process::fromShellCommandline('drall site:aliases', static::PATH_DRUPAL);
+    $process->run();
     $this->assertOutputEquals(<<<EOF
 @donnie.local
 @leo.local
@@ -31,43 +42,56 @@ class SiteAliasesCommandTest extends IntegrationTestCase {
 @ralph.local
 @tmnt.local
 
-EOF, $output);
+EOF, $process->getOutput());
   }
 
   /**
-   * Run site:aliases with --drall-filter.
+   * @testdox with --drall-filter.
    */
-  public function testExecuteWithFilter(): void {
-    $output = shell_exec('drall site:aliases --drall-filter="leo||ralph"');
+  public function testWithFilter(): void {
+    $process = Process::fromShellCommandline(
+      'drall site:aliases --drall-filter="leo||ralph"',
+      static::PATH_DRUPAL,
+    );
+    $process->run();
     $this->assertOutputEquals(<<<EOF
 @leo.local
 @ralph.local
 
-EOF, $output);
+EOF, $process->getOutput());
   }
 
   /**
-   * Run site:aliases with --drall-group.
+   * @testdox with --drall-group.
    */
   public function testWithGroup(): void {
-    $output = shell_exec('drall site:aliases --drall-group=reddish');
+    $process = Process::fromShellCommandline(
+      'drall site:aliases --drall-group=reddish',
+      static::PATH_DRUPAL
+    );
+    $process->run();
     $this->assertOutputEquals(<<<EOF
 @mikey.local
 @ralph.local
 
-EOF, $output);
+EOF, $process->getOutput());
   }
 
   /**
-   * Run site:aliases with DRALL_GROUP env var.
+   * @testdox with DRALL_GROUP env var.
    */
   public function testWithGroupEnvVar(): void {
-    $output = shell_exec('DRALL_GROUP=reddish drall site:aliases');
+    $process = Process::fromShellCommandline(
+      'drall site:aliases',
+      static::PATH_DRUPAL,
+      ['DRALL_GROUP' => 'reddish']
+    );
+    $process->run();
     $this->assertOutputEquals(<<<EOF
 @mikey.local
 @ralph.local
 
-EOF, $output);
+EOF, $process->getOutput());
   }
 
 }

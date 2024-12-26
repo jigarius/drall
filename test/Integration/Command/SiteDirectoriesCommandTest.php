@@ -1,29 +1,40 @@
 <?php
 
-namespace Drall\Test\Integration\Commands;
+namespace Drall\Test\Integration\Command;
 
-use Drall\IntegrationTestCase;
+use Drall\TestCase;
+use Symfony\Component\Process\Process;
 
 /**
+ * @testdox site:directories command
  * @covers \Drall\Command\SiteDirectoriesCommand
  */
-class SiteDirectoriesCommandTest extends IntegrationTestCase {
+class SiteDirectoriesCommandTest extends TestCase {
 
   /**
-   * Run site:directories with no Drupal installation.
+   * @testdox with no Drupal installation.
    */
   public function testWithNoDrupal(): void {
-    $this->markTestSkipped('Needs work.');
-    chdir('/tmp');
-    $output = shell_exec('drall site:directories');
-    $this->assertOutputEquals("[warning] No Drupal sites found." . PHP_EOL, $output);
+    $process = Process::fromShellCommandline('drall site:directories', static::PATH_NO_DRUPAL);
+    $process->run();
+    $this->assertStringContainsString('Package "drupal/core" is not installed', $process->getErrorOutput());
   }
 
   /**
-   * Run site:directories with a Drupal installation.
+   * @testdox with an empty Drupal installation.
+   */
+  public function testWithEmptyDrupal(): void {
+    $process = Process::fromShellCommandline('drall site:directories', static::PATH_EMPTY_DRUPAL);
+    $process->run();
+    $this->assertStringContainsString('[warning] No Drupal sites found.', $process->getOutput());
+  }
+
+  /**
+   * @testdox with a valid Drupal installation.
    */
   public function testExecute(): void {
-    $output = shell_exec('drall site:directories');
+    $process = Process::fromShellCommandline('drall site:directories', static::PATH_DRUPAL);
+    $process->run();
     $this->assertOutputEquals(<<<EOF
 default
 donnie
@@ -31,43 +42,50 @@ leo
 mikey
 ralph
 
-EOF, $output);
+EOF, $process->getOutput());
   }
 
   /**
-   * Run site:directories with --drall-filter.
+   * @testdox with --drall-filter.
    */
   public function testExecuteWithFilter(): void {
-    $output = shell_exec('drall site:directories --drall-filter="leo||ralph"');
+    $process = Process::fromShellCommandline('drall site:directories --drall-filter="leo||ralph"', static::PATH_DRUPAL);
+    $process->run();
     $this->assertOutputEquals(<<<EOF
 leo
 ralph
 
-EOF, $output);
+EOF, $process->getOutput());
   }
 
   /**
-   * Run site:directories with --drall-group.
+   * @testdox with --drall-group.
    */
   public function testWithGroup(): void {
-    $output = shell_exec('drall site:directories --drall-group=bluish');
+    $process = Process::fromShellCommandline('drall site:directories --drall-group=bluish', static::PATH_DRUPAL);
+    $process->run();
     $this->assertOutputEquals(<<<EOF
 donnie
 leo
 
-EOF, $output);
+EOF, $process->getOutput());
   }
 
   /**
-   * Run site:directories with DRALL_GROUP env var.
+   * @testdox with DRALL_GROUP env var.
    */
   public function testWithGroupEnvVar(): void {
-    $output = shell_exec('DRALL_GROUP=bluish drall site:directories');
+    $process = Process::fromShellCommandline(
+      'drall site:directories',
+      static::PATH_DRUPAL,
+      ['DRALL_GROUP' => 'bluish'],
+    );
+    $process->run();
     $this->assertOutputEquals(<<<EOF
 donnie
 leo
 
-EOF, $output);
+EOF, $process->getOutput());
   }
 
 }

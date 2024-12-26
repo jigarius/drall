@@ -105,6 +105,10 @@ class SiteDetector {
     ?string $group = NULL,
     ?string $filter = NULL,
   ): array {
+    // Use Drupal Finder to ensure that the Drupal is installed. This ensures
+    // consistency in errors raised by methods that depend on sites.*.php.
+    $this->drupalFinder()->getDrupalRoot();
+
     $result = array_values($this->siteAliasManager()->getMultiple());
 
     if ($group) {
@@ -158,13 +162,7 @@ class SiteDetector {
    *   Path/to/drush.
    */
   public function getDrushPath(): string {
-    if (!$vendorDir = $this->drupalFinder->getVendorDir()) {
-      // This should only happen when drall is installed globally and not in a
-      // specific Drupal project.
-      return 'drush';
-    }
-
-    return "$vendorDir/bin/drush";
+    return $this->drupalFinder->getVendorDir() . "/bin/drush";
   }
 
   private function getSitesFile($group = NULL): ?SitesFile {

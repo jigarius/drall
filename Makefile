@@ -4,18 +4,23 @@ ssh:
 
 
 .PHONY: provision
-provision: provision/drall provision/drupal
+provision: provision/env provision/drall provision/no-drupal provision/empty-drupal provision/drupal
+
+
+.PHONY: provision/env
+provision/env:
+	cp /opt/drall/bin/drall-launcher /usr/local/bin/drall
 
 
 .PHONY: provision/drupal
 provision/drupal:
 	mkdir -p /opt/drupal
-	cp /opt/drall/.docker/main/composer.json /opt/drupal/ || echo "Skipping drupal/composer.json"
+
+	cp /opt/drall/.docker/main/drupal/composer.json /opt/drupal/ || echo "Skipping: drupal/composer.json"
 	rm -f /opt/drupal/composer.lock
 	composer --working-dir=/opt/drupal install --no-progress
-
-	cp -r /opt/drall/.docker/main/drush /opt/drupal/ || echo "Skipping drush directory."
-	cp -r /opt/drall/.docker/main/sites /opt/drupal/web/ || echo "Skipping sites directory."
+	cp -r /opt/drall/.docker/main/drupal/drush /opt/drupal/ || echo "Skipping: drupal/drush"
+	cp -r /opt/drall/.docker/main/drupal/web/sites /opt/drupal/web/ || echo "Skipping: drupal/web/sites"
 
 	mkdir -p /opt/drupal/web/sites/default
 	mkdir -p /opt/drupal/web/sites/donnie
@@ -29,7 +34,25 @@ provision/drupal:
 	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/mikey/settings.php
 	cp /opt/drupal/web/sites/default/default.settings.php /opt/drupal/web/sites/ralph/settings.php
 
+	@echo ''
 	@echo 'Drupal databases can be provisioned with: make provision/drupal/database'
+
+
+.PHONY: provision/no-drupal
+provision/no-drupal:
+	mkdir -p /opt/no-drupal
+	cp /opt/drall/.docker/main/no-drupal/composer.json /opt/no-drupal/ || echo "Skipping: no-drupal/composer.json"
+	rm -f /opt/no-drupal/composer.lock
+	composer --working-dir=/opt/no-drupal install --no-progress
+
+
+.PHONY: provision/empty-drupal
+provision/empty-drupal:
+	mkdir -p /opt/empty-drupal
+	cp /opt/drall/.docker/main/empty-drupal/composer.json /opt/empty-drupal/ || echo "Skipping: empty-drupal/composer.json"
+	rm -f /opt/empty-drupal/composer.lock
+	composer --working-dir=/opt/empty-drupal install --no-progress
+	cp /opt/drall/.docker/main/empty-drupal/web/sites/sites.php /opt/empty-drupal/web/sites/sites.php
 
 
 .PHONY: provision/drupal/database
@@ -56,17 +79,14 @@ provision/drupal/database:
 provision/drall:
 	composer install --working-dir=/opt/drall --no-progress
 
-	# The GitHub Action shivammathur/setup-php@v2 gives higher priority to
-  # the executables present in /opt/drall/vendor/bin. Thus, we remove
-  # Drush from this directory to force /opt/drupal/vendor/bin/drush.
-	rm -f /opt/drall/vendor/bin/drush
-
 
 # Due to the way Composer works, jigarius/drall cannot be symlinked into
 # the Drupal setup used for development. Thus, after every change made to
 # Drall, it must be re-installed inside the Drupal installation.
 .PHONY: refresh
 refresh:
+	rsync -Ervu --inplace --delete --exclude=.coverage --exclude=.phpunit.cache --exclude=.idea --exclude=.git --exclude=vendor /opt/drall/ /opt/no-drupal/vendor/jigarius/drall/
+	rsync -Ervu --inplace --delete --exclude=.coverage --exclude=.phpunit.cache --exclude=.idea --exclude=.git --exclude=vendor /opt/drall/ /opt/empty-drupal/vendor/jigarius/drall/
 	rsync -Ervu --inplace --delete --exclude=.coverage --exclude=.phpunit.cache --exclude=.idea --exclude=.git --exclude=vendor /opt/drall/ /opt/drupal/vendor/jigarius/drall/
 
 
@@ -92,17 +112,8 @@ test:
 
 .PHONY: info
 info:
-	@cd $(DRUPAL_PATH)
+	@echo "Path: $(PATH)"
+	@echo "PWD: $(PWD)"
 	@echo "Drupal path: $(DRUPAL_PATH)"
-
-	which php
-	@php --version
-
-	which composer
 	@composer --version
-
-	which drush
-	@drush --version
-
 	which drall
-	@drall --version

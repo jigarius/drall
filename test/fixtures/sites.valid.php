@@ -2,7 +2,7 @@
 
 /**
  * @file
- * A valid sites.php file.
+ * A sites.php with valid entries.
  */
 
 $sites['tmnt.com'] = 'default';
