@@ -21,10 +21,13 @@ class DrallTest extends TestCase {
     $app = new Drall();
     $options = $app->getDefinition()->getOptions();
 
-    $this->assertArrayNotHasKey('quiet', $options);
-    $this->assertArrayNotHasKey('verbose', $options);
-    $this->assertArrayHasKey('drall-verbose', $options);
-    $this->assertArrayHasKey('drall-debug', $options);
+    $this->assertEquals([
+      'help',
+      'verbose',
+      'version',
+      'ansi',
+      'debug',
+    ], array_keys($options));
   }
 
   public function testOptionVerbosityNormal() {
@@ -35,13 +38,13 @@ class DrallTest extends TestCase {
 
   public function testOptionVerbosityVerbose() {
     $tester = new ApplicationTester(new Drall());
-    $tester->run(['command' => 'version', '--drall-verbose' => TRUE]);
+    $tester->run(['command' => 'version', '--verbose' => TRUE]);
     $this->assertEquals(OutputInterface::VERBOSITY_VERY_VERBOSE, $tester->getOutput()->getVerbosity());
   }
 
   public function testOptionVerbosityDebug() {
     $tester = new ApplicationTester(new Drall());
-    $tester->run(['command' => 'version', '--drall-debug' => TRUE]);
+    $tester->run(['command' => 'version', '--debug' => TRUE]);
     $this->assertEquals(OutputInterface::VERBOSITY_DEBUG, $tester->getOutput()->getVerbosity());
   }
 

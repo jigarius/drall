@@ -11,7 +11,6 @@ use Amp\Sync\LocalSemaphore;
 use Drall\Drall;
 use Drall\Model\EnvironmentId;
 use Drall\Model\Placeholder;
-use Drall\Model\RawCommand;
 use Drall\Trait\SignalAwareTrait;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
@@ -54,11 +53,11 @@ class ExecCommand extends BaseCommand {
     $this->setDescription('Execute a command on multiple Drupal sites.');
     $this->addUsage('drush core:status');
     $this->addUsage('./vendor/bin/drush core:status');
-    $this->addUsage('--drall-group=GROUP drush core:status');
-    $this->addUsage('--drall-filter=FILTER drush core:status');
-    $this->addUsage('--drall-workers=4 drush cache:rebuild');
+    $this->addUsage('--group=GROUP -- drush core:status');
+    $this->addUsage('--filter=FILTER -- drush core:status');
+    $this->addUsage('--workers=4 -- drush cache:rebuild');
     $this->addUsage('ls web/sites/@@dir/settings.php');
-    $this->addUsage('echo "Working on @@site" && drush @@site.local core:status');
+    $this->addUsage('\'echo "Working on @@site" && drush @@site.local core:status\'');
 
     $this->addArgument(
       'cmd',
@@ -67,22 +66,22 @@ class ExecCommand extends BaseCommand {
     );
 
     $this->addOption(
-      'drall-workers',
-      NULL,
+      'workers',
+      'w',
       InputOption::VALUE_OPTIONAL,
       'Number of commands to execute in parallel.',
       1,
     );
 
     $this->addOption(
-      'drall-no-execute',
-      NULL,
+      'dry-run',
+      'X',
       InputOption::VALUE_NONE,
       'Do not execute commands, only display them.'
     );
 
     $this->addOption(
-      'drall-no-progress',
+      'no-progress',
       NULL,
       InputOption::VALUE_NONE,
       'Do not show a progress bar.'
@@ -91,41 +90,10 @@ class ExecCommand extends BaseCommand {
     $this->ignoreValidationErrors();
   }
 
-  /**
-   * Sets an array to be treated as $argv, mostly for testing.
-   *
-   * The $argv array contains:
-   *   - Script name as the first parameter, i.e. drall.
-   *   - The Drall command as the second parameter, e.g. exec.
-   *   - Options for the Drall command, e.g. --drall-group=bluish.
-   *   - The Drush command and its arguments, e.g. pmu devel
-   *   - Options for the Drush command, e.g. --fields=site.
-   *
-   * @code
-   * $command->setArgv([
-   *   '/opt/drall/bin/drall',
-   *   'exec',
-   *   '--drall-group=bluish',
-   *   'core:status',
-   *   '--fields=site',
-   * ]);
-   * @endcode
-   *
-   * @param array $argv
-   *   An array matching the $argv array format.
-   *
-   * @return self
-   *   The command.
-   */
-  public function setArgv(array $argv): self {
-    $this->argv = $argv;
-    return $this;
-  }
-
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);
 
-    $command = $this->getCommand();
+    $command = $this->getCommand($input);
     $group = $this->getDrallGroup($input);
     $filter = $this->getDrallFilter($input);
 
@@ -150,7 +118,7 @@ class ExecCommand extends BaseCommand {
     $workers = $this->getWorkerCount($input);
 
     // Display commands without executing them.
-    if ($input->getOption('drall-no-execute')) {
+    if ($input->getOption('dry-run')) {
       foreach ($values as $value) {
         $sCommand = Placeholder::replace([$placeholder->value => $value], $command);
         $output->writeln("# Item: $value", OutputInterface::VERBOSITY_VERBOSE);
@@ -235,22 +203,35 @@ class ExecCommand extends BaseCommand {
     return $exitCode;
   }
 
-  protected function getCommand(): RawCommand {
-    // Symfony Console only recognizes options that are defined in the
-    // ::configure() method. Since our goal is to catch all arguments and
-    // options and send them to drush, we do it ourselves using $argv.
-    //
-    // @todo Is there a way to catch all options from $input?
-    $command = RawCommand::fromArgv($this->argv);
+  /**
+   * Extracts the command to be executed by Drall.
+   *
+   * All drall-specific components are removed from the command.
+   *
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   *   Console input.
+   *
+   * @return string
+   *   The command without Drall elements.
+   *
+   * @example
+   * Input: /path/to/drall exec --verbose -- drush st --fields=site
+   * Output: drush st --fields=site
+   */
+  protected function getCommand(InputInterface $input): string {
+    // @todo Force -- for clarity if options are present.
+    // @todo Throw an error if --drall-* options are present.
+    // Everything after the first "--" is treated as an argument. All such
+    // arguments are treated as parts of the command to be executed.
+    $command = implode(' ', $input->getArguments()['cmd']);
+    $this->logger->debug("Command: {command}", ['command' => $command]);
 
-    if (!str_contains($command, 'drush')) {
-      return $command;
-    }
-
-    // Inject --uri=@@dir for Drush commands without placeholders.
-    if (!Placeholder::search($command)) {
-      $sCommand = preg_replace('/\b(drush) /', 'drush --uri=@@dir ', $command, -1);
-      $command = new RawCommand($sCommand);
+    if (
+      str_contains($command, 'drush') &&
+      !Placeholder::search($command)
+    ) {
+      // Inject --uri=@@dir for Drush commands without placeholders.
+      $command = preg_replace('/\b(drush) /', 'drush --uri=@@dir ', $command, -1);
       $this->logger->debug('Injected --uri parameter for Drush command.');
     }
 
@@ -267,7 +248,7 @@ class ExecCommand extends BaseCommand {
    *   Number of workers to be used.
    */
   protected function getWorkerCount(InputInterface $input): int {
-    $result = $input->getOption('drall-workers');
+    $result = $input->getOption('workers');
 
     if ($result > self::WORKER_LIMIT) {
       $this->logger->warning('Limiting workers to {count}, which is the maximum.', ['count' => self::WORKER_LIMIT]);
@@ -284,7 +265,7 @@ class ExecCommand extends BaseCommand {
   /**
    * Get unique placeholder from a command.
    */
-  private function getUniquePlaceholder(RawCommand $command): ?Placeholder {
+  private function getUniquePlaceholder(string $command): ?Placeholder {
     if (!$placeholders = Placeholder::search($command)) {
       $this->logger->error('The command contains no placeholders. Please run it directly without Drall.');
       return NULL;
@@ -311,7 +292,7 @@ class ExecCommand extends BaseCommand {
   private function isProgressBarHidden(InputInterface $input): bool {
     if (
       Drall::isEnvironment(EnvironmentId::Test) ||
-      $input->getOption('drall-no-progress')
+      $input->getOption('no-progress')
     ) {
       return TRUE;
     }

@@ -17,8 +17,8 @@ class SiteKeysCommand extends BaseCommand {
     $this->setAliases(['sk']);
     $this->setDescription('List the keys of the $sites array.');
     $this->addUsage('site:keys');
-    $this->addUsage('--drall-group=GROUP site:keys');
-    $this->addUsage('--drall-filter=FILTER site:keys');
+    $this->addUsage('--group=GROUP site:keys');
+    $this->addUsage('--filter=FILTER site:keys');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {

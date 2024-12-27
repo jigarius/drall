@@ -12,11 +12,37 @@ use Symfony\Component\Process\Process;
 class ExecCommandTest extends TestCase {
 
   /**
+   * @testdox Detects commands correctly.
+   */
+  public function testCommandDetection() {
+    $process = Process::fromShellCommandline(
+      'drall exec --debug --dry-run drush st',
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertEquals(<<<EOT
+[debug] Command: drush st
+[debug] Injected --uri parameter for Drush command.
+# Item: default
+drush --uri=default st
+# Item: donnie
+drush --uri=donnie st
+# Item: leo
+drush --uri=leo st
+# Item: mikey
+drush --uri=mikey st
+# Item: ralph
+drush --uri=ralph st
+
+EOT, $process->getOutput());
+  }
+
+  /**
    * @testdox With no Drupal installation.
    */
   public function testWithNoDrupal(): void {
     $process = Process::fromShellCommandline(
-      'drall exec ./vendor/bin/drush --uri=@@dir core:status',
+      'drall exec -- ./vendor/bin/drush --uri=@@dir core:status',
       static::PATH_NO_DRUPAL,
     );
     $process->run();
@@ -35,7 +61,7 @@ class ExecCommandTest extends TestCase {
    */
   public function testWithEmptyDrupal(): void {
     $process = Process::fromShellCommandline(
-      'drall exec ./vendor/bin/drush --uri=@@dir core:status',
+      'drall exec -- ./vendor/bin/drush --uri=@@dir core:status',
       static::PATH_EMPTY_DRUPAL,
     );
     $process->run();
@@ -50,9 +76,9 @@ class ExecCommandTest extends TestCase {
   }
 
   /**
-   * @testdox With no placeholders.
+   * @testdox Raises error for non-Drush command with no placeholders.
    */
-  public function testWithNoPlaceholders(): void {
+  public function testNonDrushWithNoPlaceholders(): void {
     $process = Process::fromShellCommandline('drall exec foo', static::PATH_DRUPAL);
     $process->run();
     $this->assertOutputEquals(
@@ -66,7 +92,7 @@ class ExecCommandTest extends TestCase {
    */
   public function testWorkingDirectory(): void {
     $process = Process::fromShellCommandline(
-      'drall exec --drall-filter=tmnt "echo \"Site: @@site\" && pwd"',
+      'drall exec --filter=tmnt "echo \"Site: @@site\" && pwd"',
       static::PATH_DRUPAL,
     );
     $process->run();
@@ -83,21 +109,21 @@ EOT, $process->getOutput());
    */
   public function testDrushWithUriPlaceholder(): void {
     $process = Process::fromShellCommandline(
-      'drall exec ./vendor/bin/drush --uri=@@dir core:status --fields=site',
+      'drall exec -- ./vendor/bin/drush --uri=@@dir core:status --field=site',
       static::PATH_DRUPAL,
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
 Finished: default
-Site path : sites/default
+sites/default
 Finished: donnie
-Site path : sites/donnie
+sites/donnie
 Finished: leo
-Site path : sites/leo
+sites/leo
 Finished: mikey
-Site path : sites/mikey
+sites/mikey
 Finished: ralph
-Site path : sites/ralph
+sites/ralph
 
 EOF, $process->getOutput());
   }
@@ -107,45 +133,45 @@ EOF, $process->getOutput());
    */
   public function testDrushWithSitePlaceholder(): void {
     $process = Process::fromShellCommandline(
-      'drall exec ./vendor/bin/drush @@site.local core:status --fields=site',
+      'drall exec ./vendor/bin/drush -- @@site.local core:status --field=site',
       static::PATH_DRUPAL,
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
 Finished: @donnie
-Site path : sites/donnie
+sites/donnie
 Finished: @leo
-Site path : sites/leo
+sites/leo
 Finished: @mikey
-Site path : sites/mikey
+sites/mikey
 Finished: @ralph
-Site path : sites/ralph
+sites/ralph
 Finished: @tmnt
-Site path : sites/default
+sites/default
 
 EOF, $process->getOutput());
   }
 
   /**
-   * @testdox With no placeholders.
+   * @testdox Injects --uri for Drush command with no placeholders.
    */
   public function testDrushWithNoPlaceholders(): void {
     $process = Process::fromShellCommandline(
-      'drall exec ./vendor/bin/drush core:status --fields=site',
+      'drall exec -- ./vendor/bin/drush core:status --field=site',
       static::PATH_DRUPAL,
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
 Finished: default
-Site path : sites/default
+sites/default
 Finished: donnie
-Site path : sites/donnie
+sites/donnie
 Finished: leo
-Site path : sites/leo
+sites/leo
 Finished: mikey
-Site path : sites/mikey
+sites/mikey
 Finished: ralph
-Site path : sites/ralph
+sites/ralph
 
 EOF, $process->getOutput());
   }
@@ -266,31 +292,44 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox With --drall-filter.
+   * @testdox With --filter.
    */
   public function testWithFilter(): void {
-    $process = Process::fromShellCommandline(
-      'drall exec --drall-filter=leo ./vendor/bin/drush st --field=site',
+    $process1 = Process::fromShellCommandline(
+      'drall exec --filter=leo -- ./vendor/bin/drush st --field=site',
     static::PATH_DRUPAL,
     );
-    $process->run();
+    $process1->run();
     $this->assertOutputEquals(<<<EOF
 Finished: leo
 sites/leo
 
-EOF, $process->getOutput());
+EOF, $process1->getOutput());
+
+    // Short form.
+    $process2 = Process::fromShellCommandline(
+      'drall exec -f leo -- ./vendor/bin/drush st --field=site',
+    static::PATH_DRUPAL,
+    );
+    $process2->run();
+    $this->assertOutputEquals(<<<EOF
+Finished: leo
+sites/leo
+
+EOF, $process2->getOutput());
   }
 
   /**
-   * @testdox With @@dir placeholder and --drall-debug.
+   * @testdox With @@dir placeholder and --debug.
    */
   public function testWithDirPlaceholderAndDebug(): void {
     $process = Process::fromShellCommandline(
-      'drall exec --drall-debug ls web/sites/@@dir/settings.php',
+      'drall exec --debug ls web/sites/@@dir/settings.php',
       static::PATH_DRUPAL,
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
+[debug] Command: ls web/sites/@@dir/settings.php
 [debug] Running: ls web/sites/default/settings.php
 Finished: default
 web/sites/default/settings.php
@@ -311,21 +350,35 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox With --drall-group.
+   * @testdox With --group.
    */
   public function testWithGroup(): void {
-    $process = Process::fromShellCommandline(
-      'drall exec --drall-group=bluish ./vendor/bin/drush st --field=site',
+    $process1 = Process::fromShellCommandline(
+      'drall exec --group=bluish -- ./vendor/bin/drush st --field=site',
     static::PATH_DRUPAL,
     );
-    $process->run();
+    $process1->run();
     $this->assertOutputEquals(<<<EOF
 Finished: donnie
 sites/donnie
 Finished: leo
 sites/leo
 
-EOF, $process->getOutput());
+EOF, $process1->getOutput());
+
+    // Short form.
+    $process2 = Process::fromShellCommandline(
+      'drall exec -g bluish -- ./vendor/bin/drush st --field=site',
+    static::PATH_DRUPAL,
+    );
+    $process2->run();
+    $this->assertOutputEquals(<<<EOF
+Finished: donnie
+sites/donnie
+Finished: leo
+sites/leo
+
+EOF, $process2->getOutput());
   }
 
   /**
@@ -333,7 +386,7 @@ EOF, $process->getOutput());
    */
   public function testWithGroupEnvVar(): void {
     $process = Process::fromShellCommandline(
-      'drall exec ./vendor/bin/drush st --field=site',
+      'drall exec -- ./vendor/bin/drush st --field=site',
       static::PATH_DRUPAL,
       ['DRALL_GROUP' => 'bluish'],
     );
@@ -352,7 +405,7 @@ EOF, $process->getOutput());
    */
   public function testWithSitePlaceholder(): void {
     $process = Process::fromShellCommandline(
-      'drall exec ./vendor/bin/drush @@site.local core:status --fields=site',
+      'drall exec ./vendor/bin/drush -- @@site.local core:status --fields=site',
       static::PATH_DRUPAL,
     );
     $process->run();
@@ -372,15 +425,16 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox With @@site placeholder and --drall-debug.
+   * @testdox With @@site placeholder and --debug.
    */
   public function testWithSitePlaceholderDebug(): void {
     $process = Process::fromShellCommandline(
-      'drall exec --drall-debug ./vendor/bin/drush @@site.local st --fields=site',
+      'drall exec --debug -- ./vendor/bin/drush @@site.local st --fields=site',
       static::PATH_DRUPAL,
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
+[debug] Command: ./vendor/bin/drush @@site.local st --fields=site
 [debug] Running: ./vendor/bin/drush @donnie.local st --fields=site
 Finished: @donnie
 Site path : sites/donnie
@@ -401,19 +455,19 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox With @@site placeholder and --drall-group.
+   * @testdox With @@site placeholder and --group.
    */
   public function testWithSitePlaceholderAndGroup(): void {
     $process = Process::fromShellCommandline(
-      'drall exec ./vendor/bin/drush --drall-group=bluish @@site.local st --fields=site',
+      'drall exec --group=bluish -- ./vendor/bin/drush @@site.local st --field=site',
       static::PATH_DRUPAL,
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
 Finished: @donnie
-Site path : sites/donnie
+sites/donnie
 Finished: @leo
-Site path : sites/leo
+sites/leo
 
 EOF, $process->getOutput());
   }
@@ -423,7 +477,7 @@ EOF, $process->getOutput());
    */
   public function testCatchStdErrOutput(): void {
     $process = Process::fromShellCommandline(
-      'drall exec --drall-filter=default ./vendor/bin/drush --verbose version',
+      'drall exec --filter=default -- ./vendor/bin/drush --verbose version',
       static::PATH_DRUPAL,
     );
     $process->run();
@@ -446,7 +500,7 @@ EOF, $output);
    */
   public function testWithProgressBarVisible(): void {
     $process = Process::fromShellCommandline(
-      'drall exec ./vendor/bin/drush st --field=site 2>&1',
+      'drall exec -- ./vendor/bin/drush st --field=site 2>&1',
       static::PATH_DRUPAL,
       ['DRALL_ENVIRONMENT' => 'unknown'],
     );
@@ -468,11 +522,11 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox With --drall-no-progress.
+   * @testdox With --no-progress.
    */
   public function testWithProgressBarHidden(): void {
     $process = Process::fromShellCommandline(
-      'drall exec --drall-no-progress ./vendor/bin/drush st --field=site 2>&1',
+      'drall exec --no-progress -- ./vendor/bin/drush st --field=site 2>&1',
       static::PATH_DRUPAL,
       // The progress bar is always hidden in the "test" environment to avoid
       // repeating --no-progress in all commands. Thus, for this test,
@@ -497,72 +551,99 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox With --drall-no-execute.
+   * @testdox With --dry-run.
    */
-  public function testWithNoExecute(): void {
-    $process = Process::fromShellCommandline(
-      'drall exec --drall-no-execute ./vendor/bin/drush core:status',
+  public function testWithDryRun(): void {
+    $process1 = Process::fromShellCommandline(
+      'drall exec --dry-run -- ./vendor/bin/drush st',
       static::PATH_DRUPAL,
     );
-    $process->run();
+    $process1->run();
     $this->assertOutputEquals(<<<EOF
-./vendor/bin/drush --uri=default core:status
-./vendor/bin/drush --uri=donnie core:status
-./vendor/bin/drush --uri=leo core:status
-./vendor/bin/drush --uri=mikey core:status
-./vendor/bin/drush --uri=ralph core:status
+./vendor/bin/drush --uri=default st
+./vendor/bin/drush --uri=donnie st
+./vendor/bin/drush --uri=leo st
+./vendor/bin/drush --uri=mikey st
+./vendor/bin/drush --uri=ralph st
 
-EOF, $process->getOutput());
+EOF, $process1->getOutput());
+
+    // Short form.
+    $process2 = Process::fromShellCommandline(
+      'drall exec -X -- ./vendor/bin/drush st',
+      static::PATH_DRUPAL,
+    );
+    $process2->run();
+    $this->assertOutputEquals(<<<EOF
+./vendor/bin/drush --uri=default st
+./vendor/bin/drush --uri=donnie st
+./vendor/bin/drush --uri=leo st
+./vendor/bin/drush --uri=mikey st
+./vendor/bin/drush --uri=ralph st
+
+EOF, $process2->getOutput());
   }
 
   /**
-   * @testdox With --drall-no-execute --drall-verbose.
+   * @testdox With --dry-run --verbose.
    */
-  public function testWithNoExecuteVerbose(): void {
+  public function testWithDryRunVerbose(): void {
     $process = Process::fromShellCommandline(
-      'drall exec --drall-no-execute --drall-verbose drush core:status',
+      'drall exec --dry-run --verbose -- drush st',
       static::PATH_DRUPAL,
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
 # Item: default
-drush --uri=default core:status
+drush --uri=default st
 # Item: donnie
-drush --uri=donnie core:status
+drush --uri=donnie st
 # Item: leo
-drush --uri=leo core:status
+drush --uri=leo st
 # Item: mikey
-drush --uri=mikey core:status
+drush --uri=mikey st
 # Item: ralph
-drush --uri=ralph core:status
+drush --uri=ralph st
 
 EOF, $process->getOutput());
   }
 
   /**
-   * @testdox With --drall-workers=2.
+   * @testdox With --workers=2.
    */
   public function testWithWorkers(): void {
-    $process = Process::fromShellCommandline(
-      'drall ex --drall-workers=2 --drall-verbose drush --uri=@@dir core:status --fields=site',
+    $process1 = Process::fromShellCommandline(
+      'drall ex --workers=2 --verbose -- drush --uri=@@dir core:status --fields=site',
       static::PATH_DRUPAL,
     );
-    $process->run();
+    $process1->run();
 
     $this->assertStringStartsWith(
       '[notice] Using 2 workers.',
-      $process->getOutput(),
+      $process1->getOutput(),
+    );
+
+    // Short form.
+    $process2 = Process::fromShellCommandline(
+      'drall ex -w2 --verbose -- drush --uri=@@dir core:status --fields=site',
+      static::PATH_DRUPAL,
+    );
+    $process2->run();
+
+    $this->assertStringStartsWith(
+      '[notice] Using 2 workers.',
+      $process2->getOutput(),
     );
   }
 
   /**
-   * @testdox With --drall-workers=17.
+   * @testdox With --workers=17.
    *
    * Drall caps the maximum workers to a pre-determined limit.
    */
   public function testWorkerLimit(): void {
     $process = Process::fromShellCommandline(
-      'drall ex --drall-workers=17 --drall-verbose drush --uri=@@dir st --fields=site',
+      'drall ex --workers=17 --verbose -- drush --uri=@@dir st --fields=site',
       static::PATH_DRUPAL,
     );
     $process->run();
@@ -577,7 +658,7 @@ EOF, $process->getOutput());
    */
   public function testNonZeroExitCode(): void {
     $process = Process::fromShellCommandline(
-      'drall exec --drall-group=bad ./vendor/bin/drush st --field=site',
+      'drall exec --group=bad ./vendor/bin/drush st --field=site',
     );
     $process->run();
     $this->assertEquals(1, $process->getExitCode());

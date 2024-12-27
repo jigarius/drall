@@ -42,15 +42,25 @@ final class Drall extends Application {
   protected function configureIO(InputInterface $input, OutputInterface $output): void {
     parent::configureIO($input, $output);
 
-    if ($input->hasParameterOption('--drall-debug', TRUE)) {
+    if ($input->hasParameterOption('--debug', TRUE)) {
       $output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
     }
-    elseif ($input->hasParameterOption('--drall-verbose', TRUE)) {
+    elseif ($input->hasParameterOption('--verbose', TRUE)) {
       $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
     }
     else {
       $output->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
     }
+
+    // The parent::configureIO sets verbosity in a SHELL_VERBOSITY. This causes
+    // other Symfony Console apps to become verbose, for example, Drush. To
+    // prevent such behavior, we force the SHELL_VERBOSITY to be normal.
+    $shellVerbosity = 0;
+    if (\function_exists('putenv')) {
+      @putenv("SHELL_VERBOSITY=$shellVerbosity");
+    }
+    $_ENV['SHELL_VERBOSITY'] = $shellVerbosity;
+    $_SERVER['SHELL_VERBOSITY'] = $shellVerbosity;
   }
 
   protected function getDefaultInputDefinition(): InputDefinition {
@@ -58,18 +68,15 @@ final class Drall extends Application {
 
     // Remove unneeded options.
     $options = $definition->getOptions();
-    unset($options['verbose'], $options['quiet']);
+    unset(
+      $options['quiet'],
+      $options['no-interaction'],
+    );
     $definition->setOptions($options);
 
     $definition->addOption(new InputOption(
-      'drall-verbose',
-      NULL,
-      InputOption::VALUE_NONE,
-      'Display verbose output for Drall.'
-    ));
-    $definition->addOption(new InputOption(
-      'drall-debug',
-      NULL,
+      'debug',
+      'd',
       InputOption::VALUE_NONE,
       'Display debugging output for Drall.'
     ));

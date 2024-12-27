@@ -53,10 +53,10 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox with --drall-filter.
+   * @testdox with --filter.
    */
   public function testExecuteWithFilter(): void {
-    $process = Process::fromShellCommandline('drall site:keys --drall-filter="value~=@.local\$@"', static::PATH_DRUPAL);
+    $process = Process::fromShellCommandline('drall site:keys --filter="value~=@.local\$@"', static::PATH_DRUPAL);
     $process->run();
     $this->assertOutputEquals(<<<EOF
 tmnt.drall.local
@@ -69,10 +69,10 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox with --drall-group.
+   * @testdox with --group.
    */
   public function testWithGroup(): void {
-    $process = Process::fromShellCommandline('drall site:keys --drall-group=bluish', static::PATH_DRUPAL);
+    $process = Process::fromShellCommandline('drall site:keys --group=bluish', static::PATH_DRUPAL);
     $process->run();
     $this->assertOutputEquals(<<<EOF
 donatello.com

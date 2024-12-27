@@ -173,25 +173,34 @@ cat web/sites/ralph/settings.local.php
 
 #### Options
 
-For the `drall exec` command, all Drall parameters must be passed right
-after the `drall exec`. Here's an example:
+For the `drall exec` command, all Drall options must be set right after
+`drall exec`. For example,
 
 ```shell
-# This will work.
-drall exec --drall-workers=4 drush cache:rebuild
+# Correct: Drall gets --verbose.
+drall exec --verbose drush core:status
+# Incorrect: --verbose is ignored.
+drall exec drush core:status --verbose
+# Correct: Drall and Drush, both --verbose.
+drall exec --verbose -- drush --verbose core:status
+# Incorrect: Only Drall gets --verbose.
+drall exec --verbose drush core:status
+```
 
-# This won't work.
-drall exec drush cache:rebuild --drall-workers=4
+In summary, the syntax is as follows:
+
+```shell
+drall exec [DRALL-OPTIONS] -- drush [DRUSH-OPTIONS]
 ```
 
 Besides the global options, the `exec` command supports the following options.
 
-#### --drall-workers
+#### --workers
 
 Say you have 100 sites in a Drupal installation. By default, Drall runs
 commands on these sites one after the other. To speed up the execution, you
 can ask Drall to execute multiple commands in parallel. You can specify the
-number of workers with the `--drall-workers=n` option, where `n` is the
+number of workers with the `--workers=n` option, where `n` is the
 number of processes you want to run in parallel.
 
 Please keep in mind that the performance of the workers depends on your
@@ -204,11 +213,11 @@ conflict between the Drall workers.
 
 The command below launches 3 instances of Drall to run `core:rebuild` command.
 
-    drall exec drush core:rebuild --drall-workers=3
+    drall exec drush core:rebuild --workers=3
 
 When a worker runs out of work, it terminates automatically.
 
-#### --drall-no-progress
+#### --no-progress
 
 By default, Drall displays a progress bar that indicates how many sites have
 been processed and how many are remaining. In verbose mode, this progress
@@ -216,13 +225,13 @@ indicator also displays the time elapsed.
 
 However, the progress display that can mess with some terminals or scripts
 which don't handle backspace characters. For these environments, the progress
-bar can be disabled using the `--drall-no-progress` option.
+bar can be disabled using the `--no-progress` option.
 
 ##### Example: Hide progress bar
 
-    drall exec --drall-no-progress drush core:rebuild
+    drall exec --no-progress drush core:rebuild
 
-#### --drall-no-execute
+#### --dry-run
 
 This option allows you to see what commands will be executed without actually
 executing them.
@@ -230,7 +239,7 @@ executing them.
 ##### Example: Dry run
 
 ```shell
-$ drall exec --drall-no-execute --drall-group=bluish core:status
+$ drall exec --dry-run --group=bluish core:status
 drush --uri=donnie core:status
 drush --uri=leo core:status
 ```
@@ -319,38 +328,38 @@ done;
 
 This section covers some options that are supported by all `drall` commands.
 
-### --drall-group
+### --group
 
 Specify the target site group. See the section *site groups* for more
 information on site groups.
 
-    drall exec --drall-group=GROUP core:status --field=site
+    drall exec --group=GROUP core:status --field=site
 
-If `--drall-group` is not set, then the Drall uses the environment variable
+If `--group` is not set, then the Drall uses the environment variable
 `DRALL_GROUP`, if it is set.
 
-### --drall-filter
+### --filter
 
 Filter placeholder values with an expression. This is helpful for running
 commands on specific sites.
 
 ```shell
 # Run only on the "leo" site.
-drall exec --drall-filter=leo core:status
+drall exec --filter=leo core:status
 # Run only on "leo" and "ralph" sites.
-drall exec --drall-filter="leo||ralph" core:status
+drall exec --filter="leo||ralph" core:status
 ```
 
 For more on using filter expressions, refer to the documentation on
 [consolidation/filter-via-dot-access-data](https://github.com/consolidation/filter-via-dot-access-data).
 
-### --drall-verbose
+### --verbose
 
-Whether Drall should display verbose output.
+Display verbose output.
 
-### --drall-debug
+### --debug
 
-Whether Drall should display debugging output.
+Display debug-level output.
 
 ## Auto-detect sites
 
@@ -367,7 +376,7 @@ can alter the `$sites` variable based on your requirements.
 ## Site groups
 
 Drall allows you to group your sites so that you can run commands on these
-groups using the `--drall-group` option.
+groups using the `--group` option.
 
 ### Drall groups with site aliases
 

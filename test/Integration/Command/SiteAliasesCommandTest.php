@@ -46,11 +46,11 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox with --drall-filter.
+   * @testdox with --filter.
    */
   public function testWithFilter(): void {
     $process = Process::fromShellCommandline(
-      'drall site:aliases --drall-filter="leo||ralph"',
+      'drall site:aliases --filter="leo||ralph"',
       static::PATH_DRUPAL,
     );
     $process->run();
@@ -62,11 +62,11 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox with --drall-group.
+   * @testdox with --group.
    */
   public function testWithGroup(): void {
     $process = Process::fromShellCommandline(
-      'drall site:aliases --drall-group=reddish',
+      'drall site:aliases --group=reddish',
       static::PATH_DRUPAL
     );
     $process->run();

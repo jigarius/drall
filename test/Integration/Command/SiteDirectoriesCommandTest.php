@@ -46,10 +46,10 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox with --drall-filter.
+   * @testdox with --filter.
    */
   public function testExecuteWithFilter(): void {
-    $process = Process::fromShellCommandline('drall site:directories --drall-filter="leo||ralph"', static::PATH_DRUPAL);
+    $process = Process::fromShellCommandline('drall site:directories --filter="leo||ralph"', static::PATH_DRUPAL);
     $process->run();
     $this->assertOutputEquals(<<<EOF
 leo
@@ -59,10 +59,10 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox with --drall-group.
+   * @testdox with --group.
    */
   public function testWithGroup(): void {
-    $process = Process::fromShellCommandline('drall site:directories --drall-group=bluish', static::PATH_DRUPAL);
+    $process = Process::fromShellCommandline('drall site:directories --group=bluish', static::PATH_DRUPAL);
     $process->run();
     $this->assertOutputEquals(<<<EOF
 donnie
