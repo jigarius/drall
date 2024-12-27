@@ -212,11 +212,11 @@ EOT);
             return;
           }
 
-          $sCommand = Placeholder::replace([$placeholder->value => $value], $command);
-          $process = new Process("($sCommand) 2>&1", getcwd());
+          $pCommand = Placeholder::replace([$placeholder->value => $value], $command);
+          $process = new Process("($pCommand) 2>&1", getcwd());
 
           yield $process->start();
-          $this->logger->debug('Running: {command}', ['command' => $sCommand]);
+          $this->logger->debug('Running: {command}', ['command' => $pCommand]);
 
           // @todo Improve formatting of headings.
           $pOutput = yield ByteStream\buffer($process->getStdout());
