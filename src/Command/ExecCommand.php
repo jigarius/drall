@@ -22,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * A command to execute a shell command on multiple sites.
  */
-class ExecCommand extends BaseCommand {
+final class ExecCommand extends BaseCommand {
 
   use SignalAwareTrait;
 
@@ -93,7 +93,10 @@ class ExecCommand extends BaseCommand {
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);
 
-    $command = $this->getCommand($input);
+    if (!$command = $this->getCommand($input, $output)) {
+      return 1;
+    }
+
     $group = $this->getDrallGroup($input);
     $filter = $this->getDrallFilter($input);
 
@@ -210,16 +213,35 @@ class ExecCommand extends BaseCommand {
    *
    * @param \Symfony\Component\Console\Input\InputInterface $input
    *   Console input.
+   * @param \Symfony\Component\Console\Output\OutputInterface $output
+   *   Console output.
    *
-   * @return string
+   * @return string|null
    *   The command without Drall elements.
    *
    * @example
    * Input: /path/to/drall exec --verbose -- drush st --fields=site
    * Output: drush st --fields=site
    */
-  protected function getCommand(InputInterface $input): string {
-    // @todo Force -- for clarity if options are present.
+  private function getCommand(InputInterface $input, OutputInterface $output): ?string {
+    $rawTokens = $input->getRawTokens(TRUE);
+    if (!in_array('--', $rawTokens)) {
+      foreach ($rawTokens as $token) {
+        if (str_starts_with($token, '-')) {
+          $output->writeln(<<<EOT
+When using options, a "--" must be placed before the command to be executed.
+
+<comment>Incorrect:</comment> drall exec --dry-run drush --field=site core:status
+<comment>Correct:</comment>   drall exec --dry-run -- drush --field=site core:status
+
+Notice the `--` between `--dry-run` and the word `drush`.
+EOT);
+          $this->logger->error('Separator "--" must be used when using options.');
+          return NULL;
+        }
+      }
+    }
+
     // @todo Throw an error if --drall-* options are present.
     // Everything after the first "--" is treated as an argument. All such
     // arguments are treated as parts of the command to be executed.

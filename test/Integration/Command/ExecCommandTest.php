@@ -16,7 +16,7 @@ class ExecCommandTest extends TestCase {
    */
   public function testCommandDetection() {
     $process = Process::fromShellCommandline(
-      'drall exec --debug --dry-run drush st',
+      'drall exec --debug --dry-run -- drush st',
       static::PATH_DRUPAL,
     );
     $process->run();
@@ -33,6 +33,42 @@ drush --uri=leo st
 drush --uri=mikey st
 # Item: ralph
 drush --uri=ralph st
+
+EOT, $process->getOutput());
+  }
+
+  /**
+   * @testdox Works when -- is absent and options are not used.
+   */
+  public function testMissingArgsSeparatorWithNoOptions(): void {
+    $process = Process::fromShellCommandline(
+      'drall exec --dry-run drush st',
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertOutputEquals(<<<EOT
+When using options, a "--" must be placed before the command to be executed.
+Incorrect: drall exec --dry-run drush --field=site core:status
+Correct:   drall exec --dry-run -- drush --field=site core:status
+Notice the `--` between `--dry-run` and the word `drush`.
+
+EOT, $process->getOutput());
+  }
+
+  /**
+   * @testdox Shows error when -- is absent but options are used.
+   */
+  public function testMissingArgsSeparatorWithOptions(): void {
+    $process = Process::fromShellCommandline(
+      'drall exec --dry-run drush st',
+    static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertOutputEquals(<<<EOT
+When using options, a "--" must be placed before the command to be executed.
+Incorrect: drall exec --dry-run drush --field=site core:status
+Correct:   drall exec --dry-run -- drush --field=site core:status
+Notice the `--` between `--dry-run` and the word `drush`.
 
 EOT, $process->getOutput());
   }
@@ -92,7 +128,7 @@ EOT, $process->getOutput());
    */
   public function testWorkingDirectory(): void {
     $process = Process::fromShellCommandline(
-      'drall exec --filter=tmnt "echo \"Site: @@site\" && pwd"',
+      'drall exec --filter=tmnt -- "echo \"Site: @@site\" && pwd"',
       static::PATH_DRUPAL,
     );
     $process->run();
@@ -324,7 +360,7 @@ EOF, $process2->getOutput());
    */
   public function testWithDirPlaceholderAndDebug(): void {
     $process = Process::fromShellCommandline(
-      'drall exec --debug ls web/sites/@@dir/settings.php',
+      'drall exec --debug -- ls web/sites/@@dir/settings.php',
       static::PATH_DRUPAL,
     );
     $process->run();
