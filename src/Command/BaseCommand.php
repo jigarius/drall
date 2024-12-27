@@ -32,6 +32,14 @@ abstract class BaseCommand extends Command {
     );
   }
 
+  protected function initialize(InputInterface $input, OutputInterface $output): void {
+    if (!$this->logger) {
+      $this->logger = new ConsoleLogger($output);
+    }
+
+    parent::initialize($input, $output);
+  }
+
   /**
    * Gets the active Drall group.
    *
@@ -65,10 +73,6 @@ abstract class BaseCommand extends Command {
   }
 
   protected function preExecute(InputInterface $input, OutputInterface $output) {
-    if (!$this->logger) {
-      $this->logger = new ConsoleLogger($output);
-    }
-
     if (!$this->hasSiteDetector()) {
       $this->setSiteDetector(new SiteDetector());
     }

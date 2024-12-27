@@ -12,7 +12,10 @@ use Symfony\Component\Process\Process;
  */
 class DrallTest extends TestCase {
 
-  public function testVersion() {
+  /**
+   * @testdox Returns correct version string.
+   */
+  public function testVersion(): void {
     $process = Process::fromShellCommandline('drall --version', static::PATH_DRUPAL);
     $process->run();
     $version = InstalledVersions::getPrettyVersion('jigarius/drall');
@@ -20,9 +23,9 @@ class DrallTest extends TestCase {
   }
 
   /**
-   * Run drall with a command it doesn't recognize.
+   * @testdox Suggests "drush" for unrecognized commands.
    */
-  public function testUnrecognizedCommand() {
+  public function testUnrecognizedCommand(): void {
     $process = Process::fromShellCommandline('drall st', static::PATH_DRUPAL);
     $process->run();
     $this->assertOutputEquals(<<<EOT
@@ -33,6 +36,20 @@ class DrallTest extends TestCase {
   Alternatively, run "drall list" to see a list of all available commands.
 
 EOT, $process->getErrorOutput());
+  }
+
+  /**
+   * @testdox Shows error when --drall-* options are detected.
+   */
+  public function testShowErrorForObsoleteOptions(): void {
+    $process = Process::fromShellCommandline('./vendor/bin/drall exec --drall-foo drush st', static::PATH_DRUPAL);
+    $process->run();
+    $this->assertOutputEquals(<<<EOT
+In Drall 4.x, all --drall-* options have been renamed.
+See https://github.com/jigarius/drall/issues/99
+
+EOT, $process->getOutput());
+    $this->assertEquals(1, $process->getExitCode());
   }
 
 }

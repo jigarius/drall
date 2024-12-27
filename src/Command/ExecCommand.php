@@ -90,6 +90,23 @@ final class ExecCommand extends BaseCommand {
     $this->ignoreValidationErrors();
   }
 
+  protected function initialize(InputInterface $input, OutputInterface $output): void {
+    // If obsolete --drall-* options are present, then abort.
+    if (method_exists($input, 'getRawTokens')) {
+      foreach ($input->getRawTokens() as $token) {
+        if (str_starts_with($token, '--drall-')) {
+          $output->writeln(<<<EOT
+In Drall 4.x, all --drall-* options have been renamed.
+See https://github.com/jigarius/drall/issues/99
+EOT);
+          throw new \RuntimeException('Obsolete options detected.');
+        }
+      }
+    }
+
+    parent::initialize($input, $output);
+  }
+
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);
 
