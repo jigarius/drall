@@ -42,14 +42,11 @@ final class Drall extends Application {
   protected function configureIO(InputInterface $input, OutputInterface $output): void {
     parent::configureIO($input, $output);
 
-    if ($input->hasParameterOption('--debug', TRUE)) {
+    if (
+      $input->hasParameterOption('--debug', TRUE) ||
+      $input->hasParameterOption('-d', TRUE)
+    ) {
       $output->setVerbosity(OutputInterface::VERBOSITY_DEBUG);
-    }
-    elseif ($input->hasParameterOption('--verbose', TRUE)) {
-      $output->setVerbosity(OutputInterface::VERBOSITY_VERY_VERBOSE);
-    }
-    else {
-      $output->setVerbosity(OutputInterface::VERBOSITY_NORMAL);
     }
 
     // The parent::configureIO sets verbosity in a SHELL_VERBOSITY. This causes
@@ -69,7 +66,6 @@ final class Drall extends Application {
     // Remove unneeded options.
     $options = $definition->getOptions();
     unset(
-      $options['quiet'],
       $options['no-interaction'],
     );
     $definition->setOptions($options);
