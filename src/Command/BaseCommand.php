@@ -18,18 +18,26 @@ abstract class BaseCommand extends Command {
 
   protected function configure() {
     $this->addOption(
-      'drall-group',
-      NULL,
+      'group',
+      'g',
       InputOption::VALUE_OPTIONAL,
       'Site group identifier.'
     );
 
     $this->addOption(
-      'drall-filter',
-      NULL,
+      'filter',
+      'f',
       InputOption::VALUE_OPTIONAL,
       'Filter sites based on provided expression.'
     );
+  }
+
+  protected function initialize(InputInterface $input, OutputInterface $output): void {
+    if (!$this->logger) {
+      $this->logger = new ConsoleLogger($output);
+    }
+
+    parent::initialize($input, $output);
   }
 
   /**
@@ -42,7 +50,7 @@ abstract class BaseCommand extends Command {
    *   Drall group, if any. Otherwise, NULL.
    */
   protected function getDrallGroup(InputInterface $input): ?string {
-    if ($group = $input->getOption('drall-group')) {
+    if ($group = $input->getOption('group')) {
       return $group;
     }
 
@@ -61,14 +69,10 @@ abstract class BaseCommand extends Command {
    * @see https://packagist.org/packages/consolidation/filter-via-dot-access-data
    */
   protected function getDrallFilter(InputInterface $input): ?string {
-    return $input->getOption('drall-filter') ?: NULL;
+    return $input->getOption('filter') ?: NULL;
   }
 
   protected function preExecute(InputInterface $input, OutputInterface $output) {
-    if (!$this->logger) {
-      $this->logger = new ConsoleLogger($output);
-    }
-
     if (!$this->hasSiteDetector()) {
       $this->setSiteDetector(new SiteDetector());
     }
