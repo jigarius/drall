@@ -21,6 +21,19 @@ abstract class TestCase extends TestCaseBase {
   const PATH_EMPTY_DRUPAL = '/opt/empty-drupal';
 
   /**
+   * Normalizes console output by stripping unimportant spaces.
+   *
+   * @param string $output
+   *   Raw output.
+   *
+   * @return string
+   *   Normalized output.
+   */
+  private static function normalizeString(string $output): string {
+    return preg_replace('@(\s+)\n@', "\n", $output);
+  }
+
+  /**
    * Creates a temporary file path.
    *
    * @example
@@ -57,19 +70,16 @@ abstract class TestCase extends TestCaseBase {
     return $drupalFinder;
   }
 
-  /**
-   * Asserts Shell output ignoring unimportant whitespace.
-   *
-   * @param string $expected
-   *   Expected output.
-   * @param mixed $actual
-   *   Actual output.
-   * @param string $message
-   *   Error message.
-   */
   protected function assertOutputEquals(string $expected, mixed $actual, string $message = ''): void {
-    $actual = preg_replace('@(\s+)\n@', "\n", $actual ?? '');
-    $this->assertEquals($expected, $actual, $message);
+    $this->assertEquals($expected, self::normalizeString($actual ?? ''), $message);
+  }
+
+  protected function assertOutputStartsWith(string $expected, mixed $actual, string $message = ''): void {
+    $this->assertStringStartsWith($expected, self::normalizeString($actual ?? ''), $message);
+  }
+
+  protected function assertOutputContainsString(string $expected, mixed $actual, string $message = ''): void {
+    $this->assertStringContainsString($expected, self::normalizeString($actual ?? ''), $message);
   }
 
 }

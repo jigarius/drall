@@ -78,11 +78,11 @@ abstract class BaseCommand extends Command {
     }
 
     if ($group = $this->getDrallGroup($input)) {
-      $this->logger->debug('Detected group: {group}', ['group' => $group]);
+      $this->logger->info('Using group: {group}', ['group' => $group]);
     }
 
     if ($filter = $this->getDrallFilter($input)) {
-      $this->logger->debug('Detected filter: {filter}', ['filter' => $filter]);
+      $this->logger->info('Using filter: {filter}', ['filter' => $filter]);
     }
   }
 

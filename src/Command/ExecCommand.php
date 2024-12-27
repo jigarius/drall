@@ -12,6 +12,7 @@ use Drall\Drall;
 use Drall\Model\EnvironmentId;
 use Drall\Model\Placeholder;
 use Drall\Trait\SignalAwareTrait;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -91,15 +92,38 @@ final class ExecCommand extends BaseCommand {
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output): void {
+    if (!method_exists($input, 'getRawTokens')) {
+      parent::initialize($input, $output);
+      return;
+    }
+
+    // Parts of the command after "exec".
+    $rawTokens = $input->getRawTokens(TRUE);
+
     // If obsolete --drall-* options are present, then abort.
-    if (method_exists($input, 'getRawTokens')) {
-      foreach ($input->getRawTokens() as $token) {
-        if (str_starts_with($token, '--drall-')) {
-          $output->writeln(<<<EOT
+    foreach ($rawTokens as $token) {
+      if (str_starts_with($token, '--drall-')) {
+        $output->writeln(<<<EOT
 In Drall 4.x, all --drall-* options have been renamed.
 See https://github.com/jigarius/drall/issues/99
 EOT);
-          throw new \RuntimeException('Obsolete options detected.');
+        throw new \RuntimeException('Obsolete options detected');
+      }
+    }
+
+    // If options are present, an options separator (--) is required.
+    if (!in_array('--', $rawTokens)) {
+      foreach ($rawTokens as $token) {
+        if (str_starts_with($token, '-')) {
+          $output->writeln(<<<EOT
+When using options, a "--" must be placed before the command to be executed.
+
+<comment>Incorrect:</comment> drall exec --dry-run drush --field=site core:status
+<comment>Correct:</comment>   drall exec --dry-run -- drush --field=site core:status
+
+Notice the `--` between `--dry-run` and the word `drush`.
+EOT);
+          throw new \RuntimeException('Missing options separator');
         }
       }
     }
@@ -140,19 +164,19 @@ EOT);
     // Display commands without executing them.
     if ($input->getOption('dry-run')) {
       foreach ($values as $value) {
-        $sCommand = Placeholder::replace([$placeholder->value => $value], $command);
-        $output->writeln("# Item: $value", OutputInterface::VERBOSITY_VERBOSE);
-        $output->writeln($sCommand);
+        $pCommand = Placeholder::replace([$placeholder->value => $value], $command);
+        $output->writeln("• $value: Preview");
+        $output->writeln($pCommand, OutputInterface::VERBOSITY_QUIET);
       }
 
-      return 0;
+      return Command::SUCCESS;
     }
 
     $progressBar = new ProgressBar(
       $this->isProgressBarHidden($input) ? new NullOutput() : $output,
       count($values)
     );
-    $exitCode = 0;
+    $exitCode = Command::SUCCESS;
 
     // Handle interruption signals to stop Drall gracefully.
     $isStopping = FALSE;
@@ -162,7 +186,7 @@ EOT);
       // If a previous SIGINT was received, then stop immediately.
       if ($isStopping) {
         $this->logger->error('Interrupted by user.');
-        exit(1);
+        exit(Command::FAILURE);
       }
 
       // Prepare to stop after the current item is processed.
@@ -194,14 +218,22 @@ EOT);
           yield $process->start();
           $this->logger->debug('Running: {command}', ['command' => $sCommand]);
 
-          $sOutput = yield ByteStream\buffer($process->getStdout());
-          if (0 !== yield $process->join()) {
-            $exitCode = 1;
+          // @todo Improve formatting of headings.
+          $pOutput = yield ByteStream\buffer($process->getStdout());
+          $pStatus = 'Done';
+          $pIcon = '✔';
+          if (Command::SUCCESS !== yield $process->join()) {
+            $pStatus = 'Failed';
+            $pIcon = '✖';
+            $exitCode = Command::FAILURE;
           }
 
+          $pMessage = "$pIcon $value: $pStatus";
+
           $progressBar->clear();
-          $output->writeln("Finished: $value");
-          $output->write($sOutput);
+          // Always display command output, even in --quiet mode.
+          $output->writeln($pMessage, OutputInterface::VERBOSITY_QUIET);
+          $output->write($pOutput);
 
           $progressBar->advance();
           $progressBar->display();
@@ -217,7 +249,7 @@ EOT);
 
     if ($isStopping) {
       $this->logger->error('Interrupted by user.');
-      return 1;
+      return Command::FAILURE;
     }
 
     return $exitCode;
@@ -241,29 +273,10 @@ EOT);
    * Output: drush st --fields=site
    */
   private function getCommand(InputInterface $input, OutputInterface $output): ?string {
-    $rawTokens = $input->getRawTokens(TRUE);
-    if (!in_array('--', $rawTokens)) {
-      foreach ($rawTokens as $token) {
-        if (str_starts_with($token, '-')) {
-          $output->writeln(<<<EOT
-When using options, a "--" must be placed before the command to be executed.
-
-<comment>Incorrect:</comment> drall exec --dry-run drush --field=site core:status
-<comment>Correct:</comment>   drall exec --dry-run -- drush --field=site core:status
-
-Notice the `--` between `--dry-run` and the word `drush`.
-EOT);
-          $this->logger->error('Separator "--" must be used when using options.');
-          return NULL;
-        }
-      }
-    }
-
-    // @todo Throw an error if --drall-* options are present.
     // Everything after the first "--" is treated as an argument. All such
     // arguments are treated as parts of the command to be executed.
     $command = implode(' ', $input->getArguments()['cmd']);
-    $this->logger->debug("Command: {command}", ['command' => $command]);
+    $this->logger->debug("Command received: {command}", ['command' => $command]);
 
     if (
       str_contains($command, 'drush') &&
@@ -272,6 +285,7 @@ EOT);
       // Inject --uri=@@dir for Drush commands without placeholders.
       $command = preg_replace('/\b(drush) /', 'drush --uri=@@dir ', $command, -1);
       $this->logger->debug('Injected --uri parameter for Drush command.');
+      $this->logger->notice("Command modified: {command}", ['command' => $command]);
     }
 
     return $command;

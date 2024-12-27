@@ -24,13 +24,6 @@ foreach ([
 
 use Drall\Drall;
 
-try {
-  $drall = new Drall();
-  $exitCode = $drall->run();
-}
-catch (Exception $e) {
-  echo "ERROR {$e->getCode()}: {$e->getMessage()}";
-  exit(1);
-}
-
-exit($exitCode);
+$drall = new Drall();
+$drall->setAutoExit(TRUE);
+$drall->run();
