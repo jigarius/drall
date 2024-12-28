@@ -75,6 +75,14 @@ final class ExecCommand extends BaseCommand {
     );
 
     $this->addOption(
+      'interval',
+      NULL,
+      InputOption::VALUE_OPTIONAL,
+      'Number of seconds to wait between commands.',
+      0,
+    );
+
+    $this->addOption(
       'dry-run',
       'X',
       InputOption::VALUE_NONE,
@@ -92,26 +100,22 @@ final class ExecCommand extends BaseCommand {
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output): void {
+    $this->checkObsoleteOptions($input, $output);
+    $this->checkOptionsSeparator($input, $output);
+    $this->checkIntervalOption($input, $output);
+    $this->checkWorkersOption($input, $output);
+    $this->checkInterOptionCompatibility($input, $output);
+
+    parent::initialize($input, $output);
+  }
+
+  private function checkOptionsSeparator(InputInterface $input, OutputInterface $output): void {
     if (!method_exists($input, 'getRawTokens')) {
-      parent::initialize($input, $output);
       return;
     }
 
-    // Parts of the command after "exec".
-    $rawTokens = $input->getRawTokens(TRUE);
-
-    // If obsolete --drall-* options are present, then abort.
-    foreach ($rawTokens as $token) {
-      if (str_starts_with($token, '--drall-')) {
-        $output->writeln(<<<EOT
-In Drall 4.x, all --drall-* options have been renamed.
-See https://github.com/jigarius/drall/issues/99
-EOT);
-        throw new \RuntimeException('Obsolete options detected');
-      }
-    }
-
     // If options are present, an options separator (--) is required.
+    $rawTokens = $input->getRawTokens(TRUE);
     if (!in_array('--', $rawTokens)) {
       foreach ($rawTokens as $token) {
         if (str_starts_with($token, '-')) {
@@ -127,8 +131,71 @@ EOT);
         }
       }
     }
+  }
 
-    parent::initialize($input, $output);
+  private function checkObsoleteOptions(InputInterface $input, OutputInterface $output): void {
+    if (!method_exists($input, 'getRawTokens')) {
+      return;
+    }
+
+    // If obsolete --drall-* options are present, then abort.
+    foreach ($input->getRawTokens(TRUE) as $token) {
+      if (str_starts_with($token, '--drall-')) {
+        $output->writeln(<<<EOT
+In Drall 4.x, all <comment>--drall-*</comment> options have been renamed.
+See https://github.com/jigarius/drall/issues/99
+EOT);
+        throw new \RuntimeException('Obsolete options detected');
+      }
+    }
+  }
+
+  private function checkIntervalOption(InputInterface $input, OutputInterface $output): void {
+    $interval = $input->getOption('interval');
+
+    if ($interval < 0) {
+      $output->writeln(<<<EOT
+The value for <comment>--interval</comment> must be a positive integer.
+EOT);
+      throw new \RuntimeException('Invalid options detected');
+    }
+  }
+
+  private function checkWorkersOption(InputInterface $input, OutputInterface $output): void {
+    $workers = $input->getOption('workers');
+
+    if ($workers > self::WORKER_LIMIT) {
+      $limit = self::WORKER_LIMIT;
+      $output->writeln(<<<EOT
+The value for <comment>--workers</comment> must be less than or equal to $limit.
+EOT);
+      throw new \RuntimeException('Invalid options detected');
+    }
+  }
+
+  private function checkInterOptionCompatibility(InputInterface $input, OutputInterface $output): void {
+    if (
+      $input->getOption('workers') > 1 &&
+      $input->getOption('interval') > 0
+    ) {
+      $output->writeln(<<<EOT
+The options <comment>--interval</comment> and <comment>--workers</comment> cannot be used together.
+EOT);
+      throw new \RuntimeException('Incompatible options detected');
+    }
+  }
+
+  protected function preExecute(InputInterface $input, OutputInterface $output): void {
+    parent::preExecute($input, $output);
+
+    $workers = $input->getOption('workers');
+    if ($workers > 1) {
+      $this->logger->notice("Using {count} workers.", ['count' => $workers]);
+    }
+
+    if ($interval = $input->getOption('interval')) {
+      $this->logger->notice("Using a $interval-second interval between commands.", ['interval' => $interval]);
+    }
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
@@ -159,7 +226,7 @@ EOT);
       return 0;
     }
 
-    $workers = $this->getWorkerCount($input);
+    $workers = $workers = $input->getOption('workers');
 
     // Display commands without executing them.
     if ($input->getOption('dry-run')) {
@@ -198,6 +265,7 @@ EOT);
       $values,
       $command,
       $placeholder,
+      $input,
       $output,
       $progressBar,
       $workers,
@@ -207,7 +275,15 @@ EOT);
       yield ConcurrentIterator\each(
         Iterator\fromIterable($values),
         new LocalSemaphore($workers),
-        function ($value) use ($command, $placeholder, $output, $progressBar, &$exitCode, &$isStopping) {
+        function ($value) use (
+          $command,
+          $placeholder,
+          $input,
+          $output,
+          $progressBar,
+          &$exitCode,
+          &$isStopping,
+        ) {
           if ($isStopping) {
             return;
           }
@@ -237,6 +313,11 @@ EOT);
 
           $progressBar->advance();
           $progressBar->display();
+
+          // Wait between commands if --interval is specified.
+          if ($interval = $input->getOption('interval')) {
+            sleep($interval);
+          }
         }
       );
     });
@@ -289,30 +370,6 @@ EOT);
     }
 
     return $command;
-  }
-
-  /**
-   * Gets the number of workers that should be used.
-   *
-   * @param \Symfony\Component\Console\Input\InputInterface $input
-   *   The input.
-   *
-   * @return int
-   *   Number of workers to be used.
-   */
-  protected function getWorkerCount(InputInterface $input): int {
-    $result = $input->getOption('workers');
-
-    if ($result > self::WORKER_LIMIT) {
-      $this->logger->warning('Limiting workers to {count}, which is the maximum.', ['count' => self::WORKER_LIMIT]);
-      $result = self::WORKER_LIMIT;
-    }
-
-    if ($result > 1) {
-      $this->logger->notice("Using {count} workers.", ['count' => $result]);
-    }
-
-    return $result;
   }
 
   /**

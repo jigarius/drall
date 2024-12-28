@@ -108,7 +108,7 @@ interrupt signal is received, then Drall stops immediately.
 
 In this method, the `--uri` option is sent to `drush`.
 
-    drall exec drush --uri=@@dir core:status
+    drall exec -- drush --uri=@@dir core:status
 
 If it is a Drush command and no valid `@@placeholder` are present, then
 `--uri=@@dir` is automatically added after each occurrence of `drush`.
@@ -117,7 +117,7 @@ If it is a Drush command and no valid `@@placeholder` are present, then
 # Raw drush command (no placeholders)
 drall exec drush core:status
 # Command that is executed (placeholders injected)
-drall exec drush --uri=@@dir core:status
+drall exec -- drush --uri=@@dir core:status
 ```
 
 ##### Example
@@ -174,17 +174,16 @@ cat web/sites/ralph/settings.local.php
 #### Options
 
 For the `drall exec` command, all Drall options must be set right after
-`drall exec`. For example,
+`drall exec`. Additionally, `--` must be used before the command to be
+executed. Following are some examples of running `drush` with options.
 
 ```shell
-# Correct: Drall gets --verbose.
-drall exec --verbose drush core:status
-# Incorrect: --verbose is ignored.
-drall exec drush core:status --verbose
-# Correct: Drall and Drush, both --verbose.
+# Drall is --verbose
+drall exec --verbose -- drush core:status
+# Drush is verbose
+drall exec -- drush --verbose core:status
+# Both Drall and Drush are --verbose
 drall exec --verbose -- drush --verbose core:status
-# Incorrect: Only Drall gets --verbose.
-drall exec --verbose drush core:status
 ```
 
 In summary, the syntax is as follows:
@@ -194,6 +193,14 @@ drall exec [DRALL-OPTIONS] -- drush [DRUSH-OPTIONS]
 ```
 
 Besides the global options, the `exec` command supports the following options.
+
+#### --interval
+
+This option makes Drall wait for `n` seconds after processing each item.
+
+    drall exec --interval=3 -- drush core:rebuild
+
+Such an interval cannot be used when using a multiple workers.
 
 #### --workers
 
@@ -213,7 +220,7 @@ conflict between the Drall workers.
 
 The command below launches 3 instances of Drall to run `core:rebuild` command.
 
-    drall exec drush core:rebuild --workers=3
+    drall exec --workers=3 -- drush core:rebuild
 
 When a worker runs out of work, it terminates automatically.
 
@@ -229,7 +236,7 @@ bar can be disabled using the `--no-progress` option.
 
 ##### Example: Hide progress bar
 
-    drall exec --no-progress drush core:rebuild
+    drall exec --no-progress -- drush core:rebuild
 
 #### --dry-run
 
@@ -239,7 +246,7 @@ executing them.
 ##### Example: Dry run
 
 ```shell
-$ drall exec --dry-run --group=bluish core:status
+$ drall exec --dry-run --group=bluish -- drush core:status
 drush --uri=donnie core:status
 drush --uri=leo core:status
 ```
@@ -333,7 +340,7 @@ This section covers some options that are supported by all `drall` commands.
 Specify the target site group. See the section *site groups* for more
 information on site groups.
 
-    drall exec --group=GROUP core:status --field=site
+    drall exec --group=GROUP -- drush core:status --field=site
 
 If `--group` is not set, then the Drall uses the environment variable
 `DRALL_GROUP`, if it is set.
@@ -345,9 +352,9 @@ commands on specific sites.
 
 ```shell
 # Run only on the "leo" site.
-drall exec --filter=leo core:status
+drall exec --filter=leo -- drush core:status
 # Run only on "leo" and "ralph" sites.
-drall exec --filter="leo||ralph" core:status
+drall exec --filter="leo||ralph" -- drush core:status
 ```
 
 For more on using filter expressions, refer to the documentation on

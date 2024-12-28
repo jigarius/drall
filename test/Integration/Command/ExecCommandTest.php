@@ -669,6 +669,43 @@ EOF, $process->getOutput());
   }
 
   /**
+   * @testdox Shows error when --interval is negative.
+   */
+  public function testNegativeInterval(): void {
+    $process = Process::fromShellCommandline(
+      'drall ex --interval=-3 -- drush st --fields=site',
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertOutputEquals(<<<EOT
+The value for --interval must be a positive integer.
+
+EOT, $process->getOutput());
+    $this->assertOutputContainsString('Invalid options detected', $process->getErrorOutput());
+    $this->assertEquals(1, $process->getExitCode());
+  }
+
+  /**
+   * @testdox With --interval.
+   */
+  public function testWithInterval(): void {
+    $process = Process::fromShellCommandline(
+      'drall ex --interval=2 --verbose -- ./vendor/bin/drush st --fields=site',
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertOutputContainsString(
+      '[notice] Using a 2-second interval between commands.' . PHP_EOL,
+      $process->getOutput(),
+    );
+
+    // The command must take 2 * count($sites) seconds.
+    // This confirms that the sleep(2) command is actually executed.
+    $timeTaken = microtime(TRUE) - $process->getStartTime();
+    $this->assertGreaterThan(10, $timeTaken);
+  }
+
+  /**
    * @testdox With --workers=2.
    */
   public function testWithWorkers(): void {
@@ -697,20 +734,37 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox With --workers=17.
-   *
-   * Drall caps the maximum workers to a pre-determined limit.
+   * @testdox Shows error when --worker limit exceeds the maximum.
    */
   public function testWorkerLimit(): void {
     $process = Process::fromShellCommandline(
-      'drall ex --workers=17 --verbose -- drush --uri=@@dir st --fields=site',
+      'drall ex --workers=17 -- drush st --fields=site',
       static::PATH_DRUPAL,
     );
     $process->run();
-    $this->assertStringStartsWith(
-      '[warning] Limiting workers to 16, which is the maximum.' . PHP_EOL,
-      $process->getOutput(),
+    $this->assertOutputEquals(<<<EOT
+The value for --workers must be less than or equal to 16.
+
+EOT, $process->getOutput());
+    $this->assertOutputContainsString('Invalid options detected', $process->getErrorOutput());
+    $this->assertEquals(1, $process->getExitCode());
+  }
+
+  /**
+   * @testdox Shows error when --workers and --interval are used together.
+   */
+  public function testIntervalWithWorkers(): void {
+    $process = Process::fromShellCommandline(
+      'drall ex --workers=2 --interval=2 -- drush st --fields=site',
+      static::PATH_DRUPAL,
     );
+    $process->run();
+    $this->assertOutputEquals(<<<EOT
+The options --interval and --workers cannot be used together.
+
+EOT, $process->getOutput());
+    $this->assertOutputContainsString('Incompatible options detected', $process->getErrorOutput());
+    $this->assertEquals(1, $process->getExitCode());
   }
 
   /**
