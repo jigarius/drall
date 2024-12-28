@@ -8,7 +8,6 @@ use Amp\Loop;
 use Amp\Process\Process;
 use Amp\Sync\ConcurrentIterator;
 use Amp\Sync\LocalSemaphore;
-use Drall\Drall;
 use Drall\Model\EnvironmentId;
 use Drall\Model\Placeholder;
 use Drall\Trait\SignalAwareTrait;
@@ -401,7 +400,7 @@ EOT);
    */
   private function isProgressBarHidden(InputInterface $input): bool {
     if (
-      Drall::isEnvironment(EnvironmentId::Test) ||
+      EnvironmentId::Test->isActive() ||
       $input->getOption('no-progress')
     ) {
       return TRUE;

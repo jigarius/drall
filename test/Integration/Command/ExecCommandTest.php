@@ -2,6 +2,7 @@
 
 namespace Drall\Test\Integration\Command;
 
+use Drall\Model\EnvironmentId;
 use Drall\TestCase;
 use Symfony\Component\Process\Process;
 
@@ -523,7 +524,7 @@ EOF, $output);
     $process = Process::fromShellCommandline(
       'drall exec -- ./vendor/bin/drush st --field=site 2>&1',
       static::PATH_DRUPAL,
-      ['DRALL_ENVIRONMENT' => 'unknown'],
+      ['DRALL_ENVIRONMENT' => EnvironmentId::Unknown->value],
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
@@ -553,7 +554,7 @@ EOF, $process->getOutput());
       // repeating --no-progress in all commands. Thus, for this test,
       // an "unknown" environment is used to check whether --no-progress
       // actually works.
-      ['DRALL_ENVIRONMENT' => 'unknown'],
+      ['DRALL_ENVIRONMENT' => EnvironmentId::Unknown->value],
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
