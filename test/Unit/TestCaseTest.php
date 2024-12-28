@@ -22,16 +22,32 @@ class TestCaseTest extends TestCase {
   }
 
   public function testAssertOutputEquals() {
-    $expected = <<<EOF
-foo
-bar
-baz
+    // For some reason, drush's output ($actual) has spaces before EOL.
+    // This assertion respects leading spaces and ignores trailing spaces.
+    $this->assertOutputEquals(<<<EOT
+[notice] Hakuna matata.
+  - bunny
+  - wabbit
 
-EOF;
-    // For some reason, drush's output has spaces before EOL.
-    $actual = "foo \nbar \nbaz \n";
+EOT, "[notice] Hakuna matata. \n  - bunny \n  - wabbit \n");
+  }
 
-    $this->assertOutputEquals($expected, $actual);
+  public function testAssertOutputStartsWith() {
+    // For some reason, drush's output ($actual) has spaces before EOL.
+    // This assertion respects leading spaces and ignores trailing spaces.
+    $this->assertOutputStartsWith(
+      '[notice] Hakuna matata.' . PHP_EOL,
+      "[notice] Hakuna matata. \n  - bunny \n  - wabbit \n",
+    );
+  }
+
+  public function testAssertOutputContainsString() {
+    // For some reason, drush's output ($actual) has spaces before EOL.
+    // This assertion respects leading spaces and ignores trailing spaces.
+    $this->assertOutputContainsString(
+      '  - bunny' . PHP_EOL,
+      "[notice] Hakuna matata. \n  - bunny \n  - wabbit \n",
+    );
   }
 
 }
