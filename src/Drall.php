@@ -66,6 +66,7 @@ final class Drall extends Application {
     $options = $definition->getOptions();
     unset(
       $options['no-interaction'],
+      $options['silent'],
     );
     $definition->setOptions($options);
 

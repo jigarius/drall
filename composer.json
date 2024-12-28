@@ -18,8 +18,8 @@
     "homepage": "https://github.com/jigarius/drall",
     "require": {
         "php": ">= 8.3",
-        "amphp/process": "^1.1",
-        "amphp/sync": "^1.4",
+        "amphp/pipeline": "^1.2",
+        "amphp/process": "^2",
         "consolidation/filter-via-dot-access-data": "^2.0",
         "consolidation/site-alias": "^3 || ^4",
         "drush/drush": "^12 || ^13",
@@ -29,7 +29,7 @@
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.1",
         "drupal/coder": "^8.3",
         "ergebnis/composer-normalize": "^2.28",
-        "phpro/grumphp": "^1.13",
+        "phpro/grumphp": "^2.10",
         "phpunit/phpunit": "^9.5",
         "squizlabs/php_codesniffer": "^3.6"
     },

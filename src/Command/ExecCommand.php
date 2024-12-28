@@ -3,11 +3,8 @@
 namespace Drall\Command;
 
 use Amp\ByteStream;
-use Amp\Iterator;
-use Amp\Loop;
+use Amp\Pipeline\Pipeline;
 use Amp\Process\Process;
-use Amp\Sync\ConcurrentIterator;
-use Amp\Sync\LocalSemaphore;
 use Drall\Model\EnvironmentId;
 use Drall\Model\Placeholder;
 use Drall\Trait\SignalAwareTrait;
@@ -32,18 +29,6 @@ final class ExecCommand extends BaseCommand {
    * @var int
    */
   const WORKER_LIMIT = 16;
-
-  /**
-   * To be treated as the $argv array.
-   *
-   * @var array
-   */
-  protected array $argv;
-
-  public function __construct(?string $name = NULL) {
-    parent::__construct($name);
-    $this->argv = $GLOBALS['argv'];
-  }
 
   protected function configure() {
     parent::configure();
@@ -162,11 +147,12 @@ EOT);
 
   private function checkWorkersOption(InputInterface $input, OutputInterface $output): void {
     $workers = $input->getOption('workers');
+    $limit = self::WORKER_LIMIT;
 
-    if ($workers > self::WORKER_LIMIT) {
-      $limit = self::WORKER_LIMIT;
+    if ($workers < 1 || $workers > $limit) {
+      ;
       $output->writeln(<<<EOT
-The value for <comment>--workers</comment> must be less than or equal to $limit.
+The value for <comment>--workers</comment> must be between 1 and $limit.
 EOT);
       throw new \RuntimeException('Invalid options detected');
     }
@@ -225,8 +211,6 @@ EOT);
       return 0;
     }
 
-    $workers = $workers = $input->getOption('workers');
-
     // Display commands without executing them.
     if ($input->getOption('dry-run')) {
       foreach ($values as $value) {
@@ -260,66 +244,51 @@ EOT);
       $isStopping = TRUE;
     });
 
-    Loop::run(function () use (
-      $values,
-      $command,
-      $placeholder,
-      $input,
-      $output,
-      $progressBar,
-      $workers,
-      &$exitCode,
-      &$isStopping
-    ) {
-      yield ConcurrentIterator\each(
-        Iterator\fromIterable($values),
-        new LocalSemaphore($workers),
-        function ($value) use (
-          $command,
-          $placeholder,
-          $input,
-          $output,
-          $progressBar,
-          &$exitCode,
-          &$isStopping,
-        ) {
-          if ($isStopping) {
-            return;
-          }
-
-          $pCommand = Placeholder::replace([$placeholder->value => $value], $command);
-          $process = new Process("($pCommand) 2>&1", getcwd());
-
-          yield $process->start();
-          $this->logger->debug('Running: {command}', ['command' => $pCommand]);
-
-          // @todo Improve formatting of headings.
-          $pOutput = yield ByteStream\buffer($process->getStdout());
-          $pStatus = 'Done';
-          $pIcon = '✔';
-          if (Command::SUCCESS !== yield $process->join()) {
-            $pStatus = 'Failed';
-            $pIcon = '✖';
-            $exitCode = Command::FAILURE;
-          }
-
-          $pMessage = "$pIcon $value: $pStatus";
-
-          $progressBar->clear();
-          // Always display command output, even in --quiet mode.
-          $output->writeln($pMessage, OutputInterface::VERBOSITY_QUIET);
-          $output->write($pOutput);
-
-          $progressBar->advance();
-          $progressBar->display();
-
-          // Wait between commands if --interval is specified.
-          if ($interval = $input->getOption('interval')) {
-            sleep($interval);
-          }
+    Pipeline::fromIterable($values)
+      ->concurrent($input->getOption('workers'))
+      ->unordered()
+      ->forEach((function ($value) use (
+        $input,
+        $output,
+        $command,
+        $placeholder,
+        $progressBar,
+        &$exitCode,
+        &$isStopping,
+      ) {
+        if ($isStopping) {
+          return;
         }
-      );
-    });
+
+        $pCommand = Placeholder::replace([$placeholder->value => $value], $command);
+        $process = Process::start("($pCommand) 2>&1");
+        $this->logger->debug('Running: {command}', ['command' => $pCommand]);
+
+        // @todo Improve formatting of headings.
+        $pOutput = ByteStream\buffer($process->getStdout());
+        $pStatus = 'Done';
+        $pIcon = '✔';
+        if (Command::SUCCESS !== $process->join()) {
+          $pStatus = 'Failed';
+          $pIcon = '✖';
+          $exitCode = Command::FAILURE;
+        }
+
+        $pMessage = "$pIcon $value: $pStatus";
+
+        $progressBar->clear();
+        // Always display command output, even in --quiet mode.
+        $output->writeln($pMessage, OutputInterface::VERBOSITY_QUIET);
+        $output->write($pOutput);
+
+        $progressBar->advance();
+        $progressBar->display();
+
+        // Wait between commands if --interval is specified.
+        if ($interval = $input->getOption('interval')) {
+          sleep($interval);
+        }
+      }));
 
     if (!$isStopping) {
       $progressBar->finish();

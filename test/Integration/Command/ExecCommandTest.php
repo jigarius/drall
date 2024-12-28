@@ -744,7 +744,7 @@ EOT, $process->getOutput());
     );
     $process->run();
     $this->assertOutputEquals(<<<EOT
-The value for --workers must be less than or equal to 16.
+The value for --workers must be between 1 and 16.
 
 EOT, $process->getOutput());
     $this->assertOutputContainsString('Invalid options detected', $process->getErrorOutput());

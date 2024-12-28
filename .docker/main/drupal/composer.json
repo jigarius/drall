@@ -31,10 +31,11 @@
         "sort-packages": true,
         "allow-plugins": {
             "composer/installers": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true,
             "drupal/core-composer-scaffold": true,
             "drupal/core-project-message": true,
             "drupal/core-vendor-hardening": true,
-            "dealerdirect/phpcodesniffer-composer-installer": true
+            "phpro/grumphp": true
         }
     },
     "extra": {
@@ -72,5 +73,8 @@
                 "type:drupal-custom-theme"
             ]
         }
+    },
+    "require-dev": {
+        "phpro/grumphp": "^2"
     }
 }
