@@ -63,7 +63,7 @@ final class ExecCommand extends BaseCommand {
     $this->addArgument(
       'cmd',
       InputArgument::REQUIRED | InputArgument::IS_ARRAY,
-      'A drush command.'
+      'A shell command.'
     );
 
     $this->addOption(
