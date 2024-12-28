@@ -7,7 +7,6 @@ use Drall\Command\ExecCommand;
 use Drall\Command\SiteAliasesCommand;
 use Drall\Command\SiteDirectoriesCommand;
 use Drall\Command\SiteKeysCommand;
-use Drall\Model\EnvironmentId;
 use Drall\Trait\SiteDetectorAwareTrait;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
@@ -94,23 +93,6 @@ drall exec drush $name
 Alternatively, run "drall list" to see a list of all available commands.
 EOT);
     }
-  }
-
-  /**
-   * Whether Drall is running in a specific environment.
-   *
-   * This helps with development and testing. For example, during tests,
-   * Drall progress bars can pollute the output. Thus, we hide them for
-   * the "test" environment.
-   *
-   * @param \Drall\Model\EnvironmentId $id
-   *   Environment ID.
-   *
-   * @return bool
-   *   True or False.
-   */
-  public static function isEnvironment(EnvironmentId $id): bool {
-    return getenv('DRALL_ENVIRONMENT') === $id->value;
   }
 
 }
