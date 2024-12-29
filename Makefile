@@ -107,7 +107,7 @@ lint:
 
 .PHONY: test
 test:
-	DRALL_ENVIRONMENT=test XDEBUG_MODE=coverage composer --working-dir=/opt/drall run test
+	XDEBUG_MODE=coverage composer --working-dir=/opt/drall run test
 
 
 .PHONY: info

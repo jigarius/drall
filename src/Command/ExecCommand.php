@@ -5,7 +5,6 @@ namespace Drall\Command;
 use Amp\ByteStream;
 use Amp\Pipeline\Pipeline;
 use Amp\Process\Process;
-use Drall\Model\EnvironmentId;
 use Drall\Model\Placeholder;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
@@ -85,7 +84,7 @@ final class ExecCommand extends BaseCommand implements SignalableCommandInterfac
 
     $this->addOption(
       'no-progress',
-      NULL,
+      'P',
       InputOption::VALUE_NONE,
       'Do not show a progress bar.'
     );
@@ -236,7 +235,7 @@ EOT);
     // This keeps the text at the top and the progress bar at the bottom.
     $textSection = $output->section();
     $progressBar = new ProgressBar(
-      $this->isProgressBarHidden($input) ? new NullOutput() : $output->section(),
+      $input->getOption('no-progress') ? new NullOutput() : $output->section(),
       count($values)
     );
 
@@ -345,26 +344,6 @@ EOT);
     }
 
     return reset($placeholders);
-  }
-
-  /**
-   * Whether the Drall progress bar should be hidden.
-   *
-   * @param \Symfony\Component\Console\Input\InputInterface $input
-   *   The input.
-   *
-   * @return bool
-   *   True or false.
-   */
-  private function isProgressBarHidden(InputInterface $input): bool {
-    if (
-      EnvironmentId::Test->isActive() ||
-      $input->getOption('no-progress')
-    ) {
-      return TRUE;
-    }
-
-    return FALSE;
   }
 
   public function getSubscribedSignals(): array {
