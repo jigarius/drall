@@ -543,15 +543,10 @@ EOT, $process2->getOutput());
     );
     $process1->run();
     $this->assertOutputEquals(<<<EOF
-• default: Preview
 ./vendor/bin/drush --uri=default st
-• donnie: Preview
 ./vendor/bin/drush --uri=donnie st
-• leo: Preview
 ./vendor/bin/drush --uri=leo st
-• mikey: Preview
 ./vendor/bin/drush --uri=mikey st
-• ralph: Preview
 ./vendor/bin/drush --uri=ralph st
 
 EOF, $process1->getOutput());
@@ -563,37 +558,13 @@ EOF, $process1->getOutput());
     );
     $process2->run();
     $this->assertOutputEquals(<<<EOF
-• default: Preview
 ./vendor/bin/drush --uri=default st
-• donnie: Preview
 ./vendor/bin/drush --uri=donnie st
-• leo: Preview
 ./vendor/bin/drush --uri=leo st
-• mikey: Preview
 ./vendor/bin/drush --uri=mikey st
-• ralph: Preview
 ./vendor/bin/drush --uri=ralph st
 
 EOF, $process2->getOutput());
-  }
-
-  /**
-   * @testdox With --dry-run --quiet.
-   */
-  public function testWithDryRunQuiet(): void {
-    $process = Process::fromShellCommandline(
-      'drall exec --no-progress --dry-run --quiet -- ./vendor/bin/drush st',
-      static::PATH_DRUPAL,
-    );
-    $process->run();
-    $this->assertOutputEquals(<<<EOF
-./vendor/bin/drush --uri=default st
-./vendor/bin/drush --uri=donnie st
-./vendor/bin/drush --uri=leo st
-./vendor/bin/drush --uri=mikey st
-./vendor/bin/drush --uri=ralph st
-
-EOF, $process->getOutput());
   }
 
   /**

@@ -238,8 +238,7 @@ EOT);
     if ($input->getOption('dry-run')) {
       foreach ($values as $value) {
         $pCommand = Placeholder::replace([$placeholder->value => $value], $command);
-        $output->writeln("• $value: Preview");
-        $output->writeln($pCommand, OutputInterface::VERBOSITY_QUIET);
+        $output->writeln($pCommand);
       }
 
       return Command::SUCCESS;
