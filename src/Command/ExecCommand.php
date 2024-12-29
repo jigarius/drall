@@ -3,6 +3,7 @@
 namespace Drall\Command;
 
 use Amp\ByteStream;
+use Amp\ByteStream\WritableResourceStream;
 use Amp\Pipeline\Pipeline;
 use Amp\Process\Process;
 use Drall\Model\Placeholder;
@@ -14,6 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Output\StreamOutput;
 
 /**
  * A command to execute a shell command on multiple sites.
@@ -80,6 +82,13 @@ final class ExecCommand extends BaseCommand implements SignalableCommandInterfac
       'X',
       InputOption::VALUE_NONE,
       'Do not execute commands, only display them.'
+    );
+
+    $this->addOption(
+      'no-buffer',
+      'B',
+      InputOption::VALUE_NONE,
+      'Do not buffer output.'
     );
 
     $this->addOption(
@@ -190,9 +199,14 @@ EOT);
     if ($interval = $input->getOption('interval')) {
       $this->logger->notice("Using a $interval-second interval between commands.", ['interval' => $interval]);
     }
+
+    if ($input->getOption('no-buffer')) {
+      $this->logger->notice("Using no output buffering.");
+    }
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
+    /** @var \Symfony\Component\Console\Output\ConsoleOutput $output */
     $this->preExecute($input, $output);
 
     if (!$command = $this->getCommand($input, $output)) {
@@ -231,8 +245,6 @@ EOT);
       return Command::SUCCESS;
     }
 
-    // After this point, all output must go through the output sections.
-    // This keeps the text at the top and the progress bar at the bottom.
     $textSection = $output->section();
     $progressBar = new ProgressBar(
       $input->getOption('no-progress') ? new NullOutput() : $output->section(),
@@ -241,6 +253,8 @@ EOT);
 
     $exitCode = Command::SUCCESS;
 
+    // Within the iteration, all output must go through the output sections.
+    // This keeps the text at the top and the progress bar at the bottom.
     Pipeline::fromIterable($values)
       ->concurrent($input->getOption('workers'))
       ->unordered()
@@ -260,8 +274,16 @@ EOT);
         $pCommand = Placeholder::replace([$placeholder->value => $value], $command);
         $process = Process::start("($pCommand) 2>&1");
 
-        $pOutput = rtrim(ByteStream\buffer($process->getStdout()));
-        if ($pOutput) {
+        // Send process output directly to the output stream.
+        if (
+          $input->getOption('no-buffer') &&
+          is_a($output, StreamOutput::class)
+        ) {
+          $wStream = new WritableResourceStream($output->getStream());
+          ByteStream\pipe($process->getStdout(), $wStream);
+        }
+        // Buffer process output until it finishes.
+        elseif ($pOutput = rtrim(ByteStream\buffer($process->getStdout()))) {
           // Always display command output, even in --quiet mode.
           $textSection->writeln($pOutput, OutputInterface::VERBOSITY_QUIET);
         }

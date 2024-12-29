@@ -485,6 +485,21 @@ EOF, $process->getOutput());
   }
 
   /**
+   * @testdox With no buffer.
+   */
+  public function testWithNoBuffer(): void {
+    $process = Process::fromShellCommandline(
+      'drall exec --no-progress --no-buffer --verbose -- ./vendor/bin/drush st --field=site 2>&1',
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertStringStartsWith(
+      '[notice] Using no output buffering.' . PHP_EOL,
+      $process->getOutput(),
+    );
+  }
+
+  /**
    * @testdox With verbosity quiet.
    */
   public function testWithVerbosityQuiet(): void {
