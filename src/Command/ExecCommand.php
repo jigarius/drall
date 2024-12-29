@@ -232,10 +232,14 @@ EOT);
       return Command::SUCCESS;
     }
 
+    // After this point, all output must go through the output sections.
+    // This keeps the text at the top and the progress bar at the bottom.
+    $textSection = $output->section();
     $progressBar = new ProgressBar(
-      $this->isProgressBarHidden($input) ? new NullOutput() : $output,
+      $this->isProgressBarHidden($input) ? new NullOutput() : $output->section(),
       count($values)
     );
+
     $exitCode = Command::SUCCESS;
 
     Pipeline::fromIterable($values)
@@ -244,6 +248,7 @@ EOT);
       ->forEach((function ($value) use (
         $input,
         $output,
+        $textSection,
         $command,
         $placeholder,
         $progressBar,
@@ -255,27 +260,22 @@ EOT);
 
         $pCommand = Placeholder::replace([$placeholder->value => $value], $command);
         $process = Process::start("($pCommand) 2>&1");
-        $this->logger->debug('Running: {command}', ['command' => $pCommand]);
 
-        // @todo Improve formatting of headings.
-        $pOutput = ByteStream\buffer($process->getStdout());
-        $pStatus = 'Done';
-        $pIcon = '✔';
-        if (Command::SUCCESS !== $process->join()) {
-          $pStatus = 'Failed';
-          $pIcon = '✖';
+        $pOutput = rtrim(ByteStream\buffer($process->getStdout()));
+        if ($pOutput) {
+          // Always display command output, even in --quiet mode.
+          $textSection->writeln($pOutput, OutputInterface::VERBOSITY_QUIET);
+        }
+
+        if (Command::SUCCESS === $process->join()) {
+          $textSection->writeln("✔ $value: Done");
+        }
+        else {
+          $textSection->writeln("✖ $value: Failed");
           $exitCode = Command::FAILURE;
         }
 
-        $pMessage = "$pIcon $value: $pStatus";
-
-        $progressBar->clear();
-        // Always display command output, even in --quiet mode.
-        $output->writeln($pMessage, OutputInterface::VERBOSITY_QUIET);
-        $output->write($pOutput);
-
         $progressBar->advance();
-        $progressBar->display();
 
         // Wait between commands if --interval is specified.
         if ($interval = $input->getOption('interval')) {
@@ -289,7 +289,6 @@ EOT);
     }
 
     $progressBar->finish();
-    $output->writeln('');
 
     return $exitCode;
   }

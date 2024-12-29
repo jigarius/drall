@@ -119,9 +119,9 @@ EOT, $process->getOutput());
     );
     $process->run();
     $this->assertOutputEquals(<<<EOT
-✔ @tmnt: Done
 Site: @tmnt
 /opt/drupal
+✔ @tmnt: Done
 
 EOT, $process->getOutput());
   }
@@ -136,16 +136,16 @@ EOT, $process->getOutput());
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-✔ default: Done
 sites/default
-✔ donnie: Done
+✔ default: Done
 sites/donnie
-✔ leo: Done
+✔ donnie: Done
 sites/leo
-✔ mikey: Done
+✔ leo: Done
 sites/mikey
-✔ ralph: Done
+✔ mikey: Done
 sites/ralph
+✔ ralph: Done
 
 EOF, $process->getOutput());
   }
@@ -160,16 +160,16 @@ EOF, $process->getOutput());
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-✔ @donnie: Done
 sites/donnie
-✔ @leo: Done
+✔ @donnie: Done
 sites/leo
-✔ @mikey: Done
+✔ @leo: Done
 sites/mikey
-✔ @ralph: Done
+✔ @mikey: Done
 sites/ralph
-✔ @tmnt: Done
+✔ @ralph: Done
 sites/default
+✔ @tmnt: Done
 
 EOF, $process->getOutput());
   }
@@ -184,16 +184,16 @@ EOF, $process->getOutput());
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-✔ default: Done
 sites/default
-✔ donnie: Done
+✔ default: Done
 sites/donnie
-✔ leo: Done
+✔ donnie: Done
 sites/leo
-✔ mikey: Done
+✔ leo: Done
 sites/mikey
-✔ ralph: Done
+✔ mikey: Done
 sites/ralph
+✔ ralph: Done
 
 EOF, $process->getOutput());
   }
@@ -208,21 +208,21 @@ EOF, $process->getOutput());
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-✔ default: Done
 Site path : sites/default
 Site URI : http://default
-✔ donnie: Done
+✔ default: Done
 Site path : sites/donnie
 Site URI : http://donnie
-✔ leo: Done
+✔ donnie: Done
 Site path : sites/leo
 Site URI : http://leo
-✔ mikey: Done
+✔ leo: Done
 Site path : sites/mikey
 Site URI : http://mikey
-✔ ralph: Done
+✔ mikey: Done
 Site path : sites/ralph
 Site URI : http://ralph
+✔ ralph: Done
 
 EOF, $process->getOutput());
   }
@@ -255,21 +255,21 @@ EOF, $process->getOutput());
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-✔ default: Done
 Drush status
 Site path : sites/default
-✔ donnie: Done
+✔ default: Done
 Drush status
 Site path : sites/donnie
-✔ leo: Done
+✔ donnie: Done
 Drush status
 Site path : sites/leo
-✔ mikey: Done
+✔ leo: Done
 Drush status
 Site path : sites/mikey
-✔ ralph: Done
+✔ mikey: Done
 Drush status
 Site path : sites/ralph
+✔ ralph: Done
 
 EOF, $process->getOutput());
   }
@@ -299,16 +299,16 @@ EOF, $process->getOutput());
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-✔ default: Done
 web/sites/default/settings.php
-✔ donnie: Done
+✔ default: Done
 web/sites/donnie/settings.php
-✔ leo: Done
+✔ donnie: Done
 web/sites/leo/settings.php
-✔ mikey: Done
+✔ leo: Done
 web/sites/mikey/settings.php
-✔ ralph: Done
+✔ mikey: Done
 web/sites/ralph/settings.php
+✔ ralph: Done
 
 EOF, $process->getOutput());
   }
@@ -323,8 +323,8 @@ EOF, $process->getOutput());
     );
     $process1->run();
     $this->assertOutputEquals(<<<EOF
-✔ leo: Done
 sites/leo
+✔ leo: Done
 
 EOF, $process1->getOutput());
 
@@ -335,40 +335,10 @@ EOF, $process1->getOutput());
     );
     $process2->run();
     $this->assertOutputEquals(<<<EOF
-✔ leo: Done
 sites/leo
+✔ leo: Done
 
 EOF, $process2->getOutput());
-  }
-
-  /**
-   * @testdox With @@dir placeholder and --debug.
-   */
-  public function testWithDirPlaceholderAndDebug(): void {
-    $process = Process::fromShellCommandline(
-      'drall exec --debug -- ls web/sites/@@dir/settings.php',
-      static::PATH_DRUPAL,
-    );
-    $process->run();
-    $this->assertOutputEquals(<<<EOF
-[debug] Command received: ls web/sites/@@dir/settings.php
-[debug] Running: ls web/sites/default/settings.php
-✔ default: Done
-web/sites/default/settings.php
-[debug] Running: ls web/sites/donnie/settings.php
-✔ donnie: Done
-web/sites/donnie/settings.php
-[debug] Running: ls web/sites/leo/settings.php
-✔ leo: Done
-web/sites/leo/settings.php
-[debug] Running: ls web/sites/mikey/settings.php
-✔ mikey: Done
-web/sites/mikey/settings.php
-[debug] Running: ls web/sites/ralph/settings.php
-✔ ralph: Done
-web/sites/ralph/settings.php
-
-EOF, $process->getOutput());
   }
 
   /**
@@ -381,10 +351,10 @@ EOF, $process->getOutput());
     );
     $process1->run();
     $this->assertOutputEquals(<<<EOF
-✔ donnie: Done
 sites/donnie
-✔ leo: Done
+✔ donnie: Done
 sites/leo
+✔ leo: Done
 
 EOF, $process1->getOutput());
 
@@ -395,10 +365,10 @@ EOF, $process1->getOutput());
     );
     $process2->run();
     $this->assertOutputEquals(<<<EOF
-✔ donnie: Done
 sites/donnie
-✔ leo: Done
+✔ donnie: Done
 sites/leo
+✔ leo: Done
 
 EOF, $process2->getOutput());
   }
@@ -414,10 +384,10 @@ EOF, $process2->getOutput());
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-✔ donnie: Done
 sites/donnie
-✔ leo: Done
+✔ donnie: Done
 sites/leo
+✔ leo: Done
 
 EOF, $process->getOutput());
   }
@@ -432,46 +402,16 @@ EOF, $process->getOutput());
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-✔ @donnie: Done
 Site path : sites/donnie
-✔ @leo: Done
-Site path : sites/leo
-✔ @mikey: Done
-Site path : sites/mikey
-✔ @ralph: Done
-Site path : sites/ralph
-✔ @tmnt: Done
-Site path : sites/default
-
-EOF, $process->getOutput());
-  }
-
-  /**
-   * @testdox With @@site placeholder and --debug.
-   */
-  public function testWithSitePlaceholderDebug(): void {
-    $process = Process::fromShellCommandline(
-      'drall exec --debug -- ./vendor/bin/drush @@site.local st --fields=site',
-      static::PATH_DRUPAL,
-    );
-    $process->run();
-    $this->assertOutputEquals(<<<EOF
-[debug] Command received: ./vendor/bin/drush @@site.local st --fields=site
-[debug] Running: ./vendor/bin/drush @donnie.local st --fields=site
 ✔ @donnie: Done
-Site path : sites/donnie
-[debug] Running: ./vendor/bin/drush @leo.local st --fields=site
-✔ @leo: Done
 Site path : sites/leo
-[debug] Running: ./vendor/bin/drush @mikey.local st --fields=site
-✔ @mikey: Done
+✔ @leo: Done
 Site path : sites/mikey
-[debug] Running: ./vendor/bin/drush @ralph.local st --fields=site
-✔ @ralph: Done
+✔ @mikey: Done
 Site path : sites/ralph
-[debug] Running: ./vendor/bin/drush @tmnt.local st --fields=site
-✔ @tmnt: Done
+✔ @ralph: Done
 Site path : sites/default
+✔ @tmnt: Done
 
 EOF, $process->getOutput());
   }
@@ -486,10 +426,10 @@ EOF, $process->getOutput());
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-✔ @donnie: Done
 sites/donnie
-✔ @leo: Done
+✔ @donnie: Done
 sites/leo
+✔ @leo: Done
 
 EOF, $process->getOutput());
   }
@@ -508,11 +448,11 @@ EOF, $process->getOutput());
     $output = preg_replace('@(Drush version :) ([\d|\.|-]+)@', '$1 x.y.z', $process->getOutput());
 
     $this->assertOutputEquals(<<<EOF
-✔ default: Done
  [info] Starting bootstrap to none
  [info] Drush bootstrap phase 0
  [info] Try to validate bootstrap phase 0
 Drush version : x.y.z
+✔ default: Done
 
 EOF, $output);
   }
@@ -528,18 +468,17 @@ EOF, $output);
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-✔ default: Done
 sites/default
- 1/5 [=====>----------------------]  20%✔ donnie: Done
-sites/donnie
- 2/5 [===========>----------------]  40%✔ leo: Done
-sites/leo
- 3/5 [================>-----------]  60%✔ mikey: Done
-sites/mikey
- 4/5 [======================>-----]  80%✔ ralph: Done
-sites/ralph
+✔ default: Done
+ 1/5 [=====>----------------------]  20%sites/donnie
+✔ donnie: Done
+ 2/5 [===========>----------------]  40%sites/leo
+✔ leo: Done
+ 3/5 [================>-----------]  60%sites/mikey
+✔ mikey: Done
+ 4/5 [======================>-----]  80%sites/ralph
+✔ ralph: Done
  5/5 [============================] 100%
-
 EOF, $process->getOutput());
   }
 
@@ -558,16 +497,16 @@ EOF, $process->getOutput());
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-✔ default: Done
 sites/default
-✔ donnie: Done
+✔ default: Done
 sites/donnie
-✔ leo: Done
+✔ donnie: Done
 sites/leo
-✔ mikey: Done
+✔ leo: Done
 sites/mikey
-✔ ralph: Done
+✔ mikey: Done
 sites/ralph
+✔ ralph: Done
 
 EOF, $process->getOutput());
   }
@@ -582,11 +521,11 @@ EOF, $process->getOutput());
     );
     $process1->run();
     $this->assertEquals(<<<EOT
-✔ default: Done
-✔ donnie: Done
-✔ leo: Done
-✔ mikey: Done
-✔ ralph: Done
+sites/default
+sites/donnie
+sites/leo
+sites/mikey
+sites/ralph
 
 EOT, $process1->getOutput());
 
@@ -597,11 +536,11 @@ EOT, $process1->getOutput());
     );
     $process2->run();
     $this->assertEquals(<<<EOT
-✔ default: Done
-✔ donnie: Done
-✔ leo: Done
-✔ mikey: Done
-✔ ralph: Done
+sites/default
+sites/donnie
+sites/leo
+sites/mikey
+sites/ralph
 
 EOT, $process2->getOutput());
   }
@@ -773,20 +712,20 @@ EOT, $process->getOutput());
    */
   public function testNonZeroExitCode(): void {
     $process = Process::fromShellCommandline(
-      "drall ex -- \"if [ 'default' = '@@dir' ]; then exit 1; fi; echo 'Hello @@dir!';\"",
+      "drall ex -- \"if [ 'default' = '@@dir' ]; then exit 1; fi; echo 'Hello @@dir.';\"",
       static::PATH_DRUPAL,
     );
     $process->run();
     $this->assertOutputEquals(<<<EOT
 ✖ default: Failed
+Hello donnie.
 ✔ donnie: Done
-Hello donnie!
+Hello leo.
 ✔ leo: Done
-Hello leo!
+Hello mikey.
 ✔ mikey: Done
-Hello mikey!
+Hello ralph.
 ✔ ralph: Done
-Hello ralph!
 
 EOT, $process->getOutput());
     $this->assertEquals(1, $process->getExitCode());
@@ -802,7 +741,7 @@ EOT, $process->getOutput());
   /**
    * @testdox Two SIGINT gives a forceful exit.
    */
-  public function _testSigInt2(): void {
+  public function testSigInt2(): void {
     $this->markTestSkipped('Needs work.');
   }
 
