@@ -85,9 +85,9 @@ provision/drall:
 # Drall, it must be re-installed inside the Drupal installation.
 .PHONY: refresh
 refresh:
-	rsync -Ervu --inplace --delete --exclude=.coverage --exclude=.phpunit.cache --exclude=.idea --exclude=.git --exclude=vendor /opt/drall/ /opt/no-drupal/vendor/jigarius/drall/
-	rsync -Ervu --inplace --delete --exclude=.coverage --exclude=.phpunit.cache --exclude=.idea --exclude=.git --exclude=vendor /opt/drall/ /opt/empty-drupal/vendor/jigarius/drall/
-	rsync -Ervu --inplace --delete --exclude=.coverage --exclude=.phpunit.cache --exclude=.idea --exclude=.git --exclude=vendor /opt/drall/ /opt/drupal/vendor/jigarius/drall/
+	rsync -Ervu --inplace --delete --exclude=.coverage --exclude=.phpunit.cache --exclude=.idea --exclude=.git --exclude=test --exclude=vendor /opt/drall/ /opt/no-drupal/vendor/jigarius/drall/
+	rsync -Ervu --inplace --delete --exclude=.coverage --exclude=.phpunit.cache --exclude=.idea --exclude=.git --exclude=test --exclude=vendor /opt/drall/ /opt/empty-drupal/vendor/jigarius/drall/
+	rsync -Ervu --inplace --delete --exclude=.coverage --exclude=.phpunit.cache --exclude=.idea --exclude=.git --exclude=test --exclude=vendor /opt/drall/ /opt/drupal/vendor/jigarius/drall/
 
 
 .PHONY: coverage-report/text
