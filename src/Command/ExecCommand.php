@@ -3,9 +3,9 @@
 namespace Drall\Command;
 
 use Amp\ByteStream;
+use Amp\ByteStream\WritableResourceStream;
 use Amp\Pipeline\Pipeline;
 use Amp\Process\Process;
-use Drall\Model\EnvironmentId;
 use Drall\Model\Placeholder;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
@@ -15,6 +15,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Output\StreamOutput;
 
 /**
  * A command to execute a shell command on multiple sites.
@@ -84,8 +85,15 @@ final class ExecCommand extends BaseCommand implements SignalableCommandInterfac
     );
 
     $this->addOption(
+      'no-buffer',
+      'B',
+      InputOption::VALUE_NONE,
+      'Do not buffer output.'
+    );
+
+    $this->addOption(
       'no-progress',
-      NULL,
+      'P',
       InputOption::VALUE_NONE,
       'Do not show a progress bar.'
     );
@@ -191,9 +199,14 @@ EOT);
     if ($interval = $input->getOption('interval')) {
       $this->logger->notice("Using a $interval-second interval between commands.", ['interval' => $interval]);
     }
+
+    if ($input->getOption('no-buffer')) {
+      $this->logger->notice("Using no output buffering.");
+    }
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
+    /** @var \Symfony\Component\Console\Output\ConsoleOutput $output */
     $this->preExecute($input, $output);
 
     if (!$command = $this->getCommand($input, $output)) {
@@ -225,25 +238,29 @@ EOT);
     if ($input->getOption('dry-run')) {
       foreach ($values as $value) {
         $pCommand = Placeholder::replace([$placeholder->value => $value], $command);
-        $output->writeln("• $value: Preview");
-        $output->writeln($pCommand, OutputInterface::VERBOSITY_QUIET);
+        $output->writeln($pCommand);
       }
 
       return Command::SUCCESS;
     }
 
+    $textSection = $output->section();
     $progressBar = new ProgressBar(
-      $this->isProgressBarHidden($input) ? new NullOutput() : $output,
+      $input->getOption('no-progress') ? new NullOutput() : $output->section(),
       count($values)
     );
+
     $exitCode = Command::SUCCESS;
 
+    // Within the iteration, all output must go through the output sections.
+    // This keeps the text at the top and the progress bar at the bottom.
     Pipeline::fromIterable($values)
       ->concurrent($input->getOption('workers'))
       ->unordered()
       ->forEach((function ($value) use (
         $input,
         $output,
+        $textSection,
         $command,
         $placeholder,
         $progressBar,
@@ -255,27 +272,30 @@ EOT);
 
         $pCommand = Placeholder::replace([$placeholder->value => $value], $command);
         $process = Process::start("($pCommand) 2>&1");
-        $this->logger->debug('Running: {command}', ['command' => $pCommand]);
 
-        // @todo Improve formatting of headings.
-        $pOutput = ByteStream\buffer($process->getStdout());
-        $pStatus = 'Done';
-        $pIcon = '✔';
-        if (Command::SUCCESS !== $process->join()) {
-          $pStatus = 'Failed';
-          $pIcon = '✖';
+        // Send process output directly to the output stream.
+        if (
+          $input->getOption('no-buffer') &&
+          is_a($output, StreamOutput::class)
+        ) {
+          $wStream = new WritableResourceStream($output->getStream());
+          ByteStream\pipe($process->getStdout(), $wStream);
+        }
+        // Buffer process output until it finishes.
+        elseif ($pOutput = rtrim(ByteStream\buffer($process->getStdout()))) {
+          // Always display command output, even in --quiet mode.
+          $textSection->writeln($pOutput, OutputInterface::VERBOSITY_QUIET);
+        }
+
+        if (Command::SUCCESS === $process->join()) {
+          $textSection->writeln("✔ $value: Done");
+        }
+        else {
+          $textSection->writeln("✖ $value: Failed");
           $exitCode = Command::FAILURE;
         }
 
-        $pMessage = "$pIcon $value: $pStatus";
-
-        $progressBar->clear();
-        // Always display command output, even in --quiet mode.
-        $output->writeln($pMessage, OutputInterface::VERBOSITY_QUIET);
-        $output->write($pOutput);
-
         $progressBar->advance();
-        $progressBar->display();
 
         // Wait between commands if --interval is specified.
         if ($interval = $input->getOption('interval')) {
@@ -289,7 +309,6 @@ EOT);
     }
 
     $progressBar->finish();
-    $output->writeln('');
 
     return $exitCode;
   }
@@ -346,26 +365,6 @@ EOT);
     }
 
     return reset($placeholders);
-  }
-
-  /**
-   * Whether the Drall progress bar should be hidden.
-   *
-   * @param \Symfony\Component\Console\Input\InputInterface $input
-   *   The input.
-   *
-   * @return bool
-   *   True or false.
-   */
-  private function isProgressBarHidden(InputInterface $input): bool {
-    if (
-      EnvironmentId::Test->isActive() ||
-      $input->getOption('no-progress')
-    ) {
-      return TRUE;
-    }
-
-    return FALSE;
   }
 
   public function getSubscribedSignals(): array {
