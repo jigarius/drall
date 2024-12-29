@@ -792,4 +792,18 @@ EOT, $process->getOutput());
     $this->assertEquals(1, $process->getExitCode());
   }
 
+  /**
+   * @testdox One SIGINT gives a graceful exit.
+   */
+  public function testSigInt1(): void {
+    $this->markTestSkipped('Needs work.');
+  }
+
+  /**
+   * @testdox Two SIGINT gives a forceful exit.
+   */
+  public function _testSigInt2(): void {
+    $this->markTestSkipped('Needs work.');
+  }
+
 }

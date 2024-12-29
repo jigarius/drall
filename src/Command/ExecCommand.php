@@ -7,8 +7,8 @@ use Amp\Pipeline\Pipeline;
 use Amp\Process\Process;
 use Drall\Model\EnvironmentId;
 use Drall\Model\Placeholder;
-use Drall\Trait\SignalAwareTrait;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Command\SignalableCommandInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,9 +19,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * A command to execute a shell command on multiple sites.
  */
-final class ExecCommand extends BaseCommand {
+final class ExecCommand extends BaseCommand implements SignalableCommandInterface {
 
-  use SignalAwareTrait;
+  /**
+   * Exit code when stopping due to user interruption.
+   */
+  const INTERRUPTED = 130;
 
   /**
    * Maximum number of Drall workers.
@@ -29,6 +32,13 @@ final class ExecCommand extends BaseCommand {
    * @var int
    */
   const WORKER_LIMIT = 16;
+
+  /**
+   * Whether execution is stopping due to an interruption signal.
+   *
+   * @var bool
+   */
+  private bool $isStopping = FALSE;
 
   protected function configure() {
     parent::configure();
@@ -228,22 +238,6 @@ EOT);
     );
     $exitCode = Command::SUCCESS;
 
-    // Handle interruption signals to stop Drall gracefully.
-    $isStopping = FALSE;
-    $this->registerInterruptionListener(function () use (&$isStopping, $output) {
-      $output->writeln('');
-
-      // If a previous SIGINT was received, then stop immediately.
-      if ($isStopping) {
-        $this->logger->error('Interrupted by user.');
-        exit(Command::FAILURE);
-      }
-
-      // Prepare to stop after the current item is processed.
-      $this->logger->warning('Stopping after current item.');
-      $isStopping = TRUE;
-    });
-
     Pipeline::fromIterable($values)
       ->concurrent($input->getOption('workers'))
       ->unordered()
@@ -254,9 +248,8 @@ EOT);
         $placeholder,
         $progressBar,
         &$exitCode,
-        &$isStopping,
       ) {
-        if ($isStopping) {
+        if ($this->isStopping) {
           return;
         }
 
@@ -290,16 +283,13 @@ EOT);
         }
       }));
 
-    if (!$isStopping) {
-      $progressBar->finish();
+    if ($this->isStopping) {
+      $output->writeln('');
+      return self::INTERRUPTED;
     }
 
+    $progressBar->finish();
     $output->writeln('');
-
-    if ($isStopping) {
-      $this->logger->error('Interrupted by user.');
-      return Command::FAILURE;
-    }
 
     return $exitCode;
   }
@@ -375,6 +365,20 @@ EOT);
       return TRUE;
     }
 
+    return FALSE;
+  }
+
+  public function getSubscribedSignals(): array {
+    return [SIGINT];
+  }
+
+  public function handleSignal(int $signal, int|false $previousExitCode = 0): int|false {
+    // If a SIGINT is received more than once, stop immediately.
+    if ($this->isStopping) {
+      return self::INTERRUPTED;
+    }
+
+    $this->isStopping = TRUE;
     return FALSE;
   }
 
