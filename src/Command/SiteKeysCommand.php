@@ -2,20 +2,19 @@
 
 namespace Drall\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * A command to get a list of keys in the $sites array.
- */
+#[AsCommand(
+  name: 'site:keys',
+  description: 'List the keys of the $sites array.',
+  aliases: ['sk'],
+)]
 class SiteKeysCommand extends BaseCommand {
 
   protected function configure() {
     parent::configure();
-
-    $this->setName('site:keys');
-    $this->setAliases(['sk']);
-    $this->setDescription('List the keys of the $sites array.');
     $this->addUsage('site:keys');
     $this->addUsage('--group=GROUP site:keys');
     $this->addUsage('--filter=FILTER site:keys');

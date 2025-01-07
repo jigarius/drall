@@ -2,20 +2,19 @@
 
 namespace Drall\Command;
 
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * A command to get a list of site aliases in the Drupal installation.
- */
+#[AsCommand(
+  name: 'site:aliases',
+  description: 'List all Drush site aliases.',
+  aliases: ['sa']
+)]
 class SiteAliasesCommand extends BaseCommand {
 
   protected function configure() {
     parent::configure();
-
-    $this->setName('site:aliases');
-    $this->setAliases(['sa']);
-    $this->setDescription('List all Drush site aliases.');
     $this->addUsage('site:aliases');
     $this->addUsage('--group=GROUP site:aliases');
     $this->addUsage('--filter=FILTER  site:aliases');
