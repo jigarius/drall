@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -e
+
+dir=$(pwd)
+while [ "$dir" != "/" ]; do
+    if [ -x "$dir/vendor/bin/drush" ]; then
+        "$dir/vendor/bin/drush" "$@"
+        break
+    fi
+    dir=$(dirname "$dir")
+done
+
+if [ "$dir" == "/" ]; then
+  echo "Drush executable not found."
+  exit 1
+fi

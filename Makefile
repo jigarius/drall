@@ -10,6 +10,7 @@ provision: provision/env provision/drall provision/no-drupal provision/empty-dru
 .PHONY: provision/env
 provision/env:
 	cp /opt/drall/bin/drall-launcher /usr/local/bin/drall
+	cp /opt/drall/bin/drush-launcher /usr/local/bin/drush
 
 
 .PHONY: provision/drupal
