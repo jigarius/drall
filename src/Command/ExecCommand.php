@@ -117,22 +117,19 @@ final class ExecCommand extends BaseCommand implements SignalableCommandInterfac
     }
 
     // If options are present, an options separator (--) is required.
-    $rawTokens = $input->getRawTokens(TRUE);
-    if (!in_array('--', $rawTokens)) {
-      foreach ($rawTokens as $token) {
-        if (str_starts_with($token, '-')) {
-          $output->writeln(<<<EOT
-When using options, a "--" must be placed before the command to be executed.
+    if (in_array('--', $input->getRawTokens(TRUE))) {
+      return;
+    }
+
+    $output->writeln(<<<EOT
+A double-dash `--` must be placed before the command to be executed.
 
 <comment>Incorrect:</comment> drall exec --dry-run drush --field=site core:status
 <comment>Correct:</comment>   drall exec --dry-run -- drush --field=site core:status
 
 Notice the `--` between `--dry-run` and the word `drush`.
 EOT);
-          throw new \RuntimeException('Missing options separator');
-        }
-      }
-    }
+    throw new \RuntimeException('Missing options separator');
   }
 
   private function checkObsoleteOptions(InputInterface $input, OutputInterface $output): void {
@@ -168,7 +165,6 @@ EOT);
     $limit = self::WORKER_LIMIT;
 
     if ($workers < 1 || $workers > $limit) {
-      ;
       $output->writeln(<<<EOT
 The value for <comment>--workers</comment> must be between 1 and $limit.
 EOT);

@@ -16,28 +16,16 @@ use Symfony\Component\Process\Process;
 class ExecCommandTest extends TestCase {
 
   /**
-   * @testdox Works when -- is absent and options are not used.
+   * @testdox Shows error when -- is not used.
    */
-  public function testMissingOptionsSeparatorWithNoOptions(): void {
-    $process = Process::fromShellCommandline(
-      'drall exec ./vendor/bin/drush st',
-      static::PATH_DRUPAL,
-    );
-    $process->run();
-    $this->assertEquals(0, $process->getExitCode());
-  }
-
-  /**
-   * @testdox Shows error when -- is absent but options are used.
-   */
-  public function testMissingOptionsSeparatorWithOptions(): void {
+  public function testMissingOptionsSeparator(): void {
     $process = Process::fromShellCommandline(
       'drall exec -P --dry-run drush st',
     static::PATH_DRUPAL,
     );
     $process->run();
     $this->assertOutputEquals(<<<EOT
-When using options, a "--" must be placed before the command to be executed.
+A double-dash `--` must be placed before the command to be executed.
 Incorrect: drall exec --dry-run drush --field=site core:status
 Correct:   drall exec --dry-run -- drush --field=site core:status
 Notice the `--` between `--dry-run` and the word `drush`.

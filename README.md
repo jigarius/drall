@@ -25,7 +25,7 @@ Thus, it can easily be installed using `composer` as follows:
 Drall's functioning depends on its _Placeholders_. Here's how Drall works
 under the hood:
 
-1. Receive a command, say, `drall exec COMMAND`.
+1. Receive a command, say, `drall exec -- COMMAND`.
 2. Ensure there is a `@@placeholder` in `COMMAND`.
 3. Run `COMMAND` after replacing `@@placeholder` with site-specific values.
 4. Display the result.
@@ -94,8 +94,8 @@ sites in your Drupal installation.
 
 In Drall 2.x there were 2 exec commands. These are now unified into a single
 command just like version 1.x.
-- `drall exec:drush ...` is now `drall exec drush ...`
-- `drall exec:shell ...` is now `drall exec ...`
+- `drall exec:drush ...` is now `drall exec -- drush ...`
+- `drall exec:shell ...` is now `drall exec -- ...`
 
 #### Interrupting a command
 
@@ -108,14 +108,16 @@ interrupt signal is received, then Drall stops immediately.
 
 In this method, the `--uri` option is sent to `drush`.
 
-    drall exec -- drush --uri=@@dir core:status
+```shell
+drall exec -- drush --uri=@@dir core:status
+```
 
 If it is a Drush command and no valid `@@placeholder` are present, then
 `--uri=@@dir` is automatically added after each occurrence of `drush`.
 
 ```shell
 # Raw drush command (no placeholders)
-drall exec drush core:status
+drall exec -- drush core:status
 # Command that is executed (placeholders injected)
 drall exec -- drush --uri=@@dir core:status
 ```
@@ -123,29 +125,21 @@ drall exec -- drush --uri=@@dir core:status
 ##### Example
 
 ```shell
-$ drall exec drush core:status
-drush --uri=default core:status
-drush --uri=donnie core:status
-drush --uri=leo core:status
-drush --uri=mikey core:status
-drush --uri=ralph core:status
+drall exec -- drush core:status
 ```
 
 #### Drush with @@site
 
 In this method, a site alias is sent to `drush`.
 
-    drall exec drush @@site.local core:status
+```shell
+drall exec -- drush @@site.local core:status
+```
 
 ##### Example
 
 ```shell
-$ drall exec drush @@site.local core:status
-drush @tmnt.local core:status
-drush @donnie.local core:status
-drush @leo.local core:status
-drush @mikey.local core:status
-drush @ralph.local core:status
+drall exec -- drush @@site.local core:status
 ```
 
 #### Non-drush commands
@@ -159,17 +153,14 @@ you use `@@dir` and you cannot mix it with `@@site`.
 ##### Example: Shell command
 
 ```shell
-$ drall exec cat web/sites/@@uri/settings.local.php
-cat web/sites/default/settings.local.php
-cat web/sites/donnie/settings.local.php
-cat web/sites/leo/settings.local.php
-cat web/sites/mikey/settings.local.php
-cat web/sites/ralph/settings.local.php
+drall exec -- cat web/sites/@@uri/settings.local.php
 ```
 
 ##### Example: Multiple commands
 
-    drall exec "drush @@site.dev updb -y && drush @@site.dev cim -y && drush @@site.dev cr"
+```shell
+drall exec "drush @@site.dev updb -y && drush @@site.dev cim -y && drush @@site.dev cr"
+```
 
 #### Options
 
@@ -198,7 +189,9 @@ Besides the global options, the `exec` command supports the following options.
 
 This option makes Drall wait for `n` seconds after processing each item.
 
-    drall exec --interval=3 -- drush core:rebuild
+```shell
+drall exec --interval=3 -- drush core:rebuild
+```
 
 Such an interval cannot be used when using a multiple workers.
 
@@ -220,7 +213,9 @@ conflict between the Drall workers.
 
 The command below launches 3 instances of Drall to run `core:rebuild` command.
 
-    drall exec --workers=3 -- drush core:rebuild
+```shell
+drall exec --workers=3 -- drush core:rebuild
+```
 
 When a worker runs out of work, it terminates automatically.
 
@@ -236,7 +231,9 @@ bar can be disabled using the `--no-progress` option.
 
 ##### Example: Hide progress bar
 
-    drall exec --no-progress -- drush core:rebuild
+```shell
+drall exec --no-progress -- drush core:rebuild
+```
 
 #### --dry-run
 
@@ -246,9 +243,7 @@ executing them.
 ##### Example: Dry run
 
 ```shell
-$ drall exec --dry-run --group=bluish -- drush core:status
-drush --uri=donnie core:status
-drush --uri=leo core:status
+drall exec --dry-run --group=bluish -- drush core:status
 ```
 
 ### site:directories
@@ -260,12 +255,7 @@ individual sites.
 #### Example: Usage
 
 ```shell
-$ drall site:directories
-default
-donnie.com
-leo.com
-mikey.com
-ralph.com
+drall site:directories
 ```
 
 The output can then be iterated with scripts.
@@ -286,12 +276,7 @@ Get a list of all keys in `$sites`. Usually, these are site URIs.
 #### Example: Usage
 
 ```shell
-$ drall site:keys
-tmnt.com
-donatello.com
-leonardo.com
-michelangelo.com
-raphael.com
+drall site:keys
 ```
 
 The output can then be iterated with scripts.
@@ -312,12 +297,7 @@ Get a list of site aliases.
 #### Example: Usage
 
 ```shell
-$ drall site:aliases
-@tmnt.local
-@donnie.local
-@leo.local
-@mikey.local
-@ralph.local
+drall site:aliases
 ```
 
 The output can then be iterated with scripts.
@@ -340,7 +320,9 @@ This section covers some options that are supported by all `drall` commands.
 Specify the target site group. See the section *site groups* for more
 information on site groups.
 
-    drall exec --group=GROUP -- drush core:status --field=site
+```shell
+drall exec --group=GROUP -- drush core:status --field=site
+```
 
 If `--group` is not set, then the Drall uses the environment variable
 `DRALL_GROUP`, if it is set.
@@ -360,13 +342,21 @@ drall exec --filter="leo||ralph" -- drush core:status
 For more on using filter expressions, refer to the documentation on
 [consolidation/filter-via-dot-access-data](https://github.com/consolidation/filter-via-dot-access-data).
 
+### --silent
+
+Display no output.
+
+### --quiet
+
+Display very less output.
+
 ### --verbose
 
 Display verbose output.
 
 ### --debug
 
-Display debug-level output.
+Display very verbose output.
 
 ## Auto-detect sites
 
@@ -394,7 +384,7 @@ groups like this:
 # File: tnmt.site.yml
 local:
   root: /opt/drupal/web
-  uri: http://tmnt.com/
+  uri: https://tmnt.com/
   # ...
   drall:
     groups:
