@@ -81,16 +81,6 @@ provision/drall:
 	composer install --working-dir=/opt/drall --no-progress
 
 
-# Due to the way Composer works, jigarius/drall cannot be symlinked into
-# the Drupal setup used for development. Thus, after every change made to
-# Drall, it must be re-installed inside the Drupal installation.
-.PHONY: refresh
-refresh:
-	rsync -Ervu --inplace --delete --exclude=.coverage --exclude=.phpunit.cache --exclude=.idea --exclude=.git --exclude=test --exclude=vendor /opt/drall/ /opt/no-drupal/vendor/jigarius/drall/
-	rsync -Ervu --inplace --delete --exclude=.coverage --exclude=.phpunit.cache --exclude=.idea --exclude=.git --exclude=test --exclude=vendor /opt/drall/ /opt/empty-drupal/vendor/jigarius/drall/
-	rsync -Ervu --inplace --delete --exclude=.coverage --exclude=.phpunit.cache --exclude=.idea --exclude=.git --exclude=test --exclude=vendor /opt/drall/ /opt/drupal/vendor/jigarius/drall/
-
-
 .PHONY: coverage-report/text
 coverage-report/text:
 	cat /opt/drall/.coverage/text

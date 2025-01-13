@@ -11,7 +11,7 @@
             "type": "path",
             "url": "/opt/drall",
             "options": {
-                "symlink": false
+              "symlink": true
             }
         }
     ],

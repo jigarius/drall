@@ -6,21 +6,11 @@
  * Drall entrypoint.
  */
 
-if (php_sapi_name() !== 'cli') exit;
-
-foreach ([
-  // Regular installation.
-  __DIR__ . '/../../../autoload.php',
-  // Development environment.
-  __DIR__ . '/../vendor/autoload.php',
-] as $candidate) {
-  if (is_file($candidate)) {
-    require_once $candidate;
-    break;
-  }
-
-  unset($candidate);
+if (php_sapi_name() !== 'cli') {
+  exit;
 }
+
+require $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
 use Drall\Drall;
 
