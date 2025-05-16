@@ -72,18 +72,14 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox with DRALL_GROUP env var.
+   * @testdox with --limit and --offset.
    */
-  public function testWithGroupEnvVar(): void {
-    $process = Process::fromShellCommandline(
-      'drall site:directories',
-      static::PATH_DRUPAL,
-      ['DRALL_GROUP' => 'bluish'],
-    );
+  public function testWithRange(): void {
+    $process = Process::fromShellCommandline('drall site:directories --offset=2 --limit=2', static::PATH_DRUPAL);
     $process->run();
     $this->assertOutputEquals(<<<EOF
-donnie
 leo
+mikey
 
 EOF, $process->getOutput());
   }

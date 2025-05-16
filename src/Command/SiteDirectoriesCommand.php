@@ -2,6 +2,7 @@
 
 namespace Drall\Command;
 
+use Drall\Model\SiteDetectorOptions;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -22,11 +23,9 @@ class SiteDirectoriesCommand extends BaseCommand {
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);
 
+    $sdOptions = SiteDetectorOptions::fromInput($input);
     $dirNames = $this->siteDetector()
-      ->getSiteDirNames(
-        $this->getDrallGroup($input),
-        $this->getDrallFilter($input),
-      );
+      ->getSiteDirNames($sdOptions);
 
     if (count($dirNames) === 0) {
       $this->logger->warning('No Drupal sites found.');

@@ -2,6 +2,7 @@
 
 namespace Drall\Command;
 
+use Drall\Model\SiteDetectorOptions;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -23,11 +24,9 @@ class SiteKeysCommand extends BaseCommand {
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);
 
+    $sdOptions = SiteDetectorOptions::fromInput($input);
     $keys = $this->siteDetector()
-      ->getSiteKeys(
-        $this->getDrallGroup($input),
-        $this->getDrallFilter($input),
-      );
+      ->getSiteKeys($sdOptions);
 
     if (count($keys) === 0) {
       $this->logger->warning('No Drupal sites found.');

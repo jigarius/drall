@@ -59,4 +59,37 @@ EOT, $process1->getOutput());
 EOT, $process2->getOutput());
   }
 
+  /**
+   * @testdox Detects --offset and --limit.
+   */
+  public function testWithRange(): void {
+    $process1 = Process::fromShellCommandline(
+      'drall exec --offset=2 --dry-run -vv -- ./vendor/bin/drush st',
+      static::PATH_DRUPAL,
+    );
+    $process1->run();
+    $this->assertOutputStartsWith(<<<EOT
+[info] Using offset: 2
+EOT, $process1->getOutput());
+
+    $process2 = Process::fromShellCommandline(
+      'drall exec --limit=2 --dry-run -vv -- ./vendor/bin/drush st',
+      static::PATH_DRUPAL,
+    );
+    $process2->run();
+    $this->assertOutputStartsWith(<<<EOT
+[info] Using limit: 2
+EOT, $process2->getOutput());
+
+    $process3 = Process::fromShellCommandline(
+      'drall exec --offset=2 --limit=2 --dry-run -vv -- ./vendor/bin/drush st',
+      static::PATH_DRUPAL,
+    );
+    $process3->run();
+    $this->assertOutputStartsWith(<<<EOT
+[info] Using offset: 2
+[info] Using limit: 2
+EOT, $process3->getOutput());
+  }
+
 }

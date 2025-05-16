@@ -2,6 +2,7 @@
 
 namespace Drall\Command;
 
+use Drall\Model\SiteDetectorOptions;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -17,17 +18,15 @@ class SiteAliasesCommand extends BaseCommand {
     parent::configure();
     $this->addUsage('site:aliases');
     $this->addUsage('--group=GROUP site:aliases');
-    $this->addUsage('--filter=FILTER  site:aliases');
+    $this->addUsage('--filter=FILTER site:aliases');
   }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);
 
+    $sdOptions = SiteDetectorOptions::fromInput($input);
     $aliases = $this->siteDetector()
-      ->getSiteAliases(
-        $this->getDrallGroup($input),
-        $this->getDrallFilter($input),
-      );
+      ->getSiteAliases($sdOptions);
 
     if (count($aliases) === 0) {
       $this->logger->warning('No site aliases found.');

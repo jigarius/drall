@@ -55,7 +55,7 @@ EOF, $process->getOutput());
   /**
    * @testdox with --filter.
    */
-  public function testExecuteWithFilter(): void {
+  public function testWithFilter(): void {
     $process = Process::fromShellCommandline('drall site:keys --filter="value~=@.local\$@"', static::PATH_DRUPAL);
     $process->run();
     $this->assertOutputEquals(<<<EOF
@@ -85,21 +85,13 @@ EOF, $process->getOutput());
   }
 
   /**
-   * @testdox with DRALL_GROUP env var.
+   * @testdox with --limit and --offset.
    */
-  public function testWithGroupEnvVar(): void {
-    $process = Process::fromShellCommandline(
-      'drall site:keys',
-      static::PATH_DRUPAL,
-      ['DRALL_GROUP' => 'bluish'],
-    );
+  public function testWithRange(): void {
+    $process = Process::fromShellCommandline('drall site:keys --offset=1 --limit=1', static::PATH_DRUPAL);
     $process->run();
     $this->assertOutputEquals(<<<EOF
-donatello.com
-8080.donatello.com
-donnie.drall.local
-leonardo.com
-leo.drall.local
+cowabunga.com
 
 EOF, $process->getOutput());
   }
