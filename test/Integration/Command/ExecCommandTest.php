@@ -365,6 +365,72 @@ EOF, $process2->getOutput());
   }
 
   /**
+   * @testdox With --offset.
+   */
+  public function testWithOffset(): void {
+    $process = Process::fromShellCommandline(
+      'drall exec --no-progress --offset=3 -- ./vendor/bin/drush st --field=site',
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertOutputEquals(<<<EOF
+sites/mikey
+✔ mikey: Done
+sites/ralph
+✔ ralph: Done
+
+EOF, $process->getOutput());
+
+    // Negative offsets like -2 select the last 2 sites.
+    $process = Process::fromShellCommandline(
+      'drall exec --no-progress --offset=-2 -- ./vendor/bin/drush st --field=site',
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertOutputEquals(<<<EOF
+sites/mikey
+✔ mikey: Done
+sites/ralph
+✔ ralph: Done
+
+EOF, $process->getOutput());
+  }
+
+  /**
+   * @testdox With --limit.
+   */
+  public function testWithLimit(): void {
+    $process1 = Process::fromShellCommandline(
+      'drall exec --no-progress --limit=1 -- ./vendor/bin/drush st --field=site',
+      static::PATH_DRUPAL,
+    );
+    $process1->run();
+    $this->assertOutputEquals(<<<EOF
+sites/default
+✔ default: Done
+
+EOF, $process1->getOutput());
+  }
+
+  /**
+   * @testdox With --offset and --limit.
+   */
+  public function testWithRange(): void {
+    $process1 = Process::fromShellCommandline(
+      'drall exec --no-progress --offset=2 --limit=2 -- ./vendor/bin/drush st --field=site',
+      static::PATH_DRUPAL,
+    );
+    $process1->run();
+    $this->assertOutputEquals(<<<EOF
+sites/leo
+✔ leo: Done
+sites/mikey
+✔ mikey: Done
+
+EOF, $process1->getOutput());
+  }
+
+  /**
    * @testdox with DRALL_GROUP env var.
    */
   public function testWithGroupEnvVar(): void {

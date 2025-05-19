@@ -2,6 +2,7 @@
 
 namespace Drall\Command;
 
+use Drall\Model\SiteDetectorOptions;
 use Drall\Service\SiteDetector;
 use Drall\Trait\SiteDetectorAwareTrait;
 use Psr\Log\LoggerAwareTrait;
@@ -30,6 +31,21 @@ abstract class BaseCommand extends Command {
       InputOption::VALUE_OPTIONAL,
       'Filter sites based on provided expression.'
     );
+
+    $this->addOption(
+      'offset',
+      'o',
+      InputOption::VALUE_OPTIONAL,
+      'Number of items to skip.',
+      0,
+    );
+
+    $this->addOption(
+      'limit',
+      'l',
+      InputOption::VALUE_OPTIONAL,
+      'Number of items to process.',
+    );
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output): void {
@@ -40,49 +56,27 @@ abstract class BaseCommand extends Command {
     parent::initialize($input, $output);
   }
 
-  /**
-   * Gets the active Drall group.
-   *
-   * @param \Symfony\Component\Console\Input\InputInterface $input
-   *   The input.
-   *
-   * @return null|string
-   *   Drall group, if any. Otherwise, NULL.
-   */
-  protected function getDrallGroup(InputInterface $input): ?string {
-    if ($group = $input->getOption('group')) {
-      return $group;
-    }
-
-    return getenv('DRALL_GROUP') ?: NULL;
-  }
-
-  /**
-   * Get the --filter parameter (if any).
-   *
-   * @param \Symfony\Component\Console\Input\InputInterface $input
-   *   The input.
-   *
-   * @return null|string
-   *   A filter expression.
-   *
-   * @see https://packagist.org/packages/consolidation/filter-via-dot-access-data
-   */
-  protected function getDrallFilter(InputInterface $input): ?string {
-    return $input->getOption('filter') ?: NULL;
-  }
-
   protected function preExecute(InputInterface $input, OutputInterface $output) {
     if (!$this->hasSiteDetector()) {
       $this->setSiteDetector(new SiteDetector());
     }
 
-    if ($group = $this->getDrallGroup($input)) {
+    $options = SiteDetectorOptions::fromInput($input);
+
+    if ($group = $options->getGroup()) {
       $this->logger->info('Using group: {group}', ['group' => $group]);
     }
 
-    if ($filter = $this->getDrallFilter($input)) {
+    if ($filter = $options->getFilter()) {
       $this->logger->info('Using filter: {filter}', ['filter' => $filter]);
+    }
+
+    if ($offset = $options->getOffset()) {
+      $this->logger->info('Using offset: {offset}', ['offset' => $offset]);
+    }
+
+    if ($limit = $options->getLimit()) {
+      $this->logger->info('Using limit: {limit}', ['limit' => $limit]);
     }
   }
 

@@ -342,6 +342,31 @@ drall exec --filter="leo||ralph" -- drush core:status
 For more on using filter expressions, refer to the documentation on
 [consolidation/filter-via-dot-access-data](https://github.com/consolidation/filter-via-dot-access-data).
 
+### --offset
+
+An integer indicating the number of items to skip from the beginning. If a
+negative integer is provided it is treated as `n - o`, where `n` is the total
+number of items and `o` is the offset.
+
+```shell
+# Skip the first 2 items.
+drall exec --offset=2 -- drush core:status
+# Start at the 2nd item from the end.
+drall exec --offset=-2 -- drush core:status
+```
+
+### --limit
+
+An integer indicating the number of items to process.
+
+```shell
+# Stop after the first 2 items.
+drall exec --limit=2 -- drush core:status
+# Skip the first 2 items and process 3 items thereafter. Thus, only items
+# 3, 4, 5 are processed.
+drall exec --offset=2 --limit=3 -- drush core:status
+```
+
 ### --silent
 
 Display no output.

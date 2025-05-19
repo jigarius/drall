@@ -7,6 +7,7 @@ use Consolidation\Filter\LogicalOpFactory;
 use Consolidation\SiteAlias\SiteAliasManager;
 use Consolidation\SiteAlias\SiteAliasManagerAwareTrait;
 use Consolidation\SiteAlias\SiteAliasManagerInterface;
+use Drall\Model\SiteDetectorOptions;
 use Drall\Model\SitesFile;
 use Drall\Trait\DrupalFinderAwareTrait;
 use DrupalFinder\DrupalFinderComposerRuntime;
@@ -36,93 +37,72 @@ class SiteDetector {
   /**
    * Get a list of site directory names for a site group.
    *
-   * @param string|null $group
-   *   A site group, if any.
-   * @param string|null $filter
-   *   A filter expression.
+   * @param \Drall\Model\SiteDetectorOptions|null $options
+   *   Options.
    *
    * @return array
    *   Site directory names.
    */
-  public function getSiteDirNames(
-    ?string $group = NULL,
-    ?string $filter = NULL,
-  ): array {
-    if (!$sitesFile = $this->getSitesFile($group)) {
+  public function getSiteDirNames(?SiteDetectorOptions $options = NULL): array {
+    $options = $options ?? new SiteDetectorOptions();
+
+    if (!$sitesFile = $this->getSitesFile($options->getGroup())) {
       return [];
     }
 
     $result = $sitesFile->getDirNames();
-    if ($filter) {
-      $result = $this->filter($result, $filter);
-    }
-
-    return $result;
+    $result = $this->applyFilter($result, $options->getFilter() ?? '');
+    return $this->applyRange($result, $options->getOffset(), $options->getLimit());
   }
 
   /**
    * Get a list of site URIs.
    *
-   * @param string|null $group
-   *   A site group, if any.
-   * @param string|null $filter
-   *   A filter expression.
+   * @param \Drall\Model\SiteDetectorOptions|null $options
+   *   Options.
    * @param bool $unique
    *   Whether to return unique keys only.
    *
    * @return array
    *   Keys from the $sites array.
    */
-  public function getSiteKeys(
-    ?string $group = NULL,
-    ?string $filter = NULL,
-    bool $unique = FALSE,
-  ): array {
-    if (!$sitesFile = $this->getSitesFile($group)) {
+  public function getSiteKeys(?SiteDetectorOptions $options = NULL, bool $unique = FALSE): array {
+    $options = $options ?? new SiteDetectorOptions();
+    if (!$sitesFile = $this->getSitesFile($options->getGroup())) {
       return [];
     }
 
     $result = $sitesFile->getKeys($unique);
-    if ($filter) {
-      $result = $this->filter($result, $filter);
-    }
-
-    return $result;
+    $result = $this->applyFilter($result, $options->getFilter() ?? '');
+    return $this->applyRange($result, $options->getOffset(), $options->getLimit());
   }
 
   /**
    * Get site aliases.
    *
-   * @param string|null $group
-   *   A site group, if any.
-   * @param string|null $filter
-   *   A filter expression.
+   * @param \Drall\Model\SiteDetectorOptions|null $options
+   *   Options.
    *
    * @return string[]
    *   Site aliases.
    */
-  public function getSiteAliases(
-    ?string $group = NULL,
-    ?string $filter = NULL,
-  ): array {
+  public function getSiteAliases(?SiteDetectorOptions $options = NULL): array {
+    $options = $options ?? new SiteDetectorOptions();
     // Use Drupal Finder to ensure that the Drupal is installed. This ensures
     // consistency in errors raised by methods that depend on sites.*.php.
     $this->drupalFinder()->getDrupalRoot();
 
     $result = array_values($this->siteAliasManager()->getMultiple());
 
-    if ($group) {
+    if ($group = $options->getGroup()) {
       $result = array_filter($result, function ($alias) use ($group) {
         return in_array($group, $alias->get('drall.groups') ?? []);
       });
     }
 
     $result = array_map(fn($a) => $a->name(), $result);
-    if ($filter) {
-      $result = $this->filter($result, $filter);
-    }
-
-    return $result;
+    $result = $this->applyFilter($result, $options->getFilter() ?? '');
+    return $this->applyRange($result, $options->getOffset(), $options->getLimit());
   }
 
   /**
@@ -131,28 +111,27 @@ class SiteDetector {
    * If there are aliases like @foo.dev and @foo.prod, then @foo part is
    * considered the site name.
    *
-   * @param string|null $group
-   *   A site group, if any.
-   * @param string|null $filter
-   *   A filter expression.
+   * @param \Drall\Model\SiteDetectorOptions|null $options
+   *   Options.
    *
    * @return array
    *   An array of site alias names with the @ prefix.
    */
-  public function getSiteAliasNames(
-    ?string $group = NULL,
-    ?string $filter = NULL,
-  ): array {
+  public function getSiteAliasNames(?SiteDetectorOptions $options = NULL): array {
+    $options = $options ?? new SiteDetectorOptions();
+
+    // Certain options must be used only once in this method.
+    // Thus, we do not forward them to ::getSiteAliases().
+    $saOptions = new SiteDetectorOptions();
+    $saOptions->setGroup($options->getGroup());
+
     $result = array_map(function ($siteAlias) {
       return explode('.', $siteAlias)[0];
-    }, $this->getSiteAliases($group));
+    }, $this->getSiteAliases($saOptions));
 
     $result = array_unique(array_values($result));
-    if ($filter) {
-      $result = $this->filter($result, $filter);
-    }
-
-    return $result;
+    $result = $this->applyFilter($result, $options->getFilter() ?? '');
+    return $this->applyRange($result, $options->getOffset(), $options->getLimit());
   }
 
   /**
@@ -193,12 +172,12 @@ class SiteDetector {
    *
    * @see https://packagist.org/packages/consolidation/filter-via-dot-access-data
    */
-  private function filter(
+  private function applyFilter(
     array $data,
     string $expression,
     string $default_filter_field = 'value',
   ): array {
-    if (empty($data)) {
+    if (empty($data) || empty($expression)) {
       return $data;
     }
 
@@ -217,6 +196,27 @@ class SiteDetector {
     }
 
     return $result;
+  }
+
+  /**
+   * Get data after applying the given offset and limit.
+   *
+   * @param array $data
+   *   The data.
+   * @param int|null $offset
+   *   An offset.
+   * @param int|null $limit
+   *   A limit.
+   *
+   * @return array
+   *   The data after applying the range.
+   */
+  private function applyRange(array $data, ?int $offset, ?int $limit): array {
+    if (is_null($offset) && is_null($limit)) {
+      return $data;
+    }
+
+    return array_splice($data, $offset ?? 0, $limit);
   }
 
   /**

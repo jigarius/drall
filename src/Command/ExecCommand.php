@@ -7,6 +7,7 @@ use Amp\ByteStream\WritableResourceStream;
 use Amp\Pipeline\Pipeline;
 use Amp\Process\Process;
 use Drall\Model\Placeholder;
+use Drall\Model\SiteDetectorOptions;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -51,6 +52,7 @@ final class ExecCommand extends BaseCommand implements SignalableCommandInterfac
     $this->addUsage('./vendor/bin/drush core:status');
     $this->addUsage('--group=GROUP -- drush core:status');
     $this->addUsage('--filter=FILTER -- drush core:status');
+    $this->addUsage('--offset=2 --limit=2 -- drush core:status');
     $this->addUsage('--workers=4 -- drush cache:rebuild');
     $this->addUsage('ls web/sites/@@dir/settings.php');
     $this->addUsage('\'echo "Working on @@site" && drush @@site.local core:status\'');
@@ -209,19 +211,17 @@ EOT);
       return 1;
     }
 
-    $group = $this->getDrallGroup($input);
-    $filter = $this->getDrallFilter($input);
-
     if (!$placeholder = $this->getUniquePlaceholder($command)) {
       return 1;
     }
 
     // Get all possible values for the placeholder.
+    $sdOptions = SiteDetectorOptions::fromInput($input);
     $values = match ($placeholder) {
-      Placeholder::Directory => $this->siteDetector()->getSiteDirNames($group, $filter),
-      Placeholder::Site => $this->siteDetector()->getSiteAliasNames($group, $filter),
-      Placeholder::Key => $this->siteDetector()->getSiteKeys($group, $filter),
-      Placeholder::UniqueKey => $this->siteDetector()->getSiteKeys($group, $filter, TRUE),
+      Placeholder::Directory => $this->siteDetector()->getSiteDirNames($sdOptions),
+      Placeholder::Site => $this->siteDetector()->getSiteAliasNames($sdOptions),
+      Placeholder::Key => $this->siteDetector()->getSiteKeys($sdOptions),
+      Placeholder::UniqueKey => $this->siteDetector()->getSiteKeys($sdOptions, TRUE),
       default => throw new \RuntimeException('Unrecognized placeholder: ' . $placeholder->value),
     };
 
