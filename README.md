@@ -99,10 +99,16 @@ command just like version 1.x.
 
 #### Interrupting a command
 
-When `drall exec` receives a signal to interrupt (usually `ctrl + c`), Drall
-stops after processing the site that is currently being processed. This
+When the [PCNTL](https://www.php.net/manual/en/book.pcntl.php) is available,
+`drall exec` detects a signal to interrupt (usually `ctrl + c`) and then
+stops after processing the sites that are currently being processed. This
 prevents the current command from terminating abruptly. However, if a second
 interrupt signal is received, then Drall stops immediately.
+
+In the absence of PCNTL, sending a signal to interrupt will make Drall stop
+immediately, i.e. it won't wait for the currently running commands to finish.
+In such situations, running `drall stop` stops all `drall exec` commands.
+This command should be treated as Plan B and the use of PCNTL is recommended.
 
 #### Drush with @@dir
 

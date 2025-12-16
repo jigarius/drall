@@ -4,6 +4,7 @@ namespace Drall;
 
 use Composer\InstalledVersions;
 use Drall\Command\ExecCommand;
+use Drall\Command\StopCommand;
 use Drall\Command\SiteAliasesCommand;
 use Drall\Command\SiteDirectoriesCommand;
 use Drall\Command\SiteKeysCommand;
@@ -36,6 +37,7 @@ final class Drall extends Application {
     $this->add(new SiteKeysCommand());
     $this->add(new SiteAliasesCommand());
     $this->add(new ExecCommand());
+    $this->add(new StopCommand());
   }
 
   protected function configureIO(InputInterface $input, OutputInterface $output): void {
