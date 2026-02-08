@@ -8,6 +8,7 @@ use Amp\Pipeline\Pipeline;
 use Amp\Process\Process;
 use Drall\Model\Placeholder;
 use Drall\Model\SiteDetectorOptions;
+use Drall\Trait\StoppableCommandTrait;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -23,6 +24,8 @@ use Symfony\Component\Console\Output\StreamOutput;
  */
 final class ExecCommand extends BaseCommand implements SignalableCommandInterface {
 
+  use StoppableCommandTrait;
+
   /**
    * Exit code when stopping due to user interruption.
    */
@@ -36,11 +39,11 @@ final class ExecCommand extends BaseCommand implements SignalableCommandInterfac
   const WORKER_LIMIT = 16;
 
   /**
-   * Whether execution is stopping due to an interruption signal.
+   * Whether execution is stopping.
    *
    * @var bool
    */
-  private bool $isStopping = FALSE;
+  private bool $isInterrupted = FALSE;
 
   protected function configure() {
     parent::configure();
@@ -262,7 +265,7 @@ EOT);
         $progressBar,
         &$exitCode,
       ) {
-        if ($this->isStopping) {
+        if ($this->isInterrupted || $this->isStopped()) {
           return;
         }
 
@@ -299,7 +302,7 @@ EOT);
         }
       }));
 
-    if ($this->isStopping) {
+    if ($this->isInterrupted || $this->isStopped()) {
       $output->writeln('');
       return self::INTERRUPTED;
     }
@@ -369,11 +372,11 @@ EOT);
 
   public function handleSignal(int $signal, int|false $previousExitCode = 0): int|false {
     // If a SIGINT is received more than once, stop immediately.
-    if ($this->isStopping) {
+    if ($this->isInterrupted) {
       return self::INTERRUPTED;
     }
 
-    $this->isStopping = TRUE;
+    $this->isInterrupted = TRUE;
     return FALSE;
   }
 

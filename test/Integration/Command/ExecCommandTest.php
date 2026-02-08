@@ -507,7 +507,6 @@ EOF, $process->getOutput());
     $this->assertOutputEquals(<<<EOF
  [info] Starting bootstrap to none
  [info] Drush bootstrap phase 0
- [info] Try to validate bootstrap phase 0
 Drush version : x.y.z
 ✔ default: Done
 

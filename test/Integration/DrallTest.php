@@ -26,13 +26,13 @@ class DrallTest extends TestCase {
    * @testdox Suggests "drush" for unrecognized commands.
    */
   public function testUnrecognizedCommand(): void {
-    $process = Process::fromShellCommandline('drall st', static::PATH_DRUPAL);
+    $process = Process::fromShellCommandline('drall cron', static::PATH_DRUPAL);
     $process->run();
     $this->assertOutputEquals(<<<EOT
 
-  The command "st" was not understood. Did you mean one of the following?
-  drall exec st
-  drall exec drush st
+  The command "cron" was not understood. Did you mean one of the following?
+  drall exec cron
+  drall exec drush cron
   Alternatively, run "drall list" to see a list of all available commands.
 
 EOT, $process->getErrorOutput());
