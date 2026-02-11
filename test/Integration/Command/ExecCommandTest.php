@@ -2,6 +2,7 @@
 
 namespace Drall\Test\Integration\Command;
 
+use Drall\Command\ExecCommand;
 use Drall\TestCase;
 use Symfony\Component\Process\Process;
 
@@ -759,14 +760,60 @@ EOT, $process->getOutput());
    * @testdox One SIGINT gives a graceful exit.
    */
   public function testSigInt1(): void {
-    $this->markTestSkipped('Needs work.');
+    // Start a long-running exec command.
+    $process = Process::fromShellCommandline(
+      'exec ./vendor/bin/drall exec --no-progress -- "./vendor/bin/drush st --field=site && sleep 2" 2>&1',
+      static::PATH_DRUPAL,
+    );
+    $process->start();
+
+    // Wait till the first two sites are processed.
+    sleep(4);
+
+    $process->signal(SIGINT);
+    $process->wait();
+
+    $this->assertOutputEquals(<<<EOF
+sites/default
+✔ default: Done
+sites/donnie
+✔ donnie: Done
+
+EOF, $process->getOutput());
+
+    $this->assertEquals(ExecCommand::INTERRUPTED, $process->getExitCode());
   }
 
   /**
    * @testdox Two SIGINT gives a forceful exit.
    */
   public function testSigInt2(): void {
-    $this->markTestSkipped('Needs work.');
+    // Use a slow command so the graceful exit (from the first SIGINT) is
+    // still waiting for the current site when the second SIGINT arrives.
+    $process = Process::fromShellCommandline(
+      'exec ./vendor/bin/drall exec --no-progress -- "./vendor/bin/drush st --field=site && sleep 2" 2>&1',
+      static::PATH_DRUPAL,
+    );
+    $process->start();
+
+    // Wait till the first site is processed and the second begins.
+    sleep(3);
+
+    // Send two SIGINTs to force an immediate exit.
+    $process->signal(SIGINT);
+    usleep(300000);
+    $process->signal(SIGINT);
+    $process->wait();
+
+    // Only the first site's output is present. The second site was
+    // interrupted mid-execution, so its output was never flushed.
+    $this->assertOutputEquals(<<<EOF
+sites/default
+✔ default: Done
+
+EOF, $process->getOutput());
+
+    $this->assertEquals(ExecCommand::INTERRUPTED, $process->getExitCode());
   }
 
 }
