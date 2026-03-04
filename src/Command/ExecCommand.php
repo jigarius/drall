@@ -117,12 +117,11 @@ final class ExecCommand extends BaseCommand implements SignalableCommandInterfac
   }
 
   private function checkOptionsSeparator(InputInterface $input, OutputInterface $output): void {
-    if (!method_exists($input, 'getRawTokens')) {
-      return;
-    }
+    // @todo Use ::getRawTokens() when Symfony Console 7.x becomes a compulsory requirement.
+    $rawTokens = preg_split('/\s+/', (string) $input);
 
     // If options are present, an options separator (--) is required.
-    if (in_array('--', $input->getRawTokens(TRUE))) {
+    if (in_array('--', $rawTokens)) {
       return;
     }
 
@@ -138,12 +137,11 @@ EOT);
   }
 
   private function checkObsoleteOptions(InputInterface $input, OutputInterface $output): void {
-    if (!method_exists($input, 'getRawTokens')) {
-      return;
-    }
+    // @todo Use ::getRawTokens() when Symfony Console 7.x becomes a compulsory requirement.
+    $rawTokens = preg_split('/\s+/', (string) $input);
 
     // If obsolete --drall-* options are present, then abort.
-    foreach ($input->getRawTokens(TRUE) as $token) {
+    foreach ($rawTokens as $token) {
       if (str_starts_with($token, '--drall-')) {
         $output->writeln(<<<EOT
 In Drall 4.x, all <comment>--drall-*</comment> options have been renamed.
