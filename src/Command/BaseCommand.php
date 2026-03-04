@@ -56,6 +56,19 @@ abstract class BaseCommand extends Command {
     parent::initialize($input, $output);
   }
 
+  /**
+   * Formats a DateTime object for display in logs and messages.
+   *
+   * @param \DateTime $dateTime
+   *   The DateTime object to format.
+   *
+   * @return string
+   *   A human-readable date string, e.g. "4 Mar, 2026 @ 14:30:00".
+   */
+  public static function formatDateTime(\DateTime $dateTime): string {
+    return $dateTime->format('j M, Y @ H:i:s');
+  }
+
   protected function preExecute(InputInterface $input, OutputInterface $output) {
     if (!$this->hasSiteDetector()) {
       $this->setSiteDetector(new SiteDetector());
