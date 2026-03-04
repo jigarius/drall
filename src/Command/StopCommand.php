@@ -43,7 +43,7 @@ final class StopCommand extends BaseCommand {
     /** @var \Symfony\Component\Console\Output\ConsoleOutput $output */
     $this->preExecute($input, $output);
 
-    $this->createStopFile();
+    $this->stop();
     return Command::SUCCESS;
   }
 

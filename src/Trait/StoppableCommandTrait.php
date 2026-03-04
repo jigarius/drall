@@ -53,6 +53,7 @@ trait StoppableCommandTrait {
    *   True or False.
    */
   private function isStopped(): bool {
+    // In case we already know that a stop was requested.
     if ($this->isStopped) {
       return $this->isStopped;
     }
@@ -61,30 +62,27 @@ trait StoppableCommandTrait {
       return FALSE;
     }
 
-    // @todo Only stop commands that started before the "stop" file was created.
-    $this->logger->warning('A drall.stop file was detected. Stopping.');
-    $this->deleteStopFile();
+    // Stop commands that started before the "stop" was made.
+    $stopTimestamp = file_get_contents($this->getStopFilePath());
+    if ($_SERVER['REQUEST_TIME'] >= $stopTimestamp) {
+      return FALSE;
+    }
+
+    $this->logger->warning("A stop was requested using '{command}'.", ['command' => 'drall stop']);
     return $this->isStopped = TRUE;
   }
 
   /**
-   * Create a drall.stop file.
+   * Request the command to stop using the drall.stop file.
    */
-  protected function createStopFile(): void {
-    if (!touch($this->getStopFilePath())) {
-      throw new \RuntimeException("Failed to touch: {$this->getStopFilePath()}");
+  protected function stop(): void {
+    $now = new \DateTime();
+    if (FALSE === file_put_contents($this->getStopFilePath(), $now->getTimestamp())) {
+      throw new \RuntimeException("Failed to write: {$this->getStopFilePath()}");
     }
 
-    $this->logger->notice("Created file: {file}", ['file' => $this->getStopFilePath()]);
-  }
-
-  /**
-   * Delete the drall.stop file, if exists.
-   */
-  protected function deleteStopFile(): void {
-    if (!unlink($this->getStopFilePath())) {
-      throw new \RuntimeException("Failed to unlink: {$this->getStopFilePath()}");
-    }
+    $this->logger->notice("A stop was requested at {datetime}.", ['datetime' => $this->formatDateTime($now)]);
+    $this->logger->debug("Touched file: {file}", ['file' => $this->getStopFilePath()]);
   }
 
 }
