@@ -18,7 +18,7 @@
     "require": {
         "composer/installers": "^2",
         "drupal/core-composer-scaffold": "*",
-        "drupal/core-recommended": "^11",
+        "drupal/core-recommended": "^10",
         "drupal/core-vendor-hardening": "*",
         "jigarius/drall": "*"
     },
@@ -34,8 +34,7 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "drupal/core-composer-scaffold": true,
             "drupal/core-project-message": true,
-            "drupal/core-vendor-hardening": true,
-            "phpro/grumphp": true
+            "drupal/core-vendor-hardening": true
         }
     },
     "extra": {
@@ -73,8 +72,5 @@
                 "type:drupal-custom-theme"
             ]
         }
-    },
-    "require-dev": {
-        "phpro/grumphp": "^2"
     }
 }

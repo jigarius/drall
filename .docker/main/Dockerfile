@@ -1,4 +1,4 @@
-FROM drupal:11-php8.3-apache
+FROM drupal:11-php8.2-apache
 
 ENV PHP_INI_PATH="$PHP_INI_DIR/conf.d/php.ini"
 ENV DRUPAL_PATH="/opt/drupal"

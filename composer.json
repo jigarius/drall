@@ -17,7 +17,7 @@
     ],
     "homepage": "https://github.com/jigarius/drall",
     "require": {
-        "php": ">= 8.3",
+        "php": ">= 8.2",
         "amphp/pipeline": "^1.2",
         "amphp/process": "^2",
         "consolidation/filter-via-dot-access-data": "^2.0",
