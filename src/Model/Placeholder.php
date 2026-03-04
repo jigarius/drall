@@ -8,7 +8,6 @@ enum Placeholder: string {
   case Site = '@@site';
 
   // Represents the site's directory under "DRUPAL/sites/".
-  // @todo Rename to @@dir.
   case Directory = '@@dir';
 
   // Represents keys in the $sites array.

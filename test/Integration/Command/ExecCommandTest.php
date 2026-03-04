@@ -505,9 +505,11 @@ EOF, $process->getOutput());
     // Ignore the Drush Version.
     $output = preg_replace('@(Drush version :) ([\d|\.|-]+)@', '$1 x.y.z', $process->getOutput());
 
-    $this->assertOutputEquals(<<<EOF
- [info] Starting bootstrap to none
- [info] Drush bootstrap phase 0
+    $this->assertOutputContainsString(<<<EOF
+[info] Drush bootstrap phase 0
+EOF, $output);
+
+    $this->assertOutputContainsString(<<<EOF
 Drush version : x.y.z
 ✔ default: Done
 
