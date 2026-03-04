@@ -19,6 +19,7 @@ provision/drupal:
 
 	cp /opt/drall/.docker/main/drupal/composer.json /opt/drupal/ || echo "Skipping: drupal/composer.json"
 	rm -f /opt/drupal/composer.lock
+	rm -Rf /opt/drupal/vendor
 	composer --working-dir=/opt/drupal install --no-progress
 	cp -r /opt/drall/.docker/main/drupal/drush /opt/drupal/ || echo "Skipping: drupal/drush"
 	cp -r /opt/drall/.docker/main/drupal/web/sites /opt/drupal/web/ || echo "Skipping: drupal/web/sites"
@@ -52,6 +53,7 @@ provision/empty-drupal:
 	mkdir -p /opt/empty-drupal
 	cp /opt/drall/.docker/main/empty-drupal/composer.json /opt/empty-drupal/ || echo "Skipping: empty-drupal/composer.json"
 	rm -f /opt/empty-drupal/composer.lock
+	rm -Rf /opt/empty-drupal/vendor
 	composer --working-dir=/opt/empty-drupal install --no-progress
 	cp /opt/drall/.docker/main/empty-drupal/web/sites/sites.php /opt/empty-drupal/web/sites/sites.php
 
@@ -78,6 +80,8 @@ provision/drupal/database:
 
 .PHONY: provision/drall
 provision/drall:
+	rm -f /opt/drall/composer.lock
+	rm -Rf /opt/drall/vendor
 	composer install --working-dir=/opt/drall --no-progress
 
 
