@@ -8,7 +8,7 @@ interface BatchInterface {
 
   public function addItems(array $ids): void;
 
-  public function claimItem(): ?BatchItem;
+  public function startItem(BatchItem $item): void;
 
   public function finishItem(BatchItem $item): void;
 

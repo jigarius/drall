@@ -33,16 +33,17 @@ abstract class BatchBase implements BatchInterface {
     $this->save();
   }
 
-  public function claimItem(): ?BatchItem {
-    foreach ($this->getQueuedItems() as $item) {
+  public function startItem(BatchItem $item): void {
+    if (isset($this->data['queued'][$item->id])) {
       unset($this->data['queued'][$item->id]);
-      $this->data['started'][$item->id] = $item;
-      $item->start();
-      $this->save();
-      return $item;
+    }
+    elseif (!isset($this->data['started'][$item->id])) {
+      throw new \RuntimeException('Only a queued or started item can be started: ' . $item->id);
     }
 
-    return NULL;
+    $this->data['started'][$item->id] = $item;
+    $item->start();
+    $this->save();
   }
 
   public function finishItem(BatchItem $item): void {
@@ -50,10 +51,7 @@ abstract class BatchBase implements BatchInterface {
       throw new \RuntimeException("Only a started item can be finished: $item");
     }
 
-    if (!$item->getStatus() === BatchItemStatus::Finished) {
-      $item->finish();
-    }
-
+    $item->finish();
     unset($this->data['started'][$item->id]);
     $this->data['finished'][$item->id] = $item;
     $this->save();

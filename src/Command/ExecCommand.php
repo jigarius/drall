@@ -6,6 +6,9 @@ use Amp\ByteStream;
 use Amp\ByteStream\WritableResourceStream;
 use Amp\Pipeline\Pipeline;
 use Amp\Process\Process;
+use Drall\Batch\BatchInterface;
+use Drall\Batch\FileBatch;
+use Drall\Batch\MemoryBatch;
 use Drall\Model\Placeholder;
 use Drall\Model\SiteDetectorOptions;
 use Drall\Trait\StoppableCommandTrait;
@@ -18,6 +21,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\StreamOutput;
+use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 /**
  * A command to execute a shell command on multiple sites.
@@ -103,12 +107,20 @@ final class ExecCommand extends BaseCommand implements SignalableCommandInterfac
       'Do not show a progress bar.'
     );
 
+    $this->addOption(
+      'batch-file',
+      NULL,
+      InputOption::VALUE_OPTIONAL,
+      'Path to a batch file for resumable execution.',
+    );
+
     $this->ignoreValidationErrors();
   }
 
   protected function initialize(InputInterface $input, OutputInterface $output): void {
     $this->checkObsoleteOptions($input, $output);
     $this->checkOptionsSeparator($input, $output);
+    $this->checkBatchFileOption($input, $output);
     $this->checkIntervalOption($input, $output);
     $this->checkWorkersOption($input, $output);
     $this->checkInterOptionCompatibility($input, $output);
@@ -149,6 +161,19 @@ See https://github.com/jigarius/drall/issues/99
 EOT);
         throw new \RuntimeException('Obsolete options detected');
       }
+    }
+  }
+
+  private function checkBatchFileOption(InputInterface $input, OutputInterface $output): void {
+    if (!$batchFile = $input->getOption('batch-file')) {
+      return;
+    }
+
+    if (pathinfo($batchFile, PATHINFO_EXTENSION) !== 'json') {
+      $output->writeln(<<<EOT
+The value for <comment>--batch-file</comment> must be a path to a file with the <comment>.json</comment> extension.
+EOT);
+      throw new \RuntimeException('Invalid options detected');
     }
   }
 
@@ -223,18 +248,23 @@ EOT);
       Placeholder::Site => $this->siteDetector()->getSiteAliasNames($sdOptions),
       Placeholder::Key => $this->siteDetector()->getSiteKeys($sdOptions),
       Placeholder::UniqueKey => $this->siteDetector()->getSiteKeys($sdOptions, TRUE),
-      default => throw new \RuntimeException('Unrecognized placeholder: ' . $placeholder->value),
+      default => throw new \RuntimeException("Unrecognized placeholder: $placeholder->value"),
     };
 
-    if (empty($values)) {
+    $batch = $this->initBatch($input, $output, $values);
+    if ($batch === NULL) {
+      return 0;
+    }
+
+    if (!$batch->getQueuedItems() && !$batch->getStartedItems()) {
       $this->logger->warning('No Drupal sites found.');
       return 0;
     }
 
     // Display commands without executing them.
     if ($input->getOption('dry-run')) {
-      foreach ($values as $value) {
-        $pCommand = Placeholder::replace([$placeholder->value => $value], $command);
+      foreach ($batch->getQueuedItems() as $item) {
+        $pCommand = Placeholder::replace([$placeholder->value => $item->id], $command);
         $output->writeln($pCommand);
       }
 
@@ -251,10 +281,11 @@ EOT);
 
     // Within the iteration, all output must go through the output sections.
     // This keeps the text at the top and the progress bar at the bottom.
-    Pipeline::fromIterable($values)
+    Pipeline::fromIterable($batch->getStartedItems() + $batch->getQueuedItems())
       ->concurrent($input->getOption('workers'))
       ->unordered()
-      ->forEach((function ($value) use (
+      ->forEach((function ($item) use (
+        $batch,
         $input,
         $output,
         $textSection,
@@ -267,7 +298,9 @@ EOT);
           return;
         }
 
-        $pCommand = Placeholder::replace([$placeholder->value => $value], $command);
+        /** @var \Drall\Batch\BatchItem $item */
+        $batch->startItem($item);
+        $pCommand = Placeholder::replace([$placeholder->value => $item->id], $command);
         $process = Process::start("($pCommand) 2>&1");
 
         // Send process output directly to the output stream.
@@ -285,13 +318,14 @@ EOT);
         }
 
         if (Command::SUCCESS === $process->join()) {
-          $textSection->writeln("✔ $value: Done");
+          $textSection->writeln("✔ $item: Done");
         }
         else {
-          $textSection->writeln("✖ $value: Failed");
+          $textSection->writeln("✖ $item: Failed");
           $exitCode = Command::FAILURE;
         }
 
+        $batch->finishItem($item);
         $progressBar->advance();
 
         // Wait between commands if --interval is specified.
@@ -308,6 +342,51 @@ EOT);
     $progressBar->finish();
 
     return $exitCode;
+  }
+
+  private function initBatch(InputInterface $input, OutputInterface $output, array $values): ?BatchInterface {
+    if (!$batchFile = $input->getOption('batch-file')) {
+      $batch = new MemoryBatch();
+      $batch->addItems($values);
+      return $batch;
+    }
+
+    $batch = new FileBatch($batchFile);
+
+    // No existing batch data — start fresh.
+    if (!$batch->getItems()) {
+      $batch->addItems($values);
+      return $batch;
+    }
+
+    /** @var \Symfony\Component\Console\Helper\QuestionHelper $helper */
+    $helper = $this->getHelper('question');
+
+    if ($batch->isComplete()) {
+      $question = new ConfirmationQuestion(
+        'Batch is already complete. Restart? [y/N] ',
+        FALSE,
+      );
+
+      if (!$helper->ask($input, $output, $question)) {
+        return NULL;
+      }
+    }
+    else {
+      $question = new ConfirmationQuestion(
+        'A batch file already exists. Resume? [Y/n] ',
+        TRUE,
+      );
+
+      if ($helper->ask($input, $output, $question)) {
+        return $batch;
+      }
+    }
+
+    // Start a fresh batch.
+    $batch->reset();
+    $batch->addItems($values);
+    return $batch;
   }
 
   /**
