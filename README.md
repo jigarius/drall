@@ -225,6 +225,31 @@ drall exec --workers=3 -- drush core:rebuild
 
 When a worker runs out of work, it terminates automatically.
 
+#### --batch-file
+
+When specified, Drall tracks the current task in the specified JSON file.
+This allows long tasks to be resumed after they're interrupted.
+
+The batch file only remembers the items that were finished. It doesn't remember
+anything related to the command being executed or other Drall options. Thus,
+you can resume the batch with new options or even with a completely new command!
+
+You can use the `FileBatch` class to read the JSON batch file and do fun things
+like generate reports.
+
+##### Example: Resumable batches
+
+For example, you're running `drush updatedb` on a hundred websites and for
+some reason, you need to stop the command and resume it after a few minutes.
+
+```shell
+# When the command is run for the first time, the batch file is created.
+drall exec --batch-file=~/drall.deploy.json -- drush updatedb -y
+# When the command is run for the second time, the batch file is detected
+# and the batch can be resumed.
+drall exec --batch-file=~/drall.deploy.json -- "drush updatedb -y && drush core:rebuild"
+```
+
 #### --no-progress
 
 By default, Drall displays a progress bar that indicates how many sites have
