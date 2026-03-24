@@ -24,6 +24,10 @@ final class FileBatch extends BatchBase {
 
     $json = json_decode($json, TRUE);
 
+    if (!is_array($json)) {
+      return FALSE;
+    }
+
     if (($json['version'] ?? NULL) !== static::VERSION) {
       return FALSE;
     }

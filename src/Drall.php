@@ -66,10 +66,7 @@ final class Drall extends Application {
 
     // Remove unneeded options.
     $options = $definition->getOptions();
-    unset(
-      $options['no-interaction'],
-      $options['silent'],
-    );
+    unset($options['silent']);
     $definition->setOptions($options);
 
     $definition->addOption(new InputOption(
