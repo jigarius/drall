@@ -787,6 +787,129 @@ EOF, $process->getOutput());
   }
 
   /**
+   * @testdox Shows error when --batch-file has a non-JSON extension.
+   */
+  public function testBatchFileInvalidExtension(): void {
+    $process = Process::fromShellCommandline(
+      'drall exec --no-progress --batch-file=/tmp/batch.txt -- drush st --fields=site',
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertOutputEquals(<<<EOT
+The value for --batch-file must be a path to a file with the .json extension.
+
+EOT, $process->getOutput());
+    $this->assertOutputContainsString('Invalid options detected', $process->getErrorOutput());
+    $this->assertEquals(1, $process->getExitCode());
+  }
+
+  /**
+   * @testdox With --batch-file creates a batch file.
+   */
+  public function testBatchFileCreatesFile(): void {
+    $batchFile = tempnam(sys_get_temp_dir(), 'Drall.') . '.json';
+    $process = Process::fromShellCommandline(
+      "drall exec --no-progress --batch-file=$batchFile -- ./vendor/bin/drush st --field=site",
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertOutputEquals(<<<EOF
+sites/default
+✔ default: Done
+sites/donnie
+✔ donnie: Done
+sites/leo
+✔ leo: Done
+sites/mikey
+✔ mikey: Done
+sites/ralph
+✔ ralph: Done
+
+EOF, $process->getOutput());
+    $this->assertEquals(0, $process->getExitCode());
+
+    // Verify the batch file was created.
+    $this->assertFileExists($batchFile);
+    $data = json_decode(file_get_contents($batchFile), TRUE);
+    $this->assertEquals('1.0', $data['version']);
+    $this->assertCount(5, $data['finished']);
+    $this->assertCount(0, $data['queued']);
+    $this->assertCount(0, $data['started']);
+
+    @unlink($batchFile);
+  }
+
+  /**
+   * @testdox With --batch-file on a complete batch, default is no restart.
+   */
+  public function testBatchFileCompleteNoRestart(): void {
+    $batchFile = tempnam(sys_get_temp_dir(), 'Drall.') . '.json';
+
+    // Complete a batch.
+    $process1 = Process::fromShellCommandline(
+      "drall exec --no-progress --batch-file=$batchFile -- ./vendor/bin/drush st --field=site",
+      static::PATH_DRUPAL,
+    );
+    $process1->run();
+    $this->assertEquals(0, $process1->getExitCode());
+
+    // Running again in non-interactive mode uses the default (N for restart).
+    // The command should exit cleanly without re-executing.
+    $process2 = Process::fromShellCommandline(
+      "drall exec --no-progress --no-interaction --batch-file=$batchFile -- ./vendor/bin/drush st --field=site",
+      static::PATH_DRUPAL,
+    );
+    $process2->run();
+    $this->assertStringNotContainsString('Done', $process2->getOutput());
+    $this->assertEquals(0, $process2->getExitCode());
+
+    @unlink($batchFile);
+  }
+
+  /**
+   * @testdox With --batch-file resumes an interrupted batch.
+   */
+  public function testBatchFileResumeInterrupted(): void {
+    $batchFile = tempnam(sys_get_temp_dir(), 'Drall.') . '.json';
+
+    // Start a long-running command and interrupt it.
+    $process1 = Process::fromShellCommandline(
+      "exec ./vendor/bin/drall exec --no-progress --batch-file=$batchFile -- \"./vendor/bin/drush st --field=site && sleep 2\" 2>&1",
+      static::PATH_DRUPAL,
+    );
+    $process1->start();
+
+    // Wait for the first two sites to finish.
+    sleep(4);
+    $process1->signal(SIGINT);
+    $process1->wait();
+    $this->assertEquals(ExecCommand::INTERRUPTED, $process1->getExitCode());
+
+    // Verify the batch file has some finished and some queued items.
+    $data = json_decode(file_get_contents($batchFile), TRUE);
+    $finishedCount = count($data['finished']);
+    $this->assertGreaterThan(0, $finishedCount);
+    $this->assertLessThan(5, $finishedCount);
+
+    // Resume the batch. In non-interactive mode, the default for
+    // "Resume? [Y/n]" is Y, so it resumes automatically.
+    $process2 = Process::fromShellCommandline(
+      "drall exec --no-progress --no-interaction --batch-file=$batchFile -- ./vendor/bin/drush st --field=site",
+      static::PATH_DRUPAL,
+    );
+    $process2->run();
+    $this->assertEquals(0, $process2->getExitCode());
+
+    // After resume, all items should be finished.
+    $data = json_decode(file_get_contents($batchFile), TRUE);
+    $this->assertCount(5, $data['finished']);
+    $this->assertCount(0, $data['queued']);
+    $this->assertCount(0, $data['started']);
+
+    @unlink($batchFile);
+  }
+
+  /**
    * @testdox Two SIGINT gives a forceful exit.
    */
   public function testSigInt2(): void {

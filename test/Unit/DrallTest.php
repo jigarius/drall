@@ -30,6 +30,7 @@ class DrallTest extends TestCase {
       'verbose',
       'version',
       'ansi',
+      'no-interaction',
       'debug',
     ], array_keys($options));
   }
