@@ -276,6 +276,7 @@ EOT);
       $input->getOption('no-progress') ? new NullOutput() : $output->section(),
       count($values)
     );
+    $progressBar->setProgress(count($batch->getFinishedItems()));
 
     $exitCode = Command::SUCCESS;
 
