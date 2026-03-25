@@ -526,7 +526,7 @@ EOF, $output);
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-sites/default
+ 0/5 [>---------------------------]   0%sites/default
 ✔ default: Done
  1/5 [=====>----------------------]  20%sites/donnie
 ✔ donnie: Done
@@ -735,11 +735,31 @@ EOT, $process->getOutput());
   }
 
   /**
-   * @testdox Exits with non-zero code if any command fails.
+   * @testdox Without --continue-on-failure, stops on first failure.
    */
-  public function testNonZeroExitCode(): void {
+  public function test_stops_on_first_failure(): void {
     $process = Process::fromShellCommandline(
       "drall exec -P -- \"if [ 'default' = '@@dir' ]; then exit 1; fi; echo 'Hello @@dir.';\"",
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertOutputEquals(<<<EOT
+✖ default: Failed
+
+EOT, $process->getOutput());
+    $this->assertOutputContainsString(
+      'One or more items have failed. Stopping.',
+      $process->getErrorOutput(),
+    );
+    $this->assertEquals(1, $process->getExitCode());
+  }
+
+  /**
+   * @testdox With --continue-on-failure, continues despite failures.
+   */
+  public function test_continue_on_failure(): void {
+    $process = Process::fromShellCommandline(
+      "drall exec -P --continue-on-failure -- \"if [ 'default' = '@@dir' ]; then exit 1; fi; echo 'Hello @@dir.';\"",
       static::PATH_DRUPAL,
     );
     $process->run();
