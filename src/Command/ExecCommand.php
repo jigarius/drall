@@ -87,6 +87,13 @@ final class ExecCommand extends BaseCommand implements SignalableCommandInterfac
     );
 
     $this->addOption(
+      'continue-on-failure',
+      'c',
+      InputOption::VALUE_NONE,
+      'Continue even if one or more items fail to process.'
+    );
+
+    $this->addOption(
       'dry-run',
       'X',
       InputOption::VALUE_NONE,
@@ -324,6 +331,14 @@ EOT);
         else {
           $textSection->writeln("✖ $item: Failed");
           $exitCode = Command::FAILURE;
+        }
+
+        if (
+          $exitCode !== Command::SUCCESS &&
+          !$input->getOption('continue-on-failure')
+        ) {
+          $progressBar->clear();
+          throw new \RuntimeException('One or more items have failed. Stopping.');
         }
 
         $batch->finishItem($item);

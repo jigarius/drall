@@ -191,6 +191,17 @@ drall exec [DRALL-OPTIONS] -- drush [DRUSH-OPTIONS]
 
 Besides the global options, the `exec` command supports the following options.
 
+#### --continue-on-failure
+
+By default, Drall stops as soon as any item fails. Use this option to
+continue processing remaining items even if one or more items fail.
+
+```shell
+drall exec --continue-on-failure -- drush deploy
+```
+
+Drall still exits with a non-zero exit code if any item failed.
+
 #### --interval
 
 This option makes Drall wait for `n` seconds after processing each item.
