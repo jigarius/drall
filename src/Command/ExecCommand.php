@@ -320,9 +320,12 @@ EOT);
           ByteStream\pipe($process->getStdout(), $wStream);
         }
         // Buffer process output until it finishes.
-        elseif ($pOutput = rtrim(ByteStream\buffer($process->getStdout()))) {
-          // Always display command output, even in --quiet mode.
-          $textSection->writeln($pOutput, OutputInterface::VERBOSITY_QUIET);
+        else {
+          $pOutput = rtrim(ByteStream\buffer($process->getStdout()));
+          if ($pOutput !== '') {
+            // Always display command output, even in --quiet mode.
+            $textSection->writeln($pOutput, OutputInterface::VERBOSITY_QUIET);
+          }
         }
 
         if (Command::SUCCESS === $process->join()) {

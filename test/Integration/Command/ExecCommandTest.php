@@ -961,4 +961,21 @@ EOF, $process->getOutput());
     $this->assertEquals(ExecCommand::INTERRUPTED, $process->getExitCode());
   }
 
+  /**
+   * @testdox Falsy output is displayed correctly.
+   */
+  public function test_with_falsy_output(): void {
+    $process = Process::fromShellCommandline(
+      'drall ex --filter=default --no-progress -- \'echo "@@dir" > /dev/null; echo "0";\'',
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertOutputEquals(<<<EOF
+0
+✔ default: Done
+
+EOF, $process->getOutput());
+    $this->assertEquals(0, $process->getExitCode());
+  }
+
 }
