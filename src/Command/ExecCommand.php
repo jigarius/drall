@@ -370,7 +370,7 @@ EOT);
       return $batch;
     }
 
-    $batch = new FileBatch($batchFile);
+    $batch = new FileBatch($batchFile, writable: TRUE);
 
     // No existing batch data — start fresh.
     if (!$batch->getItems()) {
