@@ -37,6 +37,14 @@ interface BatchInterface {
   public function getQueuedItems(): array;
 
   /**
+   * Get all unfinished (started + queued) items.
+   *
+   * @return \Drall\Batch\BatchItem[]
+   *   Batch items keyed by ID.
+   */
+  public function getUnfinishedItems(): array;
+
+  /**
    * Get all finished items.
    *
    * @return \Drall\Batch\BatchItem[]

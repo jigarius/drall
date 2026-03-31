@@ -263,7 +263,7 @@ EOT);
       return 0;
     }
 
-    if (!$batch->getQueuedItems() && !$batch->getStartedItems()) {
+    if (!$batch->getUnfinishedItems()) {
       $this->logger->warning('No Drupal sites found.');
       return 0;
     }
@@ -289,7 +289,7 @@ EOT);
 
     // Within the iteration, all output must go through the output sections.
     // This keeps the text at the top and the progress bar at the bottom.
-    Pipeline::fromIterable($batch->getStartedItems() + $batch->getQueuedItems())
+    Pipeline::fromIterable($batch->getUnfinishedItems())
       ->concurrent($input->getOption('workers'))
       ->unordered()
       ->forEach((function ($item) use (

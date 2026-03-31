@@ -88,6 +88,16 @@ abstract class BatchBase implements BatchInterface {
   }
 
   /**
+   * Get all unfinished (started + queued) items.
+   *
+   * @return \Drall\Batch\BatchItem[]
+   *   Batch items keyed by ID.
+   */
+  public function getUnfinishedItems(): array {
+    return $this->data['started'] + $this->data['queued'];
+  }
+
+  /**
    * Get all finished items.
    *
    * @return \Drall\Batch\BatchItem[]
@@ -106,7 +116,7 @@ abstract class BatchBase implements BatchInterface {
   }
 
   public function isComplete(): bool {
-    return count($this->getQueuedItems()) === 0 && count($this->getStartedItems()) === 0;
+    return count($this->getUnfinishedItems()) === 0;
   }
 
   public function getStartedAt(): \DateTimeImmutable {
