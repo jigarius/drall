@@ -28,9 +28,9 @@ final class FileBatch extends BatchBase {
    */
   public function __construct(
     private readonly string $path,
-    bool $writable = FALSE,
+    private readonly bool $writable = FALSE,
   ) {
-    if ($writable) {
+    if ($this->writable) {
       $this->acquireLock();
     }
 
@@ -50,7 +50,7 @@ final class FileBatch extends BatchBase {
    * Whether the batch was opened in writable mode.
    */
   public function isWritable(): bool {
-    return $this->lockHandle !== NULL;
+    return $this->writable;
   }
 
   /**
