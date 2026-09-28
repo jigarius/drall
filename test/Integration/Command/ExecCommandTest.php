@@ -978,4 +978,36 @@ EOF, $process->getOutput());
     $this->assertEquals(0, $process->getExitCode());
   }
 
+  /**
+   * @testdox Arguments with spaces and quotes are preserved.
+   */
+  public function testWithSpacesInArguments(): void {
+    $process = new Process(
+      [
+        'drall',
+        'exec',
+        '--filter=default',
+        '--no-progress',
+        '--',
+        static::PATH_FIXTURES . '/print-args.sh',
+        'Hello   @@dir',
+        '"quoted"',
+        "this'll break execution",
+        '',
+      ],
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertEquals(0, $process->getExitCode(), 'ran successfully');
+    $this->assertOutputEquals(<<<EOF
+Count: 4
+[Hello   default]
+["quoted"]
+[this'll break execution]
+[]
+✔ default: Done
+
+EOF, $process->getOutput());
+  }
+
 }

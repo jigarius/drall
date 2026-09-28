@@ -428,7 +428,7 @@ EOT);
   private function getCommand(InputInterface $input, OutputInterface $output): ?string {
     // Everything after the first "--" is treated as an argument. All such
     // arguments are treated as parts of the command to be executed.
-    $command = implode(' ', $input->getArguments()['cmd']);
+    $command = $this->buildCommand($input->getArguments()['cmd']);
     $this->logger->debug("Command received: {command}", ['command' => $command]);
 
     if (
@@ -442,6 +442,35 @@ EOT);
     }
 
     return $command;
+  }
+
+  /**
+   * Builds a shell command from an array of arguments.
+   *
+   * A single argument is treated as a raw shell command, so that constructs
+   * like "&&" and pipes work as expected. With multiple arguments, each one
+   * is escaped if needed so that spaces and quotes are preserved.
+   *
+   * @param string[] $args
+   *   Command arguments.
+   *
+   * @return string
+   *   A shell command.
+   *
+   * @example
+   * Input: ['drush', 'php:eval', 'echo "Hello world";']
+   * Output: drush php:eval 'echo "Hello world";'
+   */
+  protected function buildCommand(array $args): string {
+    if (count($args) === 1) {
+      return reset($args);
+    }
+
+    $args = array_map(function ($arg) {
+      return preg_match('/^[\w\-.,:\/@=+%]+$/', $arg) ? $arg : escapeshellarg($arg);
+    }, $args);
+
+    return implode(' ', $args);
   }
 
   /**
