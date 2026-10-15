@@ -22,7 +22,7 @@
         "amphp/process": "^2",
         "consolidation/filter-via-dot-access-data": "^2.0",
         "consolidation/site-alias": "^3 || ^4",
-        "drush/drush": "^12 || ^13",
+        "drush/drush": "^12 || ^13 || ^14",
         "webflo/drupal-finder": "^1.2"
     },
     "require-dev": {
