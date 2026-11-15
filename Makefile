@@ -1,3 +1,7 @@
+# Optional Drush major version for the fixture sites, e.g. DRUSH_VERSION=12.
+COMPOSER_WITH := $(if $(DRUSH_VERSION),--with="drush/drush:^$(DRUSH_VERSION)")
+
+
 .PHONY: ssh
 ssh:
 	docker compose exec main bash
@@ -20,7 +24,7 @@ provision/drupal:
 	cp /opt/drall/.docker/main/drupal/composer.json /opt/drupal/ || echo "Skipping: drupal/composer.json"
 	rm -f /opt/drupal/composer.lock
 	rm -Rf /opt/drupal/vendor
-	composer --working-dir=/opt/drupal install --no-progress
+	composer --working-dir=/opt/drupal update --no-progress $(COMPOSER_WITH)
 	cp -r /opt/drall/.docker/main/drupal/drush /opt/drupal/ || echo "Skipping: drupal/drush"
 	cp -r /opt/drall/.docker/main/drupal/web/sites /opt/drupal/web/ || echo "Skipping: drupal/web/sites"
 
@@ -54,7 +58,7 @@ provision/empty-drupal:
 	cp /opt/drall/.docker/main/empty-drupal/composer.json /opt/empty-drupal/ || echo "Skipping: empty-drupal/composer.json"
 	rm -f /opt/empty-drupal/composer.lock
 	rm -Rf /opt/empty-drupal/vendor
-	composer --working-dir=/opt/empty-drupal install --no-progress
+	composer --working-dir=/opt/empty-drupal update --no-progress $(COMPOSER_WITH)
 	cp /opt/drall/.docker/main/empty-drupal/web/sites/sites.php /opt/empty-drupal/web/sites/sites.php
 
 
@@ -111,4 +115,5 @@ info:
 	@echo "PWD: $(PWD)"
 	@echo "Drupal path: $(DRUPAL_PATH)"
 	@composer --version
+	@$(DRUPAL_PATH)/vendor/bin/drush --version
 	which drall
