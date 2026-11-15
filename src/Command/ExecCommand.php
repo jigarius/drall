@@ -12,6 +12,7 @@ use Drall\Batch\MemoryBatch;
 use Drall\Model\Placeholder;
 use Drall\Model\SiteDetectorOptions;
 use Drall\Trait\StoppableCommandTrait;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
 use Symfony\Component\Console\Helper\ProgressBar;
@@ -26,6 +27,21 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 /**
  * A command to execute a shell command on multiple sites.
  */
+#[AsCommand(
+  name: 'exec',
+  description: 'Execute a command on multiple Drupal sites.',
+  aliases: ['ex'],
+  usages: [
+    'drush core:status',
+    './vendor/bin/drush core:status',
+    '--group=GROUP -- drush core:status',
+    '--filter=FILTER -- drush core:status',
+    '--offset=2 --limit=2 -- drush core:status',
+    '--workers=4 -- drush cache:rebuild',
+    'ls web/sites/@@dir/settings.php',
+    '\'echo "Working on @@site" && drush @@site.local core:status\'',
+  ],
+)]
 final class ExecCommand extends BaseCommand implements SignalableCommandInterface {
 
   use StoppableCommandTrait;
@@ -49,20 +65,8 @@ final class ExecCommand extends BaseCommand implements SignalableCommandInterfac
    */
   private bool $isInterrupted = FALSE;
 
-  protected function configure() {
+  protected function configure(): void {
     parent::configure();
-
-    $this->setName('exec');
-    $this->setAliases(['ex']);
-    $this->setDescription('Execute a command on multiple Drupal sites.');
-    $this->addUsage('drush core:status');
-    $this->addUsage('./vendor/bin/drush core:status');
-    $this->addUsage('--group=GROUP -- drush core:status');
-    $this->addUsage('--filter=FILTER -- drush core:status');
-    $this->addUsage('--offset=2 --limit=2 -- drush core:status');
-    $this->addUsage('--workers=4 -- drush cache:rebuild');
-    $this->addUsage('ls web/sites/@@dir/settings.php');
-    $this->addUsage('\'echo "Working on @@site" && drush @@site.local core:status\'');
 
     $this->addArgument(
       'cmd',

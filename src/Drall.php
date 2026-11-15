@@ -3,14 +3,11 @@
 namespace Drall;
 
 use Composer\InstalledVersions;
-use Drall\Command\ExecCommand;
-use Drall\Command\StopCommand;
-use Drall\Command\SiteAliasesCommand;
-use Drall\Command\SiteDirectoriesCommand;
-use Drall\Command\SiteKeysCommand;
 use Drall\Trait\SiteDetectorAwareTrait;
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\CommandLoader\FactoryCommandLoader;
 use Symfony\Component\Console\Exception\CommandNotFoundException;
 use Symfony\Component\Console\Input\InputDefinition;
 use Symfony\Component\Console\Input\InputInterface;
@@ -32,12 +29,41 @@ final class Drall extends Application {
     $this->setName(self::NAME);
     $this->setVersion(InstalledVersions::getPrettyVersion('jigarius/drall') ?? 'unknown');
     $this->setAutoExit(FALSE);
+    $this->setCommandLoader(new FactoryCommandLoader(self::discoverCommands()));
+  }
 
-    $this->add(new SiteDirectoriesCommand());
-    $this->add(new SiteKeysCommand());
-    $this->add(new SiteAliasesCommand());
-    $this->add(new ExecCommand());
-    $this->add(new StopCommand());
+  /**
+   * Discovers commands in src/Command by their #[AsCommand] attribute.
+   *
+   * Abstract classes and classes without the attribute are skipped.
+   *
+   * @return array<string, callable>
+   *   Command factories keyed by command name and alias.
+   */
+  private static function discoverCommands(): array {
+    $factories = [];
+
+    foreach (glob(__DIR__ . '/Command/*Command.php') as $path) {
+      $class = __NAMESPACE__ . '\\Command\\' . basename($path, '.php');
+      $reflection = new \ReflectionClass($class);
+      if ($reflection->isAbstract() || !$reflection->isSubclassOf(Command::class)) {
+        continue;
+      }
+
+      $attributes = $reflection->getAttributes(AsCommand::class);
+      if (!$attributes) {
+        continue;
+      }
+
+      // The attribute merges aliases into its name as "name|alias1|alias2".
+      // A leading empty name marks a hidden command and is not a valid key.
+      $names = explode('|', $attributes[0]->newInstance()->name);
+      foreach (array_filter($names) as $name) {
+        $factories[$name] = fn () => new $class();
+      }
+    }
+
+    return $factories;
   }
 
   protected function configureIO(InputInterface $input, OutputInterface $output): void {

@@ -2,6 +2,12 @@
 
 namespace Unit;
 
+use Drall\Command\BaseCommand;
+use Drall\Command\ExecCommand;
+use Drall\Command\SiteAliasesCommand;
+use Drall\Command\SiteDirectoriesCommand;
+use Drall\Command\SiteKeysCommand;
+use Drall\Command\StopCommand;
 use Drall\Drall;
 use Drall\TestCase;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -100,6 +106,36 @@ class DrallTest extends TestCase {
 
     $tester->run(['command' => 'version', '--debug' => TRUE]);
     $this->assertEquals(OutputInterface::VERBOSITY_DEBUG, $tester->getOutput()->getVerbosity());
+  }
+
+  /**
+   * @testdox Commands are discovered by their #[AsCommand] attribute.
+   */
+  public function test_commands_are_discovered(): void {
+    $app = new Drall();
+
+    $expected = [
+      'exec' => ExecCommand::class,
+      'ex' => ExecCommand::class,
+      'site:aliases' => SiteAliasesCommand::class,
+      'sa' => SiteAliasesCommand::class,
+      'site:directories' => SiteDirectoriesCommand::class,
+      'sd' => SiteDirectoriesCommand::class,
+      'site:keys' => SiteKeysCommand::class,
+      'sk' => SiteKeysCommand::class,
+      'stop' => StopCommand::class,
+      'st' => StopCommand::class,
+    ];
+    foreach ($expected as $name => $class) {
+      $this->assertInstanceOf($class, $app->find($name), $name);
+    }
+
+    // Abstract base classes are not commands.
+    $this->assertFalse($app->has(''));
+    $this->assertNotContains(
+      BaseCommand::class,
+      array_map(fn ($command) => get_class($command), $app->all()),
+    );
   }
 
 }

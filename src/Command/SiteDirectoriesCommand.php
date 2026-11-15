@@ -11,14 +11,12 @@ use Symfony\Component\Console\Output\OutputInterface;
   name: 'site:directories',
   description: 'List the values of the $sites array.',
   aliases: ['sd'],
+  usages: [
+    'site:directories',
+    '--group=GROUP site:directories',
+  ],
 )]
 class SiteDirectoriesCommand extends BaseCommand {
-
-  protected function configure() {
-    parent::configure();
-    $this->addUsage('site:directories');
-    $this->addUsage('--group=GROUP site:directories');
-  }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);

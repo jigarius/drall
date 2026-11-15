@@ -11,15 +11,13 @@ use Symfony\Component\Console\Output\OutputInterface;
   name: 'site:keys',
   description: 'List the keys of the $sites array.',
   aliases: ['sk'],
+  usages: [
+    'site:keys',
+    '--group=GROUP site:keys',
+    '--filter=FILTER site:keys',
+  ],
 )]
 class SiteKeysCommand extends BaseCommand {
-
-  protected function configure() {
-    parent::configure();
-    $this->addUsage('site:keys');
-    $this->addUsage('--group=GROUP site:keys');
-    $this->addUsage('--filter=FILTER site:keys');
-  }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);
