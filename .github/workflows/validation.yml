@@ -24,11 +24,12 @@ jobs:
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
       # The lock files only exist after "make provision", so the cache is
       # restored from the latest match here and saved after provisioning.
+      # The key never matches exactly, so the newest restore-keys match wins.
       - name: Restore Composer cache
         uses: actions/cache/restore@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-
+          key: ${{ runner.os }}-composer-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-composer-
       - name: Prepare
