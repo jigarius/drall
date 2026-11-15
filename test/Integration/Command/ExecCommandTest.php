@@ -978,4 +978,76 @@ EOF, $process->getOutput());
     $this->assertEquals(0, $process->getExitCode());
   }
 
+  /**
+   * @testdox Arguments with spaces and quotes are preserved.
+   */
+  public function test_with_spaces_in_arguments(): void {
+    $process = new Process(
+      [
+        'drall',
+        'exec',
+        '--filter=default',
+        '--no-progress',
+        '--',
+        // Prints each argument on its own line as "[arg]".
+        'printf',
+        '[%s]\n',
+        'Hello   @@dir',
+        '"quoted"',
+        "this'll break execution",
+        '',
+      ],
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertEquals(0, $process->getExitCode(), 'ran successfully');
+    $this->assertOutputEquals(<<<EOF
+[Hello   default]
+["quoted"]
+[this'll break execution]
+[]
+✔ default: Done
+
+EOF, $process->getOutput());
+  }
+
+  /**
+   * @testdox Shell operators in separate arguments are passed as text.
+   */
+  public function test_with_shell_operators_in_arguments(): void {
+    $process = new Process(
+      [
+        'drall',
+        'exec',
+        '--filter=default',
+        '--no-progress',
+        '--',
+        // Prints each argument on its own line as "[arg]".
+        'printf',
+        '[%s]\n',
+        '@@dir',
+        '&&',
+        '|',
+        ';',
+        '$HOME',
+        '*',
+        '`whoami`',
+      ],
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertEquals(0, $process->getExitCode(), 'ran successfully');
+    $this->assertOutputEquals(<<<'EOF'
+[default]
+[&&]
+[|]
+[;]
+[$HOME]
+[*]
+[`whoami`]
+✔ default: Done
+
+EOF, $process->getOutput());
+  }
+
 }
