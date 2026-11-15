@@ -989,7 +989,9 @@ EOF, $process->getOutput());
         '--filter=default',
         '--no-progress',
         '--',
-        static::PATH_FIXTURES . '/print-args.sh',
+        // Prints each argument on its own line as "[arg]".
+        'printf',
+        '[%s]\n',
         'Hello   @@dir',
         '"quoted"',
         "this'll break execution",
@@ -1000,7 +1002,6 @@ EOF, $process->getOutput());
     $process->run();
     $this->assertEquals(0, $process->getExitCode(), 'ran successfully');
     $this->assertOutputEquals(<<<EOF
-Count: 4
 [Hello   default]
 ["quoted"]
 [this'll break execution]
@@ -1021,7 +1022,9 @@ EOF, $process->getOutput());
         '--filter=default',
         '--no-progress',
         '--',
-        static::PATH_FIXTURES . '/print-args.sh',
+        // Prints each argument on its own line as "[arg]".
+        'printf',
+        '[%s]\n',
         '@@dir',
         '&&',
         '|',
@@ -1035,7 +1038,6 @@ EOF, $process->getOutput());
     $process->run();
     $this->assertEquals(0, $process->getExitCode(), 'ran successfully');
     $this->assertOutputEquals(<<<'EOF'
-Count: 7
 [default]
 [&&]
 [|]
