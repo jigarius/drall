@@ -22,10 +22,13 @@ jobs:
         id: composer-cache
         run: |
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v3
+      # The lock files only exist after "make provision", so the cache is
+      # restored from the latest match here and saved after provisioning.
+      - name: Restore Composer cache
+        uses: actions/cache/restore@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('/opt/*/composer.lock') }}
+          key: ${{ runner.os }}-composer-
           restore-keys: |
             ${{ runner.os }}-composer-
       - name: Prepare
@@ -34,6 +37,15 @@ jobs:
         run: |
           cp -r . /opt/drall
           make provision
+      - name: Hash Composer lock files
+        id: composer-lock
+        run: |
+          echo "hash=$(cat /opt/*/composer.lock | sha256sum | cut -c1-16)" >> $GITHUB_OUTPUT
+      - name: Save Composer cache
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ steps.composer-lock.outputs.hash }}
       - name: Info
         run: make info
       - name: Lint
