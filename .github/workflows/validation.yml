@@ -1,6 +1,8 @@
 name: validation
 on:
-  - push
+  push:
+    branches: ['*.x']
+  pull_request:
 env:
   DRUPAL_PATH: /opt/drupal
 jobs:
