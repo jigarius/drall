@@ -168,6 +168,24 @@ drall exec -- cat web/sites/@@uri/settings.local.php
 drall exec "drush @@site.dev updb -y && drush @@site.dev cim -y && drush @@site.dev cr"
 ```
 
+##### Quoting arguments
+
+How Drall treats the command depends on how many arguments it receives:
+
+- **One argument:** It's run as-is by the shell, so operators like `&&`
+  and `|` work. This is how the multiple commands example above works.
+- **Multiple arguments:** Each argument is passed to the command exactly as
+  received. Arguments containing spaces, quotes or other special characters
+  are escaped, so they are not interpreted by the shell.
+
+```shell
+# The PHP code reaches Drush as a single argument.
+drall exec -- drush @@site php:eval 'echo "Hello world";'
+
+# The "&&" is passed to Drush as text; it does not chain commands.
+drall exec -- drush @@site st '&&' drush @@site cr
+```
+
 #### Options
 
 For the `drall exec` command, all Drall options must be set right after

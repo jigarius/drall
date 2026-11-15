@@ -961,7 +961,7 @@ EOF, $process->getOutput());
   /**
    * @testdox Arguments with spaces and quotes are preserved.
    */
-  public function testWithSpacesInArguments(): void {
+  public function test_with_spaces_in_arguments(): void {
     $process = new Process(
       [
         'drall',
@@ -985,6 +985,44 @@ Count: 4
 ["quoted"]
 [this'll break execution]
 []
+✔ default: Done
+
+EOF, $process->getOutput());
+  }
+
+  /**
+   * @testdox Shell operators in separate arguments are passed as text.
+   */
+  public function test_with_shell_operators_in_arguments(): void {
+    $process = new Process(
+      [
+        'drall',
+        'exec',
+        '--filter=default',
+        '--no-progress',
+        '--',
+        static::PATH_FIXTURES . '/print-args.sh',
+        '@@dir',
+        '&&',
+        '|',
+        ';',
+        '$HOME',
+        '*',
+        '`whoami`',
+      ],
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertEquals(0, $process->getExitCode(), 'ran successfully');
+    $this->assertOutputEquals(<<<'EOF'
+Count: 7
+[default]
+[&&]
+[|]
+[;]
+[$HOME]
+[*]
+[`whoami`]
 ✔ default: Done
 
 EOF, $process->getOutput());
