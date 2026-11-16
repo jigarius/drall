@@ -17,12 +17,13 @@
     ],
     "homepage": "https://github.com/jigarius/drall",
     "require": {
-        "php": ">= 8.2",
+        "php": ">= 8.3",
         "amphp/pipeline": "^1.2",
         "amphp/process": "^2",
         "consolidation/filter-via-dot-access-data": "^2.0",
         "consolidation/site-alias": "^3 || ^4",
-        "drush/drush": "^12 || ^13",
+        "drush/drush": "^13",
+        "symfony/console": "^7.4 || ^8",
         "webflo/drupal-finder": "^1.2"
     },
     "require-dev": {

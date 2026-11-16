@@ -28,7 +28,7 @@ make coverage-report/html   # Opens HTML report
 make provision
 
 # Provision the fixture sites with a specific Drush major version
-DRUSH_VERSION=12 make provision
+DRUSH_VERSION=13 make provision
 ```
 
 Except for `make ssh`, run these inside the container.
@@ -89,10 +89,12 @@ All tests require a `@covers` annotation (`forceCoversAnnotation` in
 
 Integration tests run Drall against fixture sites built by `make provision`:
 `/opt/drupal` (multi-site), `/opt/empty-drupal` and `/opt/no-drupal`. Their
-`composer.json` files live in `.docker/main/`. The fixtures' `conflict`
-on `consolidation/robo` 5.2.1–5.2.3 is intentional: those releases call
-`Application::addCommand()`, which doesn't exist in Symfony Console 6.4
-(Drupal 10), so Drush crashes. Remove it once a fixed Robo is released.
+`composer.json` files live in `.docker/main/`.
+
+**Supported versions (5.x):** PHP 8.3+, Drupal 11.3+, Drush 13 and
+Symfony Console 7.4+. Drupal 10 (Symfony 6.4) is supported by Drall 4.x
+only. Drush 12 can't be installed alongside Symfony 7.4 because its
+dependency `chi-teck/drupal-code-generator` 3.x requires Symfony 6.
 
 CI (`.github/workflows/validation.yml`) runs a PHP × Drush matrix; the Drush
 version is passed to `make provision` via `DRUSH_VERSION`.
