@@ -501,8 +501,8 @@ Here's how you can set up a local dev environment.
 
 - Clone the `https://github.com/jigarius/drall` repository.
   - Use a branch as per your needs.
-- Run `docker compose up -d`.
-- Run `docker compose start`.
+- Run `make build` to build the Docker images.
+- Run `make start` to start the containers.
 - Run `make ssh` to launch a shell in the Drupal container.
 - Run `make provision`.
 - Run `drall --version` to test the setup.
@@ -512,6 +512,11 @@ Here's how you can set up a local dev environment.
 You should now be able to `make ssh` and then run `drall`. A multi-site Drupal
 installation should be present at `/opt/drupal`. Oh! And Drall should be
 present at `/opt/drall`.
+
+Use `make stop` and `make start` to stop and resume the containers, and
+`make restart` to restart them, e.g. after switching branches. After a
+`make build`, the next `make start` recreates the container, so you'll need
+to run `make provision` again.
 
 ### Hosts
 
