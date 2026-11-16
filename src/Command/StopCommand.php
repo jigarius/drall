@@ -25,10 +25,6 @@ final class StopCommand extends BaseCommand {
     $this->setName('stop');
     $this->setAliases(['st']);
     $this->setDescription('Stop all "exec" commands that are currently running.');
-
-    if (self::isPcntlEnabled()) {
-      $this->setHidden();
-    }
   }
 
   protected function preExecute(InputInterface $input, OutputInterface $output): void {
