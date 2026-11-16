@@ -2,6 +2,31 @@
 COMPOSER_WITH := $(if $(DRUSH_VERSION),--with="drush/drush:^$(DRUSH_VERSION)")
 
 
+# Host commands: run these outside the container.
+
+.PHONY: build
+build:
+	docker compose build
+
+
+# Creates the containers if needed; recreates them after "make build".
+.PHONY: start
+start:
+	docker compose up -d
+
+
+# Keeps the containers (and provisioned state); "docker compose down" doesn't.
+.PHONY: stop
+stop:
+	docker compose stop
+
+
+# Also re-attaches single-file bind mounts after a branch switch.
+.PHONY: restart
+restart:
+	docker compose restart
+
+
 .PHONY: ssh
 ssh:
 	docker compose exec main bash

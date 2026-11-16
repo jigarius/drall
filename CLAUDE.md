@@ -9,6 +9,12 @@ Drall is a PHP CLI tool for running Drush commands on multi-site Drupal installa
 ## Development Commands
 
 ```bash
+# Manage the Docker dev environment (run on the host)
+make build     # Build images; the next "make start" recreates containers
+make start     # Create/start containers
+make stop      # Stop containers, keeping provisioned state
+make restart   # Restart containers
+
 # Enter Docker dev environment (required for most commands)
 make ssh
 
@@ -31,14 +37,15 @@ make provision
 DRUSH_VERSION=12 make provision
 ```
 
-Except for `make ssh`, run these inside the container.
+Except for `make build`, `start`, `stop`, `restart` and `ssh`, run these
+inside the container.
 
 ### Development Environment Gotchas
 
 - `.docker/main/drupal/composer.json` and `Makefile` are bind-mounted into
   the container as single files (see `docker-compose.yml`). Edit them in
-  place. Tools that replace the file (e.g. `sed -i`, `perl -i`) break the
-  container's view of it until the container restarts.
+  place. Tools that replace the file (e.g. `sed -i`, `perl -i`) and branch
+  switches break the container's view of it; `make restart` fixes that.
 - `make provision` (via `provision/drall`) deletes and regenerates
   `/opt/drall/composer.lock` and `vendor/`, which is the project checkout.
 
