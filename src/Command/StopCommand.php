@@ -3,6 +3,7 @@
 namespace Drall\Command;
 
 use Drall\Trait\StoppableCommandTrait;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -15,17 +16,14 @@ use Symfony\Component\Console\Output\OutputInterface;
  * Also, this command might have undesirable results when multiple "exec"
  * commands are running at the same time.
  */
+#[AsCommand(
+  name: 'stop',
+  description: 'Stop all "exec" commands that are currently running.',
+  aliases: ['st'],
+)]
 final class StopCommand extends BaseCommand {
 
   use StoppableCommandTrait;
-
-  protected function configure() {
-    parent::configure();
-
-    $this->setName('stop');
-    $this->setAliases(['st']);
-    $this->setDescription('Stop all "exec" commands that are currently running.');
-  }
 
   protected function preExecute(InputInterface $input, OutputInterface $output): void {
     parent::preExecute($input, $output);

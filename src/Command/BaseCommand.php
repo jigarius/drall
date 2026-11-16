@@ -17,7 +17,7 @@ abstract class BaseCommand extends Command {
   use LoggerAwareTrait;
   use SiteDetectorAwareTrait;
 
-  protected function configure() {
+  protected function configure(): void {
     $this->addOption(
       'group',
       'g',

@@ -10,16 +10,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 #[AsCommand(
   name: 'site:aliases',
   description: 'List all Drush site aliases.',
-  aliases: ['sa']
+  aliases: ['sa'],
+  usages: [
+    'site:aliases',
+    '--group=GROUP site:aliases',
+    '--filter=FILTER site:aliases',
+  ],
 )]
 class SiteAliasesCommand extends BaseCommand {
-
-  protected function configure() {
-    parent::configure();
-    $this->addUsage('site:aliases');
-    $this->addUsage('--group=GROUP site:aliases');
-    $this->addUsage('--filter=FILTER site:aliases');
-  }
 
   protected function execute(InputInterface $input, OutputInterface $output): int {
     $this->preExecute($input, $output);
