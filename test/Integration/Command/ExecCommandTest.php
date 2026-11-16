@@ -526,7 +526,7 @@ EOF, $output);
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-sites/default
+ 0/5 [>---------------------------]   0%sites/default
 ✔ default: Done
  1/5 [=====>----------------------]  20%sites/donnie
 ✔ donnie: Done
