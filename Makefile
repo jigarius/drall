@@ -1,4 +1,4 @@
-# Optional Drush major version for the fixture sites, e.g. DRUSH_VERSION=12.
+# Optional Drush major version for the fixture sites, e.g. DRUSH_VERSION=13.
 COMPOSER_WITH := $(if $(DRUSH_VERSION),--with="drush/drush:^$(DRUSH_VERSION)")
 
 

@@ -20,6 +20,9 @@ Thus, it can easily be installed using `composer` as follows:
 
     composer require jigarius/drall
 
+Drall 5.x requires PHP 8.3+, Drupal 11.3+ and Drush 13. For Drupal 10,
+use Drall 4.x.
+
 ## Placeholders
 
 Drall's functioning depends on its _Placeholders_. Here's how Drall works
