@@ -23,6 +23,7 @@
         "jigarius/drall": "*"
     },
     "conflict": {
+        "consolidation/robo": "5.2.1 || 5.2.2 || 5.2.3",
         "drupal/drupal": "*"
     },
     "minimum-stability": "dev",

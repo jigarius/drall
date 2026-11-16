@@ -526,7 +526,7 @@ EOF, $output);
     );
     $process->run();
     $this->assertOutputEquals(<<<EOF
-sites/default
+ 0/5 [>---------------------------]   0%sites/default
 ✔ default: Done
  1/5 [=====>----------------------]  20%sites/donnie
 ✔ donnie: Done
@@ -939,6 +939,95 @@ sites/default
 EOF, $process->getOutput());
 
     $this->assertEquals(ExecCommand::INTERRUPTED, $process->getExitCode());
+  }
+
+  /**
+   * @testdox Falsy output is displayed correctly.
+   */
+  public function test_with_falsy_output(): void {
+    $process = Process::fromShellCommandline(
+      'drall ex --filter=default --no-progress -- \'echo "@@dir" > /dev/null; echo "0";\'',
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertOutputEquals(<<<EOF
+0
+✔ default: Done
+
+EOF, $process->getOutput());
+    $this->assertEquals(0, $process->getExitCode());
+  }
+
+  /**
+   * @testdox Arguments with spaces and quotes are preserved.
+   */
+  public function test_with_spaces_in_arguments(): void {
+    $process = new Process(
+      [
+        'drall',
+        'exec',
+        '--filter=default',
+        '--no-progress',
+        '--',
+        // Prints each argument on its own line as "[arg]".
+        'printf',
+        '[%s]\n',
+        'Hello   @@dir',
+        '"quoted"',
+        "this'll break execution",
+        '',
+      ],
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertEquals(0, $process->getExitCode(), 'ran successfully');
+    $this->assertOutputEquals(<<<EOF
+[Hello   default]
+["quoted"]
+[this'll break execution]
+[]
+✔ default: Done
+
+EOF, $process->getOutput());
+  }
+
+  /**
+   * @testdox Shell operators in separate arguments are passed as text.
+   */
+  public function test_with_shell_operators_in_arguments(): void {
+    $process = new Process(
+      [
+        'drall',
+        'exec',
+        '--filter=default',
+        '--no-progress',
+        '--',
+        // Prints each argument on its own line as "[arg]".
+        'printf',
+        '[%s]\n',
+        '@@dir',
+        '&&',
+        '|',
+        ';',
+        '$HOME',
+        '*',
+        '`whoami`',
+      ],
+      static::PATH_DRUPAL,
+    );
+    $process->run();
+    $this->assertEquals(0, $process->getExitCode(), 'ran successfully');
+    $this->assertOutputEquals(<<<'EOF'
+[default]
+[&&]
+[|]
+[;]
+[$HOME]
+[*]
+[`whoami`]
+✔ default: Done
+
+EOF, $process->getOutput());
   }
 
 }

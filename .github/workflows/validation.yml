@@ -1,6 +1,8 @@
 name: validation
 on:
-  - push
+  push:
+    branches: ['*.x']
+  pull_request:
 env:
   DRUPAL_PATH: /opt/drupal
 jobs:
@@ -9,7 +11,8 @@ jobs:
     strategy:
       matrix:
         os: ['ubuntu-latest']
-        php-versions: ['8.2', '8.3', '8.4']
+        php-versions: ['8.2', '8.3', '8.4', '8.5']
+        drush-versions: ['12', '13']
     steps:
       - uses: actions/checkout@v2
       - uses: shivammathur/setup-php@v2
@@ -19,16 +22,31 @@ jobs:
         id: composer-cache
         run: |
           echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@v3
+      # The lock files only exist after "make provision", so the cache is
+      # restored from the latest match here and saved after provisioning.
+      # The key never matches exactly, so the newest restore-keys match wins.
+      - name: Restore Composer cache
+        uses: actions/cache/restore@v4
         with:
           path: ${{ steps.composer-cache.outputs.dir }}
-          key: ${{ runner.os }}-composer-${{ hashFiles('/opt/*/composer.lock') }}
+          key: ${{ runner.os }}-composer-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-composer-
       - name: Prepare
+        env:
+          DRUSH_VERSION: ${{ matrix.drush-versions }}
         run: |
           cp -r . /opt/drall
           make provision
+      - name: Hash Composer lock files
+        id: composer-lock
+        run: |
+          echo "hash=$(cat /opt/*/composer.lock | sha256sum | cut -c1-16)" >> $GITHUB_OUTPUT
+      - name: Save Composer cache
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ steps.composer-lock.outputs.hash }}
       - name: Info
         run: make info
       - name: Lint
